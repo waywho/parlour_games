@@ -1,3 +1,3 @@
-class User < ApplicationRecord
+class Team < ApplicationRecord
 	has_one :score, as: :scoreable
 end
