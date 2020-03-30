@@ -7,4 +7,7 @@ class User < ApplicationRecord
 	has_many :chatrooms, through: :messages
 	has_many :messages
 
+	has_secure_password
+	validates :email, presence: true, uniqueness: true
+	validates :name, presence: true, uniqueness: true
 end
