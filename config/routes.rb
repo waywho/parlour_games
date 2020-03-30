@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :messages
+  resources :chatrooms
   resources :games
   resources :users
   get 'landings/index'

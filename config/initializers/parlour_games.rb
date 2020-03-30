@@ -1,0 +1,1 @@
+Rails.application.config.game_types = [:fish_bowl]

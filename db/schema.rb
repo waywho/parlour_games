@@ -10,32 +10,48 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_26_113623) do
+ActiveRecord::Schema.define(version: 2020_03_30_210706) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "chatrooms", force: :cascade do |t|
+    t.string "gameaable_type"
+    t.bigint "gameaable_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gameaable_type", "gameaable_id"], name: "index_chatrooms_on_gameaable_type_and_gameaable_id"
+  end
+
   create_table "game_sessions", force: :cascade do |t|
     t.bigint "game_id"
     t.bigint "user_id"
+    t.bigint "team_id"
     t.boolean "host", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["game_id"], name: "index_game_sessions_on_game_id"
     t.index ["host"], name: "index_game_sessions_on_host"
+    t.index ["team_id"], name: "index_game_sessions_on_team_id"
     t.index ["user_id"], name: "index_game_sessions_on_user_id"
   end
 
   create_table "games", force: :cascade do |t|
     t.string "name"
     t.jsonb "set"
-    t.text "description"
-    t.string "rule"
-    t.string "avatar"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_games_on_name"
-    t.index ["rule"], name: "index_games_on_rule"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "chatroom_id"
+    t.string "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chatroom_id"], name: "index_messages_on_chatroom_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
   create_table "scores", force: :cascade do |t|
@@ -50,8 +66,7 @@ ActiveRecord::Schema.define(version: 2020_03_26_113623) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "game_session_id"
-    t.index ["game_session_id"], name: "index_teams_on_game_session_id"
+    t.integer "order"
     t.index ["name"], name: "index_teams_on_name"
   end
 
@@ -68,6 +83,8 @@ ActiveRecord::Schema.define(version: 2020_03_26_113623) do
   end
 
   add_foreign_key "game_sessions", "games"
+  add_foreign_key "game_sessions", "teams"
   add_foreign_key "game_sessions", "users"
-  add_foreign_key "teams", "game_sessions"
+  add_foreign_key "messages", "chatrooms"
+  add_foreign_key "messages", "users"
 end
