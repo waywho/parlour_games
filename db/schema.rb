@@ -10,17 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_30_210706) do
+ActiveRecord::Schema.define(version: 2020_04_10_172017) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "chatroom_users", force: :cascade do |t|
+    t.bigint "chatroom_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chatroom_id"], name: "index_chatroom_users_on_chatroom_id"
+    t.index ["user_id"], name: "index_chatroom_users_on_user_id"
+  end
+
   create_table "chatrooms", force: :cascade do |t|
     t.string "gameaable_type"
     t.bigint "gameaable_id"
+    t.string "topic"
+    t.boolean "public", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["gameaable_type", "gameaable_id"], name: "index_chatrooms_on_gameaable_type_and_gameaable_id"
+    t.index ["public"], name: "index_chatrooms_on_public"
+    t.index ["topic"], name: "index_chatrooms_on_topic"
   end
 
   create_table "game_sessions", force: :cascade do |t|
@@ -82,6 +95,8 @@ ActiveRecord::Schema.define(version: 2020_03_30_210706) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "chatroom_users", "chatrooms"
+  add_foreign_key "chatroom_users", "users"
   add_foreign_key "game_sessions", "games"
   add_foreign_key "game_sessions", "teams"
   add_foreign_key "game_sessions", "users"

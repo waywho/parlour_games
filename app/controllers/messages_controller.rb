@@ -1,4 +1,5 @@
 class MessagesController < ApplicationController
+  before_action :authenticate_user 
   before_action :set_message, only: [:show, :update, :destroy]
 
   # GET /messages
@@ -15,13 +16,14 @@ class MessagesController < ApplicationController
 
   # POST /messages
   def create
-    @message = Message.new(message_params)
-    @message.user = current_user
+    message = Message.new(message_params)
+    message.user = current_user
     
-    if @message.save
-      render json: @message, status: :created, location: @message
+    if message.save
+      MessageRelayJob.perform_later(message)
+      render json: message, status: :created, location: message
     else
-      render json: @message.errors, status: :unprocessable_entity
+      render json: message.errors, status: :unprocessable_entity
     end
   end
 
@@ -47,6 +49,6 @@ class MessagesController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def message_params
-      params.require(:message).permit(:user_id, :chatroom_id, :content)
+      params.require(:message).permit(:chatroom_id, :content)
     end
 end

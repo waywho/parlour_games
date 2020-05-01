@@ -1,11 +1,15 @@
 class UsersController < ApplicationController
+  before_action :authenticate_user
   before_action :set_user, only: [:show, :update, :destroy]
 
   # GET /users
   def index
-    @users = User.all
-
-    render json: @users
+    if params[:search].present?
+      @users = User.where('name LIKE ?', "%#{params[:search]}%")
+    else
+      @users = User.all
+    end
+    render json: @users, only: [:id, :name, :email, :avatar]
   end
 
   # GET /users/1

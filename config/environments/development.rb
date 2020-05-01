@@ -46,6 +46,10 @@ Rails.application.configure do
 
   config.autoload_paths += %W(#{Rails.root}/app/models/game)
 
+  config.action_cable.url = "ws://localhost:3000/cable"
+
+  config.debug_exception_response_format = :api
+
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 

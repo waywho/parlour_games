@@ -1,24 +1,39 @@
 class ChatroomsController < ApplicationController
-  before_action :set_chatroom, only: [:show, :update, :destroy]
+  before_action :authenticate_user
+  before_action :set_chatroom, only: [:show, :join_chat, :leave_chat, :update, :destroy]
 
   # GET /chatrooms
   def index
-    @chatrooms = Chatroom.all
+    if params[:type] == "my"
+      @chatrooms = current_user.chatrooms.all
+    elsif params[:search].present?
+      @chatrooms = Chatroom.where('topic LIKE ?', "%#{params[:search]}%")
+    else
+      @chatrooms = Chatroom.all
+    end
 
-    render json: @chatrooms
+    render json: @chatrooms, methods: :user_ids
   end
 
   # GET /chatrooms/1
   def show
-    @message = Message.new
+    render json: @chatroom, include: { messages: { include: { user: { only: [:name] }}, except: [:user_id, :id]} }
+  end
+
+
+  def join_chat
+    @chatroom.chatroom_users.where(user_id: current_user.id).first_or_create
+
     render json: @chatroom
   end
 
   # POST /chatrooms
   def create
-    @chatroom = Chatroom.new(chatroom_params)
+    @chatroom = Chatroom.create(chatroom_params)
 
     if @chatroom.save
+      # ChatroomUser.create(user: current_user, chatroom: @chatroom)
+      ChatroomRelayJob.perform_later(@chatroom)
       render json: @chatroom, status: :created, location: @chatroom
     else
       render json: @chatroom.errors, status: :unprocessable_entity
@@ -39,14 +54,24 @@ class ChatroomsController < ApplicationController
     @chatroom.destroy
   end
 
+  def leave_chat
+    if chatroom_params[:user_ids].nil?
+      user_ids = [current_user.id]
+    else
+      user_ids = chatroom_params[:user_ids].push(current_user.id)
+    end
+    @chatroom.chatroom_users.where(user_id: user_ids).destroy_all
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_chatroom
-      @chatroom = Chatroom.find(params[:id])
+      chat_id = params[:id] || chat_id = params[:chatroom_id]
+      @chatroom = Chatroom.find(chat_id)
     end
 
     # Only allow a trusted parameter "white list" through.
     def chatroom_params
-      params.require(:chatroom).permit(:gameaable_id)
+      params.require(:chatroom).permit(:gameaable_id, :chatroom_id, :topic, :public, user_ids: [])
     end
 end

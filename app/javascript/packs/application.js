@@ -21,15 +21,27 @@ import Vue from 'vue'
 import App from '../app.vue'
 // import '../assets/main.css'
 // import "../assets/animate.min.css";
-// import router from '../router'
-// import { store } from '../store/store'
+import VueChatScroll from 'vue-chat-scroll'
+import router from '../router'
+import { store } from '../store/store'
+import ActionCableVue from 'actioncable-vue'
+import axios from 'axios'
+import WebRTC from '@argueta10/vue-webrtc'
+
 import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
+import '../../../node_modules/bulma/bulma.sass'
 
 document.addEventListener('DOMContentLoaded', () => {
+	axios.defaults.headers.common['Authorization'] = 'Bearer ' + store.state.token
+
 	Vue.use(Buefy, {
 		defaultFieldLabelPosition: 'on-border'
 	})
+
+	Vue.use(VueChatScroll)
+
+	Vue.use(WebRTC)
 
 	Vue.filter('capitalize', function (value) {
 	  if (!value) return ''
@@ -45,15 +57,24 @@ document.addEventListener('DOMContentLoaded', () => {
 	    return ''
 	  }
 	})
+
+	// wss://parlour-games-who.herokuapp.com/
+	// ws://localhost:5000/
+
+	Vue.use(ActionCableVue, {
+		debug: true,
+		debugLevel: 'error',
+		connectionUrl: 'wss://parlour-games-who.herokuapp.com/cable?token=' + store.state.token,
+		connectImmediately: true
+	})
 	
 	const app = new Vue({
 	 render: h => h(App),
-	 // router: router,
-	 // store: store
+	 router: router,
+	 store: store
 	}).$mount()
 	document.body.appendChild(app.$el)
 
-
-
 	console.log(app)
+	console.log(process.env)
 })
