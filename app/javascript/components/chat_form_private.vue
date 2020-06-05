@@ -1,32 +1,23 @@
 <template>
-  <chat-form :chatroom="chatroom" v-on:start-chat="$emit('start-chat', chatroom)" v-on:close-modal="$parent.close()">
+  <chat-form :chatroom="chatroom" v-on:submit="$emit('start-chat', chatroom)" v-on:close-modal="$parent.close()">
     <header slot="form-header" class="modal-card-title">New Private Chat</header>
     <div slot="form-fields">
-       <p class="content"><b>Selected users:</b> <span class="tag is-medium is-outlined is-success" v-for="user in selectedUsers">{{ user.name }}<button class="delete" @click="removeUser(user)"></button></span></p>
-         <b-field label="Find a User">
-            <b-autocomplete
-                v-model="search"
-                placeholder="e.g. Anne"
-                :keep-first="false"
-                :open-on-focus="true"
-                :data="searchResults"
-                field="name"
-                @select="option => selectUser(option)">
-            </b-autocomplete>
-        </b-field>
+       <p class="content"><b>Selected users:</b> <span class="tag is-medium is-outlined is-success" v-for="user in selectedUsers">{{ user.name }}<button class="delete" @click="$refs.userSelectInput.removeUser(user)"></button></span></p>
+         <user-select-input ref="userSelectInput" v-on:users-select="selectUsers" v-on:users-remove="selectUsers"></user-select-input>
     </div>
+    <span slot="submit-button">Start Chat</span>
   </chat-form>
 </template>
 
 <script>
 import chatForm from './chat_form';
-import axios from 'axios';
+import userSelect from './user_select'
 
 export default {
   components: {
-    'chat-form': chatForm
+    'chat-form': chatForm,
+    'user-select-input': userSelect
   },
-  props: ['users'],
   data: function () {
     return {
       selectedUsers: [],
@@ -35,8 +26,7 @@ export default {
         user_ids: [],
         topic: "",
         public: false
-      },
-      active: ''
+      }
     }
   },
   computed: {
@@ -47,55 +37,28 @@ export default {
     }
   },
   methods: {
-    userSearch: function() {
-      axios({
-        method: 'get',
-        url: '/users',
-        params: {
-          search: this.name
-        },
-        paramsSerializer: function (params) {
-          return qs.stringify(params, {arrayFormat: 'brackets'})
-        }
-      }).then(res => {
-        console.log('users', res.data)
-        this.users = res.data
-      })
-    },
-    openDropdown() {
-      this.active = 'is-active'
-    },
-    keyArrows(direction){
-      const sum = direction === 'down' ? 1 : -1
-      if(this.active === 'is-active') {
-        let index = this.searchResults.indexOf()
-      } else {
-        this.active = "is-active"
+    selectUsers: function(selectedUsers) {
+      this.selectedUsers = selectedUsers
+      if(selectedUsers === null || selectedUsers === undefined || selectedUsers.length === 0) {
+        this.chatroom.user_ids = []
+        this.chatroom.topic = ""
+        return
       }
-    },
-    selectUser: function(user) {
-      if(user === null || user === undefined) {
-        return }
-      this.selectedUsers.push(user)
-      this.search = ""
-      var nameArray = []
+
       
+      var nameArray = []
       var idArray = []
       idArray.push(this.$store.getters.currentUser.sub)
+
       this.selectedUsers.forEach((user) => {
         nameArray.push(user.name)
         idArray.push(user.id)
       })
+
       nameArray.push(this.$store.getters.currentUser.name)
       this.chatroom.topic = nameArray.join(", ")
       this.chatroom.user_ids = idArray
-      this.active = ""
-    },
-    removeUser: function(user) {
-      var foundIndex = this.selectedUsers.indexOf(user)
-      if(foundIndex > -1) {
-        this.selectedUsers.splice(foundIndex, 1);
-      }
+
     }
   }
 }

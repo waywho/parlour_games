@@ -12,7 +12,7 @@
           <b-input v-model="formFields[key].value" :type="formFields[key].type" :message="formFields[key].message" @focus="clearErrors" ></b-input>
         </b-field>
         <div class="buttons">
-          <b-button native-type="submit" type="is-primary">Sign in</b-button>
+          <b-button native-type="submit" type="is-dark">Sign in</b-button>
         </div>
       </form>
     </div>
@@ -44,9 +44,10 @@ export default {
       }
 
       // console.log(formData)
-      this.$store.dispatch('authenticateUser', formData).then(() => {
+      this.$store.dispatch('authenticateUser', formData).then((res) => {
         this.$router.replace({ path: '/' })
       }).catch(error => {
+        console.log(error)
         this.showGeneralMessage(error.response.data.statusText, 'is-danger')
       })
     }

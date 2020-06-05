@@ -4,7 +4,7 @@ class MessageRelayJob < ApplicationJob
   def perform(message)
     ActionCable.server.broadcast "chatroom:#{message.chatroom.id}",
       content: message.content,
-      user: { name: message.user.name },
+      speakerable: { name: message.speakerable.name },
       created_at: message.created_at,
       chatroom_id: message.chatroom.id
   end

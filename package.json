@@ -2,18 +2,19 @@
   "dependencies": {
     "@argueta10/vue-webrtc": "^1.3.0",
     "@rails/webpacker": "5.0.1",
-    "actioncable-vue": "^1.7.0",
     "axios": "^0.19.2",
-    "buefy": "^0.8.15",
-    "bulma": "^0.8.1",
+    "buefy": "0.8.20",
     "lodash": "^4.17.15",
     "qs": "^6.9.3",
     "vue": "^2.6.11",
+    "vue-action-cable": "^1.1.0",
     "vue-chat-scroll": "^1.4.0",
     "vue-jwt-decode": "^0.1.0",
     "vue-loader": "^15.9.1",
+    "vue-moment": "^4.1.0",
     "vue-router": "^3.1.6",
     "vue-template-compiler": "^2.6.11",
+    "vuedraggable": "^2.23.2",
     "vuex": "^3.1.3"
   },
   "devDependencies": {

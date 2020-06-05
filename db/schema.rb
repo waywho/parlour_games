@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_10_172017) do
+ActiveRecord::Schema.define(version: 2020_06_04_205220) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -38,15 +38,21 @@ ActiveRecord::Schema.define(version: 2020_04_10_172017) do
 
   create_table "game_sessions", force: :cascade do |t|
     t.bigint "game_id"
-    t.bigint "user_id"
     t.bigint "team_id"
     t.boolean "host", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "invitation_accepted", default: false
+    t.string "playerable_type"
+    t.bigint "playerable_id"
+    t.string "player_name"
+    t.string "ip_address"
+    t.jsonb "score"
     t.index ["game_id"], name: "index_game_sessions_on_game_id"
     t.index ["host"], name: "index_game_sessions_on_host"
+    t.index ["invitation_accepted"], name: "index_game_sessions_on_invitation_accepted"
+    t.index ["playerable_type", "playerable_id"], name: "index_game_sessions_on_playerable_type_and_playerable_id"
     t.index ["team_id"], name: "index_game_sessions_on_team_id"
-    t.index ["user_id"], name: "index_game_sessions_on_user_id"
   end
 
   create_table "games", force: :cascade do |t|
@@ -54,25 +60,29 @@ ActiveRecord::Schema.define(version: 2020_04_10_172017) do
     t.jsonb "set"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "started", default: false
+    t.boolean "ended", default: false
+    t.boolean "team_mode", default: false
     t.index ["name"], name: "index_games_on_name"
   end
 
   create_table "messages", force: :cascade do |t|
-    t.bigint "user_id"
     t.bigint "chatroom_id"
     t.string "content"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "speakerable_type"
+    t.bigint "speakerable_id"
     t.index ["chatroom_id"], name: "index_messages_on_chatroom_id"
-    t.index ["user_id"], name: "index_messages_on_user_id"
+    t.index ["speakerable_type", "speakerable_id"], name: "index_messages_on_speakerable_type_and_speakerable_id"
   end
 
-  create_table "scores", force: :cascade do |t|
-    t.string "scoreable_type"
-    t.bigint "scoreable_id"
+  create_table "players", force: :cascade do |t|
+    t.string "name"
+    t.string "ip_address"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["scoreable_type", "scoreable_id"], name: "index_scores_on_scoreable_type_and_scoreable_id"
+    t.index ["ip_address"], name: "index_players_on_ip_address"
   end
 
   create_table "teams", force: :cascade do |t|
@@ -80,6 +90,8 @@ ActiveRecord::Schema.define(version: 2020_04_10_172017) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "order"
+    t.bigint "game_id"
+    t.index ["game_id"], name: "index_teams_on_game_id"
     t.index ["name"], name: "index_teams_on_name"
   end
 
@@ -99,7 +111,5 @@ ActiveRecord::Schema.define(version: 2020_04_10_172017) do
   add_foreign_key "chatroom_users", "users"
   add_foreign_key "game_sessions", "games"
   add_foreign_key "game_sessions", "teams"
-  add_foreign_key "game_sessions", "users"
   add_foreign_key "messages", "chatrooms"
-  add_foreign_key "messages", "users"
 end

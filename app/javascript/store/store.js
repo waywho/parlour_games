@@ -1,13 +1,15 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import VueJwtDecode from 'vue-jwt-decode'
-import axios from 'axios'
+import axios from 'axios';
+import gameAxios from '../axios/axios_game_update.js';
 
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
 	state: {
-		token: localStorage.getItem('auth_token')
+		token: localStorage.getItem('auth_token'),
+		gameSession: localStorage.getItem('game_session')
 	},
 	getters: {
 		currentUser: (state, getters) => {
@@ -31,13 +33,19 @@ export const store = new Vuex.Store({
 				var d = new Date();
 				var now = d.getTime() /1000;
 				var expDate = new Date(expiry)
-				console.log(expiry)
-				console.log(expDate)
+				// console.log(expiry)
+				// console.log(expDate)
 
 				return now < expiry
 			} else {
 				return false
 			}
+		},
+		getToken: state => {
+			return state.token
+		},
+		getSession: state => {
+			return JSON.parse(state.gameSession)
 		}
 	},
 	mutations: {
@@ -48,16 +56,17 @@ export const store = new Vuex.Store({
 	actions: {
 		authenticateUser({commit, dispatch, state}, formData) {
 			return new Promise((resolve, reject) => { 
-				axios.post('/user_token', {auth: formData })
+				axios.post('/api/user_token', {auth: formData })
 		        .then( res => {
 		          localStorage.setItem('auth_token', res.data.jwt)
 		          // console.log(res)
 		          // console.log(res.data.jwt)
 		          commit('setToken', res.data.jwt);
+		          // console.log(state.token)
 		          resolve(res)
 		        })
 		        .catch( error => {
-		          console.log(error.response)
+		          console.log(error)
 		          localStorage.removeItem('auth_token');
 		          commit('setToken', null);
 		          reject(error)
@@ -67,19 +76,50 @@ export const store = new Vuex.Store({
 		// not being used at this moment as it may not be necessary to be put in store
 		registerUser({commit, dispatch, state}, formData) {
 			return new Promise((resolve, reject) => {
-		      axios.post('/sign_up', {user: formData })
+		      axios.post('/api/users', {user: formData })
 		        .then( res => {
+		        	console.log(res)
 		          localStorage.setItem('auth_token', res.data.body.token)
 		          commit('setToken', res.data.body.token)
-		          // console.log(res)
+		          
 		          resolve(res)	
 		        })
 		        .catch( error => {
-		          console.log(error.response)
+		          console.log(error)
 		          // localStorage.removeItem('auth_token');
 		          // commit('setToken', null);
 		          reject(error)
 		        })
+			})
+		},
+		reloadGameSession({commit, dispatch, state}, payload) {
+			return new Promise((resolve, reject) => {
+				axios.get(`/api/game_sessions?search=${payload.player.value}&game_id=${payload.gameId.value}${payload.user}`)
+        .then(res => {
+          console.log('rejoin', res.data)
+          localStorage.setItem('game_session', JSON.stringify(res.data))
+          dispatch('resetGameSession')
+        }).catch(error => {
+        	console.log(error)
+        	reject(error)
+        })
+			})
+		},
+		resetGameSession({commit, dispatch, state}) {
+			state.gameSession = localStorage.getItem('game_session')
+		},
+		updateGameSet({commit, dispatch, state}, payload) {
+			console.log('update payload', payload)
+			return new Promise((resolve, reject) => {
+				gameAxios.put(`${payload.gameId}`, { game: { set: payload.setData }})
+          .then(res => {
+            console.log('game updated', res)
+            resolve(res)
+          })
+          .catch(error => {
+          	console.log('game update error', error)
+          	reject(error)
+          })
 			})
 		}
 	}

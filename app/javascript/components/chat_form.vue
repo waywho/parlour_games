@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="$emit('start-chat', chatroom)">
+  <form @submit.prevent="$emit('submit')">
     <div class="modal-card">
       <header class="modal-card-head">
         <slot name="form-header"></slot>
@@ -10,7 +10,8 @@
       <footer class="modal-card-foot">
         <b-field class="buttons" grouped position="is-right">
           <b-button type="is-outlined" @click="$emit('close-modal')">Cancel</b-button>
-          <b-button type="is-primary" native-type="submit">Start Chat</b-button>
+          <b-button type="is-dark" native-type="submit"><slot name="submit-button"></slot></b-button>
+          <slot name="additional-buttons"></slot>
         </b-field>
       </footer>
     </div>
@@ -20,7 +21,6 @@
 <script>
 
 export default {
-  props: ['chatroom'],
   data: function () {
     return {
     }

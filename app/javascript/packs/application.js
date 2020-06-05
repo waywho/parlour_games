@@ -24,24 +24,43 @@ import App from '../app.vue'
 import VueChatScroll from 'vue-chat-scroll'
 import router from '../router'
 import { store } from '../store/store'
-import ActionCableVue from 'actioncable-vue'
-import axios from 'axios'
-import WebRTC from '@argueta10/vue-webrtc'
+import VueActionCable from 'vue-action-cable'
+// import WebRTC from '@argueta10/vue-webrtc'
+import vueMoment from 'vue-moment'
+import moment from 'moment'
+import _ from 'lodash'
+
+// import VueDraggable from 'vue-draggable'
 
 import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
-import '../../../node_modules/bulma/bulma.sass'
+// import '../../../node_modules/bulma/bulma.sass'
 
 document.addEventListener('DOMContentLoaded', () => {
-	axios.defaults.headers.common['Authorization'] = 'Bearer ' + store.state.token
-
 	Vue.use(Buefy, {
 		defaultFieldLabelPosition: 'on-border'
 	})
 
 	Vue.use(VueChatScroll)
 
-	Vue.use(WebRTC)
+	// Vue.use(WebRTC)
+	
+	Vue.use(require('vue-moment'))
+
+	Vue.use('_')
+
+	// Vue.use(VueDraggable)
+
+	Vue.filter('human-date', function(value) {
+		var now = Date.now();
+		var createdDate = new Date(value)
+		var timeDelta = now - createdDate
+		if(timeDelta > 86400000) {
+			return moment(value).format('hA, L')
+		} else {
+			return moment(value).fromNow()
+		}
+	})
 
 	Vue.filter('capitalize', function (value) {
 	  if (!value) return ''
@@ -58,14 +77,35 @@ document.addEventListener('DOMContentLoaded', () => {
 	  }
 	})
 
+		Vue.filter('camelToKabab', function (value) {
+	  if (value !== null && value !== undefined) {
+	    value = value.replace(/([A-Z])/g, "_$1");
+	    return value.substr(1).toLowerCase()
+	  } else {
+	    return ''
+	  }
+	})
+
+	Vue.filter('kabab-to-space', function (value) {
+	  if (value !== null && value !== undefined) {
+	  	// value = value.replace(/\_/g, " ")
+	    value = value.split("_");
+	    const value_array = value.map(function(word) {
+	    	return word.charAt(0).toUpperCase() + word.slice(1)
+	    })
+	    value = value_array.join(" ")
+	    return value.charAt(0).toUpperCase() + value.slice(1)
+	  } else {
+	    return ''
+	  }
+	})
+
+	
 	// wss://parlour-games-who.herokuapp.com/
 	// ws://localhost:5000/
 
-	Vue.use(ActionCableVue, {
-		debug: true,
-		debugLevel: 'error',
-		connectionUrl: 'wss://parlour-games-who.herokuapp.com/cable?token=' + store.state.token,
-		connectImmediately: true
+	Vue.use(VueActionCable, {
+		connectionUrl: 'ws://localhost:5000/cable'
 	})
 	
 	const app = new Vue({
@@ -76,5 +116,5 @@ document.addEventListener('DOMContentLoaded', () => {
 	document.body.appendChild(app.$el)
 
 	console.log(app)
-	console.log(process.env)
+	// console.log(process.env)
 })

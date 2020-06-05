@@ -1,5 +1,5 @@
 class Chatroom < ApplicationRecord
-  belongs_to :gameaable, optional: true
+  belongs_to :gameaable, polymorphic: true, optional: true
   has_many :messages
   has_many :chatroom_users, dependent: :destroy
   has_many :users, through: :chatroom_users

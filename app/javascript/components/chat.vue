@@ -1,34 +1,52 @@
 <template>
-  <div class="tile is-parent is-vertical is-9 chat-tile">
-    <div class="tile is-child chat-box">
-
-      <div class="tile title-tile">
-        <h2 class="title is-4 ">{{ chatTitle }}</h2>
-        <b-field v-if="currentChatroom && currentChatroom.public == true" grouped position="is-right" class=""><!-- Label left empty for spacing -->
-          <b-button type="is-danger is-outlined is-rounded is-small" @click="$emit('leave-chat', currentChatroom)">leave</b-button>
-        </b-field>
+  <div class="tile is-vertical chat-tile">
+    <div class="tile is-vertical chat-tile-inner">
+      <div v-if="withTitle" class="tile is-parent is-space-between">
+        <span class="title tile is-10 is-child">{{ chatTitle }}</span>
+        <!-- <b-field  grouped position="is-right" class="">Label left empty for spacing -->
+        <div class="tile is-child">
+          <b-button v-if="currentChatroom && currentChatroom.public == true" type="is-danger is-outlined is-rounded is-small" @click="$emit('leave-chat', currentChatroom)" class="is-pulled-right">leave</b-button>
+        </div>
+        <!-- </b-field> -->
       </div>
-      <div class="messages" v-chat-scroll>
-        <div class="message-piece tile" v-for="message in messages">
-          <span><b>{{message.user.name}}:</b> {{ message.content }}</span>
-          <span class="is-size-7 has-text-grey-light message-date">{{message.created_at}}</span>
+      <div class="title-frame" v-else>
+        <b>Chats / Guesses</b>
+      </div>      
+      <div class="tile is-parent messages is-vertical" v-chat-scroll>
+        <div class="message-piece" v-for="message in chatroomMessages">
+          <span><b>{{message.speakerable.name}}:</b> {{ message.content }}</span>
+          <span class="is-size-7 has-text-grey-light message-date">{{message.created_at | human-date }}</span>
         </div>
       </div>
     </div>
-    <div class="tile is-child">
-      <form @submit.prevent="sendMessage">
-        <b-field>
-          <b-input type="textarea"
-              placeholder="enter text"
-              v-model="message">
-          </b-input>
-        </b-field>
-        <b-field grouped position="is-right"><!-- Label left empty for spacing -->
-          <b-button type="is-primary" native-type="submit">chat</b-button>
-        </b-field>
-      </form>
+    <div :class="['tile', textInput ? 'chat-box-text' : 'chat-box', 'is-parent']">
+      <div class="tile is-child">
+        <form @submit.prevent="sendMessage" >
+        
+          <span v-if="textInput">
+            <b-field>
+              <b-input type="textarea"
+                placeholder="enter text"
+                v-model="message"
+                v-on:keyup.enter="sendMessage"
+                rows="3"
+              >
+              </b-input>
+            </b-field>
+            <b-field grouped position="is-right"><!-- Label left empty for spacing -->
+              <b-button type="is-dark" native-type="submit">chat</b-button>
+            </b-field>
+          </span>
+
+          <b-field v-else>
+            <b-input placeholder="enter text" v-model="message" expanded></b-input>
+            <p class="control">
+                <b-button class="button is-dark" v-on:keyup.enter="sendMessage" native-type="submit">chat</b-button>
+            </p>
+          </b-field>
+        </form>
+      </div>
     </div>
-    
   </div>
 </template>
 
@@ -36,64 +54,106 @@
 import axios from 'axios';
 
 export default {
-  props: ['userId', 'currentChatroom', 'chatName', 'messages'],
+  props: ['chatroomId', 'textInput', 'withTitle', 'gameMode'],
   data: function () {
     return {
-      message: ""
+      message: "",
+      chatroomMessages: [],
+      currentChatroom: {}
     }
   },
   computed: {
-    chatTitle: function() {
-      if(this.currentChatroom !== null && this.currentChatroom !== undefined) {
-        return this.currentChatroom.topic
+    chatTitle () {
+      return this.currentChatroom.topic
+    },
+    speaker () {
+      if(this.gameMode) {
+        return this.$store.getters.getSession
       } else {
-        return null
+        return this.$store.getters.currentUser
       }
-      
     }
   },
   methods: {
     sendMessage: function() {
-      // this.$cable.perform({
-      //   channel: 'MessagesChannel',
-      //   action: 'send_message',
-      //   data: {
-      //     content: this.message
-      //   }
-      // })
-      axios.post('/messages',  {message: {chatroom_id: this.currentChatroom.id, content: this.message}}).then(res => {
+      axios.post('/api/messages',  {
+        message: {
+          chatroom_id: this.chatroomId, 
+          content: this.message, 
+          speakerable_id: this.speaker.id, 
+          speakerable_type: this.speaker.class_name
+        }
+      }).then(res => {
           this.message = null
           console.log('sent message', res)
+        }).catch( error => {
+          console.log(error)
         })
+    },
+    getMessages: function(chatroom_id) {
+      axios({
+        method: 'get',
+        url:`/api/chatrooms/${chatroom_id}`
+      }).then(res => {
+        // console.log('current', res)
+        if(res.data !== null) {
+          this.currentChatroom = res.data
+          this.chatroomMessages = _.sortBy(res.data.messages, ["created_at"])
+        }
+      })
     }
+  },
+  created() {
+    this.getMessages(this.chatroomId)
+    this.websocket = this.$cable.useGlobalConnection(this.$store.state.token)
+    this.subscription = this.websocket.subscriptions.create({
+      channel: 'MessagesChannel', chatroom: this.chatroomId }, {
+        connected: () => console.log(`Connected to Message chatroom ${this.chatroomId}` ),
+        received: (data) => {
+          console.log('received message chat', data)
+          this.chatroomMessages.push(data)
+        }
+    })
   }
 }
 </script>
 
 <style scoped>
-.title-tile {
-  justify-content: space-between;
+.title-frame {
+  border-bottom: 1px solid grey;
+  padding: 0.75rem;
 }
 .chat-tile {
-  min-height: 95vh;
-  height: 95vh;
+  /*height: 100%;*/
+}
+
+.chat-tile-inner {
+
 }
 
 .messages {
-  min-height: 90%;
   height: 90%;
+  max-height: 90%;
+  min-height: 90%;
   overflow: scroll;
 }
 
 .chat-box {
-  min-height: 70%;
-  height: 70%;
-  max-height: 70%;
+  min-height: 16%;
+  height: 16%;
+  max-height: 16%;
+}
+
+.chat-box-text {
+  min-height: 25%;
+  height: 25%;
+  max-height: 25%;
 }
 
 .message-piece {
   margin-bottom: 10px;
   justify-content: space-between;
+  display: flex;
 }
 
 .message-piece:hover .message-date {

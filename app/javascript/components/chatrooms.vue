@@ -1,7 +1,7 @@
 <template>
   <div class="tile is-ancestor">
     <div class="tile is-3 is-vertical">
-      <div class="panel is-primary">
+      <div class="panel is-dark">
         <p class="panel-heading">Chat Channels</p>
         <div class="panel-block">
           
@@ -23,15 +23,15 @@
           #{{ chat.topic }}
         </a>
         <div class="panel-block">
-          <button class="button is-link is-outlined is-fullwidth is-primary" @click="setOpenForm('chat-form-channel')">
+          <b-button type="is-dark" @click="setOpenForm('chat-form-channel')" outlined expanded>
             Create new channel
-          </button>
+          </b-button>
         </div>
         <p class="panel-heading">Private Chat</p>
         <div class="panel-block">
-          <button class="button is-link is-outlined is-fullwidth is-primary" @click="setOpenForm('chat-form-private')">
+          <b-button type="is-dark" @click="setOpenForm('chat-form-private')" outlined expanded>
             Start Private Chat
-          </button>
+          </b-button>
         </div>
           <a class="panel-block" :id="'chatroom-' + chat.id" v-for="chat in privateChats" @click="joinChat(chat.id)" ref="privateChats">
             #{{ chat.topic }}
@@ -39,23 +39,22 @@
       </div>
     </div>
 
-    <chat v-if="currentChatroom" :user-id="userId" :current-chatroom="currentChatroom" v-on:leave-chat="leaveChat" :messages="messages"></chat>
+    <chat v-if="chatroomId" :text-input="true" :with-title="true" :chatroom-id="chatroomId" v-on:leave-chat="leaveChat" :messages="messages" :key="chatroomId"></chat>
     <b-modal :active.sync="isComponentModalActive" 
                  has-modal-card
                  trap-focus
                  aria-role="dialog"
                  aria-modal>
-      <component :is="currentForm" :users="users" v-on:start-chat="startChat"></component>
+      <component :is="currentForm" v-on:start-chat="startChat"></component>
     </b-modal>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import parlourAxios from '../axios/axios_parlour.js';
 import chat from './chat';
 import chatFormChannel from './chat_form_channel';
 import chatFormPrivate from './chat_form_private';
-import _ from 'lodash';
 import qs from 'qs';
 
 export default {
@@ -95,39 +94,10 @@ export default {
       return _.sortBy(chats, ['updated_at']).slice(0, 5)
     }
   },
-  channels: {
-    ChatroomsChannel: {
-      connected() {},
-      rejected() {},
-      received(data) {
-        // console.log('received chatroom', data)
-        // if(_.includes(data.user_ids, this.$store.getters.currentUser.id)) {
-          this.chatrooms.push(data)
-        // }
-      },
-      disconnected() {}
-    },
-    MessagesChannel: {
-      connected() {},
-      rejected() {},
-      received(data) {
-        console.log('received message', data)
-        var chatNew = this.chatrooms.filter(chat => {
-          return chat.id === data.chatroom_id
-        })
-        chatNew[0].new_message = true
-        if(this.currentChatroom != undefined && this.currentChatroom != null && data.chatroom_id == this.currentChatroom.id) {
-            this.messages.push(data)
-        }
-
-      },
-      disconnected() {}
-    }
-  },
   methods: {
     searchChatrooms() {
       if(this.search.length > 2) {
-          axios({
+          parlourAxios({
           method: 'get',
           url: `/chatrooms`,
           params: {
@@ -138,24 +108,25 @@ export default {
           }
 
         }).then(res => {
-          console.log('chatrooms serach', res.data)
+          // console.log('chatrooms serach', res.data)
           this.chatroomSearchResults = res.data
         })
       }
       
     },
     joinChat(chatroom_id) {
+      console.log('join chat')
       if(chatroom_id != null || chatroom_id != undefined) {
-        axios.post(`/chatrooms/${chatroom_id}/join_chat`, {chatroom: {user_id: null}}).then(res => {
-          // console.log(res)
-          this.chatroomId = chatroom_id
-          this.getMessages(this.chatroomId, null)
+        parlourAxios.post(`/chatrooms/${chatroom_id}/join_chat`, {chatroom: {user_id: null}}).then(res => {
+          console.log(res)
+          this.chatroomId = res.data.id
+          // this.getMessages(this.chatroomId, null)
         })
       }
       
     },
     leaveChat(chatroom) {
-      axios.post(`/chatrooms/${chatroom.id}/leave_chat`, {chatroom: {user_id: null}}).then(res => {
+      parlourAxios.post(`/chatrooms/${chatroom.id}/leave_chat`, {chatroom: {user_id: null}}).then(res => {
           // console.log(res)
           this.chatroomId = null
           this.currentChatroom = null
@@ -164,28 +135,22 @@ export default {
     startChat: function(chatroom_object) {
       console.log('chat', chatroom_object)
 
-      axios.post('/chatrooms', {chatroom: chatroom_object}).then(res => {
+      parlourAxios.post('/chatrooms', {chatroom: chatroom_object}).then(res => {
         console.log('room created', res)
         this.isComponentModalActive = false
       })
 
     },
     getMessages: function(chatroom_id, user_ids) {
-      axios({
+      parlourAxios({
         method: 'get',
-        url:`/chatrooms/${chatroom_id}`, 
-        params: {
-          chatroom: { user_ids: user_ids, chatroom_id: chatroom_id }
-        },
-        paramsSerializer: function (params) {
-          return qs.stringify(params, {arrayFormat: 'brackets'})
-        }
+        url:`/chatrooms/${chatroom_id}`
       }).then(res => {
-          // console.log('current', res)
-          if(res.data !== null) {
-            this.currentChatroom = res.data
-            this.messages = res.data.messages
-          }
+        // console.log('current', res)
+        if(res.data !== null) {
+          this.currentChatroom = res.data
+          this.messages = res.data.messages
+        }
 
         var chatNew = this.chatrooms.filter(chat => {
           return chat.id === this.currentChatroom.id
@@ -206,12 +171,8 @@ export default {
     //   channel: 'ChatroomChannel'
     // })
     console.log('current user', this.$store.getters.currentUser)
-    axios.get('/users')
-      .then(res => {
-        // console.log('users', res.data)
-        this.users = res.data
-      })
-    axios({
+    
+    parlourAxios({
       method: 'get', 
       url: '/chatrooms',
       params: {
@@ -222,7 +183,7 @@ export default {
         }
 
       }).then(res => {
-        // console.log('chatrooms', res.data)
+        console.log('chatrooms', res.data)
         res.data.forEach(chat => {
           chat["new_message"] = false
         })
@@ -232,12 +193,21 @@ export default {
 
   },
   mounted() {
-    this.$cable.subscribe({
-      channel: 'ChatroomsChannel'
-    })
+    this.websocket = this.$cable.useGlobalConnection(this.$store.state.token)
 
-    this.$cable.subscribe({
-      channel: 'MessagesChannel'
+    this.subscription = this.websocket.subscriptions.create({
+      channel: 'MessagesChannel' }, {
+        connected: () => console.log('Connected to Message'),
+        received: (data) => {
+          console.log('received message room', data)
+          var chatNew = this.chatrooms.filter(chat => {
+            return chat.id === data.chatroom_id
+          })
+          if(chatNew != undefined && chatNew != null) {
+            chatNew[0].new_message = true
+          }
+          
+        }
     })
   }
 }

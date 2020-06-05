@@ -54,7 +54,7 @@ export default {
 		showFieldErrors: function (errorObject) {
 			console.log(errorObject.response)
 			// console.log(errorObject.response.data.errors[0].details)
-			
+			if(errorObject == undefined || errorObject == null) {return }
 			// console.log(Object.keys(errorDetails))
 			if(errorObject.response.data.data == "" || errorObject.response.data.data == undefined || errorObject.response.data.data == null ) {
 				this.showGeneralMessage(errorObject.response.statusText, 'is-danger')

@@ -11,7 +11,7 @@
         </b-field>
 
         <div class="buttons">
-          <b-button native-type="submit" type="is-primary">Create</b-button>
+          <b-button native-type="submit" type="is-dark">Create</b-button>
         </div>
       </form>
     </div>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 import FormErrorHandlingMixin from '../mixins/FormErrorHandlingMixin'
 
 export default {
@@ -53,17 +53,25 @@ export default {
 
       // console.log(formData)
       // not using store method
-      axios.post('http://localhost:5000/sign_up', {user: formData })
-        .then( res => {
-          localStorage.setItem('auth_token', res.data.body.token)
-          this.$store.commit('setToken', res.data.body.token);
-          console.log(res)
-          this.$router.replace({ path: '/' })
-        })
-        .catch( error => {
-          console.log(error)
-          this.showFieldErrors(error)
-        })
+      // axios.post('/api/sign_up', {user: formData })
+      //   .then( res => {
+      //     localStorage.setItem('auth_token', res.data.body.token)
+      //     this.$store.commit('setToken', res.data.body.token);
+      //     console.log(res)
+      //     this.$cable.connection.connect();
+      //     this.$router.replace({ path: '/' })
+      //   })
+      //   .catch( error => {
+      //     console.log(error)
+      //     this.showFieldErrors(error)
+      //   })
+      this.$store.dispatch('registerUser', formData).then((res) => {
+        this.$router.replace({ path: '/' })
+      }).catch(error => {
+        console.log('registration error', error)
+        this.showFieldErrors(error)
+        // this.showGeneralMessage(error.response.data.statusText, 'is-danger')
+      })
     }
   }
 }

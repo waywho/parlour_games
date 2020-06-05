@@ -5,8 +5,11 @@ module ApplicationCable
 
   	def connect
   		@jwt_token = request.params[:token]
-  		self.current_user = find_verified_user
-  		logger.add_tags "ActionCable", "User #{current_user.id}"
+      if @jwt_token.present?
+  		  self.current_user = find_verified_user
+        logger.add_tags "ActionCable", "User #{current_user.id}"
+      end
+  		logger.add_tags "ActionCable", "Unauthenticated User"
   	end
 
   	private

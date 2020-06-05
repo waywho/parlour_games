@@ -1,10 +1,12 @@
 class User < ApplicationRecord
-	has_one :score, as: :scoreable
-	has_many :game_sessions
+	has_many :game_sessions, as: :playerable
 	accepts_nested_attributes_for :game_sessions, allow_destroy: true
 	has_many :teams, through: :game_sessions
 	has_many :games, through: :game_sessions
-	has_many :messages
+	has_many :fish_bowls, through: :game_sessions
+	
+	has_many :messages, as: :speakerable
+	accepts_nested_attributes_for :messages, allow_destroy: true
 	has_many :chatroom_users
 	has_many :chatrooms, through: :chatroom_users
 
@@ -14,6 +16,6 @@ class User < ApplicationRecord
 
 	def to_token_payload
     # Returns the payload as a hash
-    { sub: id, name: name, email: email }
+    { sub: id, id: id, name: name, email: email, class_name: self.class.name }
 	end
 end
