@@ -71,6 +71,7 @@ export default {
     onTimesUp() {
       this.stopTimer();
       this.resetTimer();
+      console.log('times up')
       this.$emit('times-up')
     },
     resetTimer() {

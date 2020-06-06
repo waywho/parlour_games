@@ -2,7 +2,7 @@ class FishBowl < Game
 	before_create :game_setup
 	before_update :start_game, if: :started_changed?
 	before_update :populate_pot, if: :only_clue_keys?
-	before_update :play, if: :start_round_one?
+	before_update :play, if: :after_clues?
 
 	ROUNDS = { 
 					0 => { name: "Clues", instructions: "Please fill in up to 5 clues each person", score_round: false}, 
@@ -34,10 +34,17 @@ class FishBowl < Game
 		logger.debug("#{self}: next round, #{self.set}")
 		if set["current_round"]["round_number"] == rounds.keys.last
 			set["current_round"]["completed"] = true
+			set["current_turn"]["team"] = 0
+			set["current_turn"]["nominated_player"] = nil
 			self.ended = true
-		else
+		elsif !set["current_round"]["round_number"].nil?
+			if set["current_round"]["round_number"] > 0
+				set["clues"] = set["guessed_clues"]
+				set["guessed_clues"] = []
+			end
 			set["current_round"]["round_number"] += 1
 			set["current_round"]["completed"] = false
+	
 			next_turn
 		end
 	end
@@ -75,12 +82,14 @@ class FishBowl < Game
 		self.set["current_turn"]["nominated_player"] = left_players.first
 	end
 
-	def clue_round?
-		return self.set["current_round"]["round_number"] == 0
-	end
-
-	def start_round_one?
-		!started_changed? && set_changed?
+	def after_clues?
+		if set["current_round"]["round_number"] == 0 && set["current_round"]["completed"] == true
+			return true
+		elsif set["current_round"]["round_number"] > 0
+			return true
+		else
+			return false
+		end
 	end
 
 	def populate_pot

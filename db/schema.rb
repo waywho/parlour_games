@@ -47,7 +47,7 @@ ActiveRecord::Schema.define(version: 2020_06_04_205220) do
     t.bigint "playerable_id"
     t.string "player_name"
     t.string "ip_address"
-    t.jsonb "score"
+    t.jsonb "scores"
     t.index ["game_id"], name: "index_game_sessions_on_game_id"
     t.index ["host"], name: "index_game_sessions_on_host"
     t.index ["invitation_accepted"], name: "index_game_sessions_on_invitation_accepted"

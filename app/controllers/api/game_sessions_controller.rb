@@ -29,29 +29,15 @@ module Api
         params[:user_ids].each do |id|
           user = User.find(id)
           @game_session = user.game_sessions.build(game_session_params)
-          logger.debug "Game Session initialised #{@game_session.inspect}"
-          
-          if @game_session.save
-            GameSessionRelayJob.perform_later(@game_session)
-            render json: @game_session, status: :created
-          else
-            render json: @game_session.errors, status: :unprocessable_entity
-          end
+          create_response(@game_session)
+          logger.debug "Game Session created #{@game_session.inspect}"
         end
       else
          # player = Player.create(name: params[:player][:name], ip_address: request.remote_ip)
         @game_session = GameSession.new(game_session_params.merge(ip_address: request.remote_ip))
-        logger.debug "Game Session initialised #{@game_session.inspect}"
-        if @game_session.save
-          GameSessionRelayJob.perform_later(@game_session)
-          render json: @game_session, status: :created
-        else
-          render json: @game_session.errors, status: :unprocessable_entity
-        end
+        logger.debug "Game Session created #{@game_session.inspect}"
+        create_response(@game_session)
       end
-      
-
-
     end
 
     # PATCH/PUT /api/game_sessions/1
@@ -80,8 +66,17 @@ module Api
 
       # Only allow a trusted parameter "white list" through.
       def game_session_params
-        params.require(:game_session).permit(:playerable_id, :playerable_type, :score, :game_id, :team_id, :host, :invitation_accepted, :player_name)
+        params.require(:game_session).permit(:playerable_id, :playerable_type, :scores, :game_id, :team_id, :host, :invitation_accepted, :player_name)
         # params.fetch(:game_session, {})
+      end
+
+      def create_response(game_session)
+        if game_session.save
+          GameSessionRelayJob.perform_later(game_session)
+          render json: game_session, status: :created
+        else
+          render json: game_session.errors, status: :unprocessable_entity
+        end
       end
   end
 end

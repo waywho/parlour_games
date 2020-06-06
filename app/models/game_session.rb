@@ -6,6 +6,8 @@ class GameSession < ApplicationRecord
   has_many :messages, as: :speakerable
 	accepts_nested_attributes_for :messages, allow_destroy: true
 
+  before_create :setup_scores
+
   def team_name
   	team.name if team.present?
   end
@@ -24,10 +26,12 @@ class GameSession < ApplicationRecord
 
   private
 
-  def setup_score
-    scores = {}
-    game.rounds&.each do |key, round|
-      score[key] = 0 if round[:score_round]
+  def setup_scores
+    self.scores = {}
+    logger.debug "create scores #{scores}"
+    logger.debug "find game #{game}"
+    self.game.rounds&.each do |key, round|
+      scores[key] = 0 if round[:score_round]
     end
   end
 end

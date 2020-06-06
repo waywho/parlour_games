@@ -8,9 +8,23 @@
       </div>
       <b-button class="clue-button" type="is-dark" @click="submitClues" expanded>Add Clues into the FishBowl</b-button>
     </div>
-    <div v-else>
-      Waiting to start the game
-      <b-button type="is-dark" @click="startGame" expanded v-if="currentHost">Start Game</b-button>
+    <div class="tile is-parent is-vertical" v-else>
+      <div class="tile is-child">
+        Waiting to start the game
+        <br />
+        <b-button type="is-dark" @click="startGame" v-if="currentHost">Start Game</b-button>
+      </div>
+      <div class="tags are-large tile is-child" v-if="submittedPlayers.length > 0">
+        <div>Players Submitted Clues</div>
+        <div :class="['tag', session.host ? 'is-info' : 'is-dark', session.invitation_accepted ? '' : 'is-light']" v-for="session in submittedPlayers" :key="session.id">
+          {{session.player_name}}{{ session.host ? ' (host)' : ''}}
+        </div>
+        <div>Waiting from these Players</div>
+        <div :class="['tag', session.host ? 'is-info' : 'is-dark is-light']" v-for="session in notSubmittedPlayers" :key="session.id">
+          {{session.player_name}}{{ session.host ? ' (host)' : ''}}
+        </div>
+      </div>
+
     </div>
     
   </div>
@@ -33,27 +47,47 @@ export default {
   },
   computed: {
     cluesSubmitted: function() {
-      if(_.includes(this.currentGame.set.players_gone, this.gameSession.id)) {
+      if(_.includes(this.game.set.players_gone, this.gameSession.id)) {
         return true
       } else {
         return false
       }
+    },
+    submittedPlayers: function() {
+      let playerArr = []
+      let playersGone = this.game.set.players_gone
+      _.forEach(this.game.game_sessions, function(session) {
+        if(_.includes(playersGone, session.id)) {
+          playerArr.push(session)
+        }
+      })
+      return playerArr
+    },
+    notSubmittedPlayers: function() {
+      let playerArr = []
+      let playersGone = this.game.set.players_gone
+      _.forEach(this.game.game_sessions, function(session) {
+        if(!_.includes(playersGone, session.id)) {
+          playerArr.push(session)
+        }
+      })
+      return playerArr
     }
   },
   methods: {
     startGame: function() {
       let startGame = false
-      if(this.currentGame.set.players_gone.length == this.currentGame.game_sessions.length) {
-        startGame = true
-      } else {
-        const startGame = confirm('Are you sure you want to start? Not all players have submitted their clues?')
+      if(this.game.set.players_gone.length != this.game.game_sessions.length) {
+        startGame = confirm('Are you sure you want to start? Not all players have submitted their clues?')
       }
       console.log('start game', startGame)
 
       if(startGame) {
         console.log('starting game')
-        this.currentGame.set.current_round.completed = true
-        this.$store.dispatch('updateGameSet', {gameId: this.currentGame.id, setData: this.currentGame.set}).then(res => {
+        let gameSet = this.game.set
+        gameSet.current_round.completed = true
+        console.log(gameSet)
+        this.$store.dispatch('updateGame', {id: this.game.id, set: gameSet}).then(res => {
           console.log('dispatched update', res)
         })
       }
@@ -67,7 +101,7 @@ export default {
         return clue != ""
       })
       console.log(filterClueArray)
-      gameAxios.put(this.game.id, {game: {set: {clues: clueArray, players_gone: [this.gameSession.id] }}})
+      gameAxios.put(this.game.id.toString(), {game: {set: {clues: clueArray, players_gone: [this.gameSession.id] }}})
         .then(res => {
           console.log('populate pot')
           // this.currentGame = res.data

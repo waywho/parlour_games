@@ -1,11 +1,14 @@
 <template>
   <div class="tile is-ancestor is-vertical">
-    <div class="tile is-parent">
-      <div class="tile is-8 is-child">
+    <div class="tile">
+    <div class="tile is-parent is-8">
+      <div class="tile is-child">
         <h2 class="title is-3">{{game.name}}: Game {{game.id}}</h2>
       </div>
-      <div class="tile is-4 is-child">
-        <div class=""><i><b>Round:</b> {{currentRound.name}}</i>
+    </div>
+    <div class="tile is-parent">
+      <div class="tile is-child">
+        <div v-if="!game.ended"><i><b>Round:</b> {{currentRound.name}}</i>
           <b-tooltip :label="currentRound.instructions" type="is-dark"
             position="is-bottom" multilined is-large>
             <button class="button is-dark is-small instruction-button">
@@ -13,22 +16,24 @@
             </button>
           </b-tooltip>
         </div>
-          
-          <div class=""><b>Player:</b> {{gameSession.player_name}} </div>
+        <div class=""><b>Player:</b> {{gameSession.player_name}} </div>
       </div>
     </div>
-    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :timer-start="timerStart" :guessed-clue="guessedClue"></component>
+  </div>
+    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :timer-start="timerStart" :guessed-clue="guessedClue" :current-round="currentRound"></component>
   </div>
 </template>
 
 <script>
 import clues from './clues'
 import gameArena from './game_arena'
+import endGame from './end_game'
 export default {
 	props: ['game', 'gameSession', 'currentHost', 'gameSubscription', 'timerStart', 'guessedClue'],
   components: {
     'clues': clues,
-    'gameArena': gameArena
+    'game-arena': gameArena,
+    'end-game': endGame
   },
   data: function () {
     return {
@@ -37,16 +42,17 @@ export default {
         1: {component: 'gameArena'},
         2: {component: 'gameArena'},
         3: {component: 'gameArena'}
-
       }
     }
   },
   computed: {
     currentComponent: function() {
-      console.log('current round', this.game.set.current_round)
-      console.log('round name', this.game.rounds[this.game.set.current_round.round_number])
-      if(this.game.set.current_round.round_number != null && this.game.set.current_round.round_number > 0) {
-        return 'gameArena'
+      // console.log('current round', this.game.set.current_round)
+      // console.log('round name', this.game.rounds[this.game.set.current_round.round_number])
+      if(this.game.ended) {
+        return 'end-game'
+      } else if(this.game.set.current_round.round_number != null && this.game.set.current_round.round_number > 0) {
+        return 'game-arena'
       } else {
         return 'clues'
       }

@@ -24,33 +24,27 @@ module Api
     def create
       @game = game_params[:name].constantize.create
       @game.game_sessions.build(playerable: current_user, host: true, invitation_accepted: true)
-      # if game_params[:user_ids].present?
-      #   @game.user_ids = game_params[:user_ids]
-      # end
       logger.debug "Game created: #{@game.inspect}"
 
       if @game.save
-        # @game.game_sessions&.each do |session|
-        #   GameSessionRelayJob.perform_later(session)
-        # end
         game_json_response(:created)
       else
         render json: @game.errors, status: :unprocessable_entity
       end
     end
 
-    def setup
-      if game_params[:team_mode].present? && game_params[:team_mode]
-        teams = []
-        game_params[:team_numbers].to_i.times { @game.teams.build }
-        logger.debug "Teams to create #{game_params[:team][:numbers]}"
-      else
-        teams = game_params[:teams]
-      end
+    # def setup
+    #   if game_params[:team_mode].present? && game_params[:team_mode]
+    #     teams = []
+    #     game_params[:team_numbers].to_i.times { @game.teams.build }
+    #     logger.debug "Teams to create #{game_params[:team][:numbers]}"
+    #   else
+    #     teams = game_params[:teams]
+    #   end
       
-      GameSetupRelayJob.perform_later({game: @game, teams: teams.to_json})
-      render json: @game.teams, status: :ok
-    end
+    #   GameSetupRelayJob.perform_later({game: @game, teams: teams.to_json})
+    #   render json: @game.teams, status: :ok
+    # end
 
     # PATCH/PUT /games/1
     def update
@@ -85,12 +79,12 @@ module Api
       end
 
       def game_json_response(status=:ok)
-        render json: @game, include: {chatroom: {}, teams: { include: [:game_sessions], except: [:game_id, :updated_at]}, game_sessions: { methods: [:team_name, :class_name, :name], except: [:game_id, :created_at, :updated_at] }}, status: status
+        render json: @game, include: {chatroom: {}, teams: { include: [:game_sessions], methods: [:scores], except: [:game_id, :updated_at]}, game_sessions: { methods: [:team_name, :class_name, :name], except: [:game_id, :created_at, :updated_at] }}, status: status
       end
 
       # Only allow a trusted parameter "white list" through.
       def game_params
-        params.require(:game).permit(:id, :name, :team_mode, :score, :game_sessions, :started, :ended, set: {}, user_ids: [], player_ids: [], teams_attributes: [:id, :name, :order, game_session_ids: []], team: {})
+        params.require(:game).permit(:id, :name, :team_mode, :started, :ended, set: {}, user_ids: [], player_ids: [], teams_attributes: [:id, :name, :order, game_session_ids: []], team: {}, game_sessions_attributes: [:id, scores: {}])
       end
 
       def team_params

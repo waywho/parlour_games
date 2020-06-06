@@ -12,7 +12,7 @@ Rails.application.routes.draw do
       # end
     end
     resources :games do
-      post 'setup', on: :member
+      # post 'setup', on: :member
     end
     resources :game_sessions
     resources :users

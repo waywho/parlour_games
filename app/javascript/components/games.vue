@@ -8,7 +8,7 @@
                  trap-focus
                  aria-role="dialog"
                  aria-modal>
-      <component :is="currentForm" :game_name="currentGameName" :game_id="currentGameId" v-on:send-invite="sendGameInvite" v-on:no-invite="sendGameInvite"></component>
+      <component :is="currentForm" :game_name="currentGameName" :game_id="currentGameId" v-on:send-invite="sendGameInvite" v-on:no-invite="isComponentModalActive = false"></component>
     </b-modal>
   </div>
 </template>
@@ -17,6 +17,7 @@
 import parlourAxios from '../axios/axios_parlour.js';
 import GameInvite from './game_invite_form';
 import { mapGetters } from 'vuex'
+import goToGame from '../mixins/goToGame';
 
 export default {
   components: {
@@ -32,6 +33,7 @@ export default {
       games: ['FishBowl']
     }
   },
+  mixins: [goToGame],
   computed: {
     ...mapGetters({
       currentUser: 'currentUser'
@@ -46,7 +48,7 @@ export default {
         })[0]
         localStorage.setItem('game_session', JSON.stringify(host))
         this.currentGameId = res.data.id 
-        this.currentGameName = game_name
+        this.currentGameName = this.$options.filters.camelToUnderscore(res.data.name)
         this.isComponentModalActive = true
       })   
     },
@@ -56,9 +58,8 @@ export default {
       parlourAxios.post('/game_sessions', {user_ids: userIds, game_session: { game_id: this.currentGameId }})
         .then(res => {
         this.isComponentModalActive = false
-        const comp = this.$options.filters.camelToKabab(res.data.name)
-        console.log(comp)
-        this.$router.push({name: 'join_game', params: {game_id: this.currentGameId.toString() }})
+
+        this.goToGame(res.data.name, this.res.data.id)
       })
     }
   },

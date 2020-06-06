@@ -50,7 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	Vue.use('_')
 
 	// Vue.use(VueDraggable)
-
+	Vue.filter('sumScore', function(object) {
+		return Object.values(object).reduce((a, b) => a + b)
+	})
 	Vue.filter('human-date', function(value) {
 		var now = Date.now();
 		var createdDate = new Date(value)
@@ -77,10 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	  }
 	})
 
-		Vue.filter('camelToKabab', function (value) {
+		Vue.filter('camelToUnderscore', function (value) {
 	  if (value !== null && value !== undefined) {
 	    value = value.replace(/([A-Z])/g, "_$1");
-	    return value.substr(1).toLowerCase()
+	    value = value.replace(/^[_]/, "");
+	    return value.toLowerCase()
 	  } else {
 	    return ''
 	  }

@@ -99,6 +99,7 @@ export const store = new Vuex.Store({
           console.log('rejoin', res.data)
           localStorage.setItem('game_session', JSON.stringify(res.data))
           dispatch('resetGameSession')
+          resolve(res)
         }).catch(error => {
         	console.log(error)
         	reject(error)
@@ -108,10 +109,10 @@ export const store = new Vuex.Store({
 		resetGameSession({commit, dispatch, state}) {
 			state.gameSession = localStorage.getItem('game_session')
 		},
-		updateGameSet({commit, dispatch, state}, payload) {
-			console.log('update payload', payload)
+		updateGame({commit, dispatch, state}, game) {
+			console.log('update payload', game)
 			return new Promise((resolve, reject) => {
-				gameAxios.put(`${payload.gameId}`, { game: { set: payload.setData }})
+				gameAxios.put(`${game.id}`, {game: game})
           .then(res => {
             console.log('game updated', res)
             resolve(res)

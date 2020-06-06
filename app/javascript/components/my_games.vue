@@ -21,7 +21,7 @@
           </div>
         </div>
         <footer class="card-footer">
-          <a href="#" class="card-footer-item">Play</a>
+          <a href="" class="card-footer-item" @click="goToGame(game.name, game.id)">Play</a>
           <a href="#" class="card-footer-item">Delete</a>
         </footer>
       </div>
@@ -32,11 +32,10 @@
 
 <script>
 import parlourAxios from '../axios/axios_parlour.js';
+import goToGame from '../mixins/goToGame';
 
 export default {
-  components: {
-
-  },
+  mixins: [goToGame],
   data: function () {
     return {
       games: null

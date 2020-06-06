@@ -56,10 +56,6 @@ export default {
       required: true,
       type: Object
     },
-    websocket: {
-      type: Object,
-      required: true
-    },
     currentHost: {
       type: Boolean,
       required: true
@@ -172,6 +168,7 @@ export default {
   created () {
     // console.log('where is my game', this.game)
     this.currentGame = this.game
+    this.websocket = this.$cable.useGlobalConnection(this.$store.state.token)
     this.game_sessions = this.currentGame.game_sessions.filter(session => {
               return session.team_id == null
             })
@@ -223,9 +220,5 @@ export default {
 
 .players-tile {
   align-content: center;
-}
-
-.is-dark.is-light {
-  background-color: grey !important;
 }
 </style>

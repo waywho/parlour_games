@@ -1,6 +1,6 @@
 <template>
   <div>
-    <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGame" :game-subscription="gameSubscription" :current-host="currentHost" :timer-start="timerStart" :guessed-clue="guessedClue"></component>
+    <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost" :timer-start="timerStart" :guessed-clue="guessedClue"></component>
   </div>
 </template>
 
@@ -45,16 +45,16 @@ export default {
   watch: {
     game: function(newVal, oldVal) {
       if(this.gameSession.game_id == newVal.id && newVal.set.current_round.round_number != null) { 
-        this.comp = this.$options.filters.camelToKabab(newVal.name);
+        this.comp = this.$options.filters.camelToUnderscore(newVal.name);
       } else {
         this.comp = 'waiting_room'
       }
     }
   },
   methods: {
-    goToGame: function(game) {
+    goToGameComponent: function(game) {
       this.game = game
-      this.comp = this.$options.filters.camelToKabab(game.name)
+      this.comp = this.$options.filters.camelToUnderscore(game.name)
     }
   },
   created () {
@@ -62,7 +62,11 @@ export default {
       .then(res => {
         console.log('got game', res)
         // console.log('gameset', res.data.set)
-        this.game = res.data
+        if(res.data.ended) {
+          this.$router.push({name: 'join_game'})
+        } else {
+          this.game = res.data
+        }
       })
     const gameId = this.game_id
     this.websocket = this.$cable.useGlobalConnection(this.$store.state.token)
