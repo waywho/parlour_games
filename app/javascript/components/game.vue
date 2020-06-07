@@ -1,6 +1,6 @@
 <template>
   <div>
-    <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost" :timer-start="timerStart" :guessed-clue="guessedClue"></component>
+    <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed"></component>
   </div>
 </template>
 
@@ -31,7 +31,8 @@ export default {
       game: null,
       subscription: null,
       timerStart: false,
-      guessedClue: null
+      guessedClue: null,
+      passed: 0
     }
   },
   computed: {
@@ -88,6 +89,9 @@ export default {
           if(data.guessed_clue != null || data.guessed_clue != undefined) {
             this.guessedClue = data.guessed_clue
           }
+          if(data.passed != null || data.passed != undefined) {
+            this.passed = data.passed
+          }
         },
         timerStart: function () {
           console.log('starting timer from client', gameId)
@@ -95,6 +99,9 @@ export default {
         },
         clueGuessed: function(guessedClue) {
           this.perform('guessed_clue', {game_id: gameId, guessed_clue: guessedClue})
+        },
+        cluesPassed: function(passed) {
+          this.perform('passed', {game_id: gameId, passed: passed})
         }
     })
     

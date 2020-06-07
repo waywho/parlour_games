@@ -18,6 +18,12 @@ class GamesChannel < ApplicationCable::Channel
       game_id: data['game_id']
   end
 
+  def passed(data)
+    ActionCable.server.broadcast "game:#{data['game_id']}",
+      passed: data['passed'],
+      game_id: data['game_id']
+  end
+
   def unsubscribed
     # Any cleanup needed when channel is unsubscribed
     stop_all_streams

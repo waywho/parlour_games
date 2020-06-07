@@ -6,16 +6,22 @@
           <div>{{currentGame.set.clues}}</div><div>{{currentGame.set.guessed_clues}}</div>
         </div>
       </div> -->
-      <div class="tile is-parent timer-outer-tile">
+      <div class="tile is-parent">
         <div class="tile is-child timer-tile">
           <b-taglist attached>
-              <b-tag type="is-light" size="is-medium" class="light-tag" v-if="game.game_mode">{{nominatedPlayer.team_name}}</b-tag>
+              <b-tag type="is-light" size="is-medium" class='light-tag'>{{passed}}</b-tag>
               <b-tag type="is-dark" size="is-medium">{{nominatedPlayer.player_name}}</b-tag>
               <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentRoundPlayerScore}}</b-tag>
           </b-taglist>
         </div>
         <div class="tile is-child timer-tile">
           <timer :time-limit="timeLimit" ref="gameTimer" @times-up="updateGame"></timer>
+        </div>
+        <div class="tile is-child timer-tile" v-if="game.team_mode">
+          <b-taglist attached>
+            <b-tag type="is-dark" size="is-medium">{{currentTeam.name}}</b-tag>
+            <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentTeam.scores | sumScore}}</b-tag>
+          </b-taglist>
         </div>
       </div>
       <div class='tile is-parent'>
@@ -25,8 +31,8 @@
             <span v-if="reveal && !currentPlayer">{{guessedClue}}</span>
           </div>
           <div class="control buttons-tile" v-if="currentPlayer">
-            <b-button class="button is-dark" size="is-medium" @click="start">{{playButton}}</b-button>
-            <b-button class="button is-dark" size="is-medium" @click="guessed">Guessed</b-button>
+            <b-button class="button is-dark" size="is-medium" @click="start" :disabled="noMorePass">{{playButton}}</b-button>
+            <b-button class="button is-dark" size="is-medium" @click="guessed" v-if="turnStarted">Guessed</b-button>
 <!--             <b-button class="button is-dark is-large" @click="updateGame">Update Game</b-button> -->
           </div>
         </div>
@@ -50,7 +56,7 @@ import scoreBoard from './score_board'
 import axios from 'axios'
 
 export default {
-  props: ['game', 'gameSession', 'gameSubscription', 'timerStart', 'guessedClue', 'currentRound'],
+  props: ['game', 'gameSession', 'gameSubscription', 'timerStart', 'guessedClue', 'currentRound', 'passed'],
   components: {
     'timer': timer,
     'chat': chat,
@@ -61,10 +67,10 @@ export default {
       currentGame: null,
       clues: null,
       randIndex: null,
-      roundStart: false,
-      passed: 0,
+      turnStarted: false,
       timeLimit: 60,
-      reveal: false
+      reveal: false,
+      noMorePass: false
     }
   },
   computed: {
@@ -72,14 +78,14 @@ export default {
       return this.clues[this.randIndex]
     },
     playButton: function() {
-      if(this.roundStart) {
+      if(this.turnStarted) {
         return "Pass"
       } else {
         return "Start"
       }
     },
     nominatedPlayer: function() {
-      return _.find(this.currentGame.game_sessions, { id: this.currentGame.set.current_turn.nominated_player })
+      return _.find(this.game.game_sessions, { id: this.game.set.current_turn.nominated_player })
     },
     currentPlayer: function() {
       return this.nominatedPlayer.id == this.gameSession.id
@@ -88,10 +94,10 @@ export default {
       return this.nominatedPlayer.scores[this.currentRoundNum]
     },
     currentTeam: function() {
-      return this.currentGame.set.current_turn.team
+      return  _.find(this.game.teams, { order: this.game.set.current_turn.team })
     },
     currentRoundNum: function() {
-      return this.currentGame.set.current_round.round_number
+      return this.game.set.current_round.round_number
     },
     scoreParties: function() {
       if(this.game.team_mode) {
@@ -116,20 +122,30 @@ export default {
       this.reveal = true
       setTimeout(() => {this.reveal = false}, 2000)
     },
+    passed (newVal, oldVal) {
+      return newVal
+    },
     game (newVal, oldVal) {
       this.currentGame = newVal
     }
   },
   methods: {
     start: function() {
+      if(this.passed >= 3) {
+        return
+      }
       this.randIndex = Math.floor(Math.random() * this.clues.length)
-      if(!this.roundStart) {
-        this.roundStart = true
+      if(!this.turnStarted) {
+        this.turnStarted = true
         // this.$refs.gameTimer.startTimer()
         console.log('timer step 1 start')
         this.gameSubscription.timerStart()
       } else {
-        this.passed += 1
+        console.log("passing clue")
+        this.gameSubscription.cluesPassed(this.passed += 1)
+        if(this.passed == 3) {
+          this.noMorePass = true
+        }
       }
     },
     resetClock: function() {
@@ -138,6 +154,7 @@ export default {
     updatePlayerScore: function(incre) {
       let player_index = this.currentGame.game_sessions.indexOf(this.nominatedPlayer)
       this.currentGame.game_sessions[player_index].scores[this.currentRoundNum] += 1
+      this.currentTeam.scores[this.currentRoundNum] += 1
       // this.nominatedPlayer.scores[this.currentRoundNum] += 1
       console.log('score update', this.currentGame.game_sessions[player_index].scores)
     },
