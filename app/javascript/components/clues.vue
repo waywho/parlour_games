@@ -86,6 +86,8 @@ export default {
       let startGame = false
       if(this.game.set.players_gone.length != this.game.game_sessions.length) {
         startGame = confirm('Are you sure you want to start? Not all players have submitted their clues?')
+      } else {
+        startGame = true
       }
       console.log('start game', startGame)
 

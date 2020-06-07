@@ -51,6 +51,9 @@ export const store = new Vuex.Store({
 	mutations: {
 		setToken (state, payload) {
 			state.token = payload
+		},
+		setGameSession (state, payload) {
+			state.gameSession = localStorage.getItem('game_session')
 		}
 	},
 	actions: {
@@ -97,8 +100,7 @@ export const store = new Vuex.Store({
 				axios.get(`/api/game_sessions?search=${payload.player.value}&game_id=${payload.gameId.value}${payload.user}`)
         .then(res => {
           console.log('rejoin', res.data)
-          localStorage.setItem('game_session', JSON.stringify(res.data))
-          dispatch('resetGameSession')
+          dispatch('resetGameSession', res.data)
           resolve(res)
         }).catch(error => {
         	console.log(error)
@@ -106,8 +108,9 @@ export const store = new Vuex.Store({
         })
 			})
 		},
-		resetGameSession({commit, dispatch, state}) {
-			state.gameSession = localStorage.getItem('game_session')
+		resetGameSession({commit, dispatch, state}, gameSession) {
+			localStorage.setItem('game_session', JSON.stringify(gameSession))
+			commit('setGameSession')
 		},
 		updateGame({commit, dispatch, state}, game) {
 			console.log('update payload', game)

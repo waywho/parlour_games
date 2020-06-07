@@ -35,7 +35,7 @@ export default {
         const host = res.data.hosts.filter(host => {
           return host.playerable_id == this.$store.getters.currentUser.id
         })[0]
-        localStorage.setItem('game_session', JSON.stringify(host))
+        this.$store.dispatch('resetGameSession', host)
         this.currentGameId = res.data.id 
         this.currentGameName = this.$options.filters.camelToUnderscore(res.data.name)
       })   

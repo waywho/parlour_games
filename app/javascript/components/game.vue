@@ -58,7 +58,7 @@ export default {
     }
   },
   created () {
-    this.$store.dispatch('reloadGameSession', {player: {value: this.gameSession.player_name}, gameId: {value: this.game_id}, user: ""})
+    // this.$store.dispatch('reloadGameSession', {player: {value: this.gameSession.player_name}, gameId: {value: this.game_id}, user: ""})
     gameAxios.get(`${this.game_id}`)
       .then(res => {
         console.log('got game', res)
@@ -69,6 +69,8 @@ export default {
           this.game = res.data
         }
       })
+
+    // TODO: extract to bus
     const gameId = this.game_id
     this.websocket = this.$cable.useGlobalConnection(this.$store.state.token)
     this.gameSubscription = this.websocket.subscriptions.create({

@@ -9,7 +9,7 @@
                  trap-focus
                  aria-role="dialog"
                  aria-modal>
-      <component :is="currentForm" :game_name="currentGameName" :game_id="currentGameId" v-on:send-invite="sendGameInvite" v-on:no-invite="isComponentModalActive = false"></component>
+      <component :is="currentForm" :game_name="currentGameName" :game_id="currentGameId" v-on:send-invite="sendGameInvite" v-on:no-invite="noInvite"></component>
     </b-modal>
   </div>
 </template>
@@ -47,20 +47,24 @@ export default {
         const host = res.data.hosts.filter(host => {
           return host.playerable_id == this.$store.getters.currentUser.id
         })[0]
-        localStorage.setItem('game_session', JSON.stringify(host))
+
+        this.$store.dispatch('resetGameSession', host)
+
         this.currentGameId = res.data.id 
         this.currentGameName = this.$options.filters.camelToUnderscore(res.data.name)
         this.isComponentModalActive = true
       })   
     },
+    noInvite: function() {
+      this.isComponentModalActive = false
+      this.goToGame(this.currentGameName, this.currentGameId)
+    },
     sendGameInvite: function(userIds) {
       console.log('game invite user ids', userIds)
-      // axios.post('/games', {game: game})
       parlourAxios.post('/game_sessions', {user_ids: userIds, game_session: { game_id: this.currentGameId }})
         .then(res => {
         this.isComponentModalActive = false
-
-        this.goToGame(res.data.name, this.res.data.id)
+        this.goToGame(this.currentGameName, this.currentGameId)
       })
     }
   },

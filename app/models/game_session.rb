@@ -7,6 +7,7 @@ class GameSession < ApplicationRecord
 	accepts_nested_attributes_for :messages, allow_destroy: true
 
   before_create :setup_scores
+  after_create :default_player_name
 
   def team_name
   	team.name if team.present?
@@ -32,6 +33,12 @@ class GameSession < ApplicationRecord
     logger.debug "find game #{game}"
     self.game.rounds&.each do |key, round|
       scores[key] = 0 if round[:score_round]
+    end
+  end
+
+  def default_player_name
+    if playerable.present?
+      self.update_attributes(player_name: playerable.name)
     end
   end
 end

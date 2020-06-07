@@ -88,8 +88,7 @@ export default {
       axios.post('/api/game_sessions', {game_session: { player_name: this.formFields.player.value, game_id: this.formFields.gameId.value, invitation_accepted: true }})
         .then(res => {
           console.log('join game', res.data)
-          localStorage.setItem('game_session', JSON.stringify(res.data))
-          this.$store.dispatch('resetGameSession')
+          this.$store.dispatch('resetGameSession', host)
           this.goGame()
         })
     },

@@ -96,7 +96,9 @@ class FishBowl < Game
 	end
 
 	def after_clues?
-		if set["current_round"]["round_number"] == 0 && set["current_round"]["completed"] == true
+		if set["current_round"]["round_number"].nil?
+			return false
+		elsif set["current_round"]["round_number"] == 0 && set["current_round"]["completed"] == true
 			return true
 		elsif set["current_round"]["round_number"] > 0
 			return true
