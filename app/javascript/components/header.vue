@@ -1,7 +1,7 @@
 <template>
   <b-navbar spaced shadow>
     <template slot="start">
-      <b-navbar-item><router-link to="/">Main Page</router-link></b-navbar-item>
+      <b-navbar-item><router-link to="/">Parlour Games</router-link></b-navbar-item>
       <b-navbar-item v-if="authorisedLinks"><router-link to="/chats">Chats</router-link></b-navbar-item>
       <b-navbar-item v-if="authorisedLinks"><router-link to="/games">Games</router-link></b-navbar-item>
       <b-navbar-item v-if="authorisedLinks"><router-link to="/my_games">My Games</router-link></b-navbar-item>
@@ -39,13 +39,5 @@ export default {
 p {
   font-size: 2em;
   text-align: center;
-}
-
-a {
-  color: black !important;
-}
-
-a:hover {
-  color: grey !important;
 }
 </style>

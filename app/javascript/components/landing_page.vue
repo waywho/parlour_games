@@ -1,6 +1,10 @@
 <template>
-  <div>
-    <p>{{ message }}</p>
+  <div class="tile is-ancestor">
+    <div class="tile is-parent hero-tile">
+      <div class="tile is-child hero-tile">
+        <h1 class="title is-1">Welcome to Parlour Games</h1>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -18,8 +22,10 @@ export default {
 </script>
 
 <style scoped>
-p {
-  font-size: 2em;
-  text-align: center;
+.hero-tile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 75vh;
 }
 </style>

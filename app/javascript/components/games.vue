@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h2 class="title is-2">Games</h2>
     <b-button v-for="game in games" type="is-dark" @click="startGameInvite(game)" expanded outlined>
       Start {{game | camel-to-space }}
     </b-button>

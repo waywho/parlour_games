@@ -1,16 +1,18 @@
 <template>
   <div class="tile">
     <div class="tile is-vertical is-7">
-      <div class="tile is-parent">
+<!--       <div class="tile is-parent">
         <div class="tile is-child timer-tile">
           <div>{{currentGame.set.clues}}</div><div>{{currentGame.set.guessed_clues}}</div>
         </div>
-      </div>
-      <div class="tile is-parent">
-        <div class="tile is-child">
-          <div class="tag">{{nominatedPlayer.team_name}}</div>
-          <div class="tag is-dark is-large">{{nominatedPlayer.player_name}}</div>
-          <div class="tag">{{currentRoundPlayerScore}}</div>
+      </div> -->
+      <div class="tile is-parent timer-outer-tile">
+        <div class="tile is-child timer-tile">
+          <b-taglist attached>
+              <b-tag type="is-light" size="is-medium" class="light-tag" v-if="game.game_mode">{{nominatedPlayer.team_name}}</b-tag>
+              <b-tag type="is-dark" size="is-medium">{{nominatedPlayer.player_name}}</b-tag>
+              <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentRoundPlayerScore}}</b-tag>
+          </b-taglist>
         </div>
         <div class="tile is-child timer-tile">
           <timer :time-limit="timeLimit" ref="gameTimer" @times-up="updateGame"></timer>
@@ -23,8 +25,8 @@
             <span v-if="reveal && !currentPlayer">{{guessedClue}}</span>
           </div>
           <div class="control buttons-tile" v-if="currentPlayer">
-            <b-button class="button is-dark is-large" @click="start">{{playButton}}</b-button>
-            <b-button class="button is-dark is-large" @click="guessed">Guessed</b-button>
+            <b-button class="button is-dark" size="is-medium" @click="start">{{playButton}}</b-button>
+            <b-button class="button is-dark" size="is-medium" @click="guessed">Guessed</b-button>
 <!--             <b-button class="button is-dark is-large" @click="updateGame">Update Game</b-button> -->
           </div>
         </div>
@@ -32,7 +34,7 @@
     </div>
     <div class="tile is-parent is-vertical">
       <div calss="tile is-child score-board">
-        <score-board :teams="this.currentGame.teams" :rounds="this.currentGame.rounds"></score-board>
+        <score-board :teams="scoreParties" :rounds="this.currentGame.rounds"></score-board>
       </div>
       <div class="tile is-child">
         <chat :chatroom-id="game.chatroom.id" :game-mode="true" :with-title="false" class="chat-column"></chat>
@@ -90,6 +92,13 @@ export default {
     },
     currentRoundNum: function() {
       return this.currentGame.set.current_round.round_number
+    },
+    scoreParties: function() {
+      if(this.game.team_mode) {
+        return this.game.teams
+      } else {
+        return this.game.game_sessions
+      }
     }
   },
   watch: {
@@ -166,7 +175,6 @@ export default {
   created () {
     this.currentGame = this.game
     this.clues = this.game.set.clues
-    this.$store.dispatch('reloadGameSession', {player: {value: this.gameSession.player_name}, gameId: {value: this.game.id}, user: ""})
 
     console.log('game gameSubscription', this.gameSubscription)
     console.log('current player', this.currentPlayer)
@@ -174,10 +182,23 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+
+.light-tag {
+  border: 1px solid #363636;
+}
+
+.timer-outer-tile {
+  height: 100px;
+  max-height: 100px;
+}
+
 .timer-tile {
-  height: 70px;
-  max-height: 70px;
+  height: 100px;
+  max-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .chat-column {

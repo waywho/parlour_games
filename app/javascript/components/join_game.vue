@@ -152,8 +152,7 @@ export default {
             if(this.game_ended) {
               this.errorMessage = "This game has finished, please enter another game code"
               this.showError = true
-            }
-            if(this.gameSession != null || this.gameSession != undefined && !this.game_ended) {
+            } else if(this.gameSession != null || this.gameSession != undefined) {
               if(this.gameSession.game_id == this.game.id) {
                 this.formFields.player.value = this.gameSession.player_name
                 this.rejoin = true

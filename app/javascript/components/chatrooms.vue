@@ -2,7 +2,7 @@
   <div class="tile is-ancestor">
     <div class="tile is-3 is-vertical">
       <div class="panel is-dark">
-        <p class="panel-heading">Chat Channels</p>
+        <p class="panel-heading">Chatrooms</p>
         <div class="panel-block">
           
           <b-field  class="full-input">
@@ -27,7 +27,7 @@
             Create new channel
           </b-button>
         </div>
-        <p class="panel-heading">Private Chat</p>
+        <p class="panel-heading">Private Chats</p>
         <div class="panel-block">
           <b-button type="is-dark" @click="setOpenForm('chat-form-private')" outlined expanded>
             Start Private Chat

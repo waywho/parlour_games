@@ -51,35 +51,48 @@ class FishBowl < Game
 
 	def next_turn
 		logger.debug("#{self}: next turn, #{self.set}")
-		if set["current_turn"]["team"] == teams.length
-			set["current_turn"]["team"] = 1
-		else
-			set["current_turn"]["team"] += 1
+		if team_mode
+			if set["current_turn"]["team"] == teams.length
+				set["current_turn"]["team"] = 1
+			else
+				set["current_turn"]["team"] += 1
+			end
 		end
 		next_player
 	end
 
 
 	def next_player
-		current_team = teams.where(order: set["current_turn"]["team"]).take
-		logger.debug("#{self}: team order #{set["current_turn"]["team"]}")
-		logger.debug("#{self}: current team #{current_team.id}, #{self.set}")
-		
-		players = current_team.game_sessions.map(&:id)
+		if team_mode
+			current_team = teams.where(order: set["current_turn"]["team"]).take
+
+			logger.debug("#{self}: team order #{set["current_turn"]["team"]}")
+			logger.debug("#{self}: current team #{current_team}, #{self.set}")
+			
+			players = current_team.game_sessions.map(&:id)
+		else
+			players = game_sessions.map(&:id)
+		end
 
 		logger.debug("#{self}: current team members #{players}")
+
 		if set["current_turn"]["nominated_player"].present?
 			set["current_turn"]["gone_players"] << set["current_turn"]["nominated_player"]
 		end
-		logger.debug("#{self}: players gone, #{self.set}")
+
+		logger.debug("#{self}: players gone, #{self.set["current_turn"]["gone_players"]}")
+
 		left_players = players - set["current_turn"]["gone_players"]
+
 		logger.debug("#{self}: left players, #{left_players}")
+		
 		if left_players.empty?
 			left_players = players
 			set["current_turn"]["gone_players"] = []
 		end
-		logger.debug("#{self}: next player #{left_players.first}, #{self.set}")
+
 		self.set["current_turn"]["nominated_player"] = left_players.first
+		logger.debug("#{self}: next player #{left_players.first}, #{self.set}")
 	end
 
 	def after_clues?

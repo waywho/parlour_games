@@ -3,25 +3,32 @@
     <div v-if="!cluesSubmitted" class="tile is-parent wrap-tile">
       <div class="tile is-child is-2 box clue-box" v-for="(clue, index) in clues" :key="index">
         <textarea class="textarea clue-input" placeholder="enter a clue" rows="10" v-model="clue.value"></textarea>
-
-
       </div>
       <b-button class="clue-button" type="is-dark" @click="submitClues" expanded>Add Clues into the FishBowl</b-button>
     </div>
-    <div class="tile is-parent is-vertical" v-else>
-      <div class="tile is-child">
-        Waiting to start the game
-        <br />
-        <b-button type="is-dark" @click="startGame" v-if="currentHost">Start Game</b-button>
-      </div>
-      <div class="tags are-large tile is-child" v-if="submittedPlayers.length > 0">
-        <div>Players Submitted Clues</div>
-        <div :class="['tag', session.host ? 'is-info' : 'is-dark', session.invitation_accepted ? '' : 'is-light']" v-for="session in submittedPlayers" :key="session.id">
-          {{session.player_name}}{{ session.host ? ' (host)' : ''}}
+    <div class="tile is-vertical" v-else>
+      <div class="tile is-parent is-vertical">
+        <div class="tile is-child">
+          <i>Waiting to start the game</i>
         </div>
-        <div>Waiting from these Players</div>
-        <div :class="['tag', session.host ? 'is-info' : 'is-dark is-light']" v-for="session in notSubmittedPlayers" :key="session.id">
-          {{session.player_name}}{{ session.host ? ' (host)' : ''}}
+        <div class="tile is-child">
+          <b-button type="is-dark start-button" @click="startGame" v-if="currentHost">Host to Start Game</b-button>
+        </div>
+      </div>
+
+      <div class="tags are-medium tile is-parent" v-if="submittedPlayers.length > 0">
+        <div class="tile is-child box">
+          <div class="title is-4">Players submitted clues</div>
+          <div :class="['tag', session.host ? 'is-info' : 'is-dark', session.invitation_accepted ? '' : 'is-light']" v-for="session in submittedPlayers" :key="session.id">
+            {{session.player_name}}{{ session.host ? ' (host)' : ''}}
+          </div>
+        </div>
+
+        <div class="tile is-child box">
+          <div class="title is-4">Waiting from these Players</div>
+          <div :class="['tag', session.host ? 'is-info' : 'is-dark is-light']" v-for="session in notSubmittedPlayers" :key="session.id">
+            {{session.player_name}}{{ session.host ? ' (host)' : ''}}
+          </div>
         </div>
       </div>
 

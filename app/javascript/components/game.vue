@@ -58,11 +58,12 @@ export default {
     }
   },
   created () {
+    this.$store.dispatch('reloadGameSession', {player: {value: this.gameSession.player_name}, gameId: {value: this.game_id}, user: ""})
     gameAxios.get(`${this.game_id}`)
       .then(res => {
         console.log('got game', res)
         // console.log('gameset', res.data.set)
-        if(res.data.ended) {
+        if(res.data.ended && this.gameSession.game_id != res.data.id) {
           this.$router.push({name: 'join_game'})
         } else {
           this.game = res.data

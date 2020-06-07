@@ -12,7 +12,7 @@ module Api
         @games = Game.all
       end
 
-      render json: @games, include: {chatroom: {}, teams: {}, users: { only: :name }, players: { only: :name }}, except: [:user_id, :team_id]
+      render json: @games, include: {chatroom: {}, teams: { include: [:game_sessions], methods: [:scores], except: [:game_id, :updated_at]}, game_sessions: { methods: [:team_name, :class_name, :name], except: [:game_id, :created_at, :updated_at] }}
     end
 
     # GET /games/1

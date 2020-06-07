@@ -1,7 +1,7 @@
 <template>
   <div class="tile is-ancestor is-vertical">
     <div class="tile">
-    <div class="tile is-parent is-8">
+    <div class="tile is-parent is-7">
       <div class="tile is-child">
         <h2 class="title is-3">{{game.name}}: Game {{game.id}}</h2>
       </div>
