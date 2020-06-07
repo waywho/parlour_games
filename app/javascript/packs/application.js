@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// ws://localhost:5000/
 
 	Vue.use(VueActionCable, {
-		connectionUrl: 'ws://parlour-games-who.herokuapp.com/cable'
+		connectionUrl: 'wss://parlourgames.club/cable'
 	})
 	
 	const app = new Vue({
