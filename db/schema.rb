@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_04_205220) do
+ActiveRecord::Schema.define(version: 2020_06_07_092226) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -63,7 +63,10 @@ ActiveRecord::Schema.define(version: 2020_06_04_205220) do
     t.boolean "started", default: false
     t.boolean "ended", default: false
     t.boolean "team_mode", default: false
+    t.string "slug"
+    t.string "password_digest"
     t.index ["name"], name: "index_games_on_name"
+    t.index ["slug"], name: "index_games_on_slug", unique: true
   end
 
   create_table "messages", force: :cascade do |t|
