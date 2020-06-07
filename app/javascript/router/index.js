@@ -42,7 +42,7 @@ const router = new VueRouter({
 	mode: 'history',
 	routes: [
 		{ path: '/', component: landingPage },
-		{ path: '/chats', component: Chatrooms, beforeEnter: ifNotAuthenticated },
+		{ path: '/chats', name: 'chats', component: Chatrooms, beforeEnter: ifNotAuthenticated },
 		{ path: '/video_chats', component: videoChats, beforeEnter: ifNotAuthenticated },
 		{ path: '/games', component: Games, beforeEnter: ifNotAuthenticated },
 		{ path: '/my_games', component: MyGames, beforeEnter: ifNotAuthenticated},

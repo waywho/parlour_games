@@ -19,7 +19,7 @@
         </div>
       </div>
     </div>
-    <div :class="['tile', textInput ? 'chat-box-text' : 'chat-box', 'is-parent']">
+    <div :class="['tile', textInput ? 'chat-box-text' : 'chat-box', 'is-parent']" v-if="withInput">
       <div class="tile is-child">
         <form @submit.prevent="sendMessage" >
         
@@ -27,7 +27,7 @@
             <b-field>
               <b-input type="textarea"
                 placeholder="enter text"
-                v-model="message"
+                v-model="currentMessage"
                 v-on:keyup.enter="sendMessage"
                 rows="3"
               >
@@ -39,7 +39,7 @@
           </span>
 
           <b-field v-else>
-            <b-input placeholder="enter text" v-model="message" expanded></b-input>
+            <b-input placeholder="enter text" v-model="currentMessage" expanded></b-input>
             <p class="control">
                 <b-button class="button is-dark" v-on:keyup.enter="sendMessage" native-type="submit">chat</b-button>
             </p>
@@ -54,12 +54,41 @@
 import axios from 'axios';
 
 export default {
-  props: ['chatroomId', 'textInput', 'withTitle', 'gameMode'],
+  props: {
+    chatroomId: {
+      type: Number,
+      required: true,
+    },
+    textInput: {
+      type: Boolean,
+      required: false,
+      default: true
+    },
+    withTitle: {
+      type: Boolean,
+      required: false,
+      default: true
+    },
+    gameMode: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    withInput: {
+      type: Boolean,
+      required: false,
+      default: true
+    },
+    message: {
+      type: String,
+      required: false
+    }
+  },
   data: function () {
     return {
-      message: "",
       chatroomMessages: [],
-      currentChatroom: {}
+      currentChatroom: {},
+      currentMessage: ""
     }
   },
   computed: {
@@ -74,17 +103,23 @@ export default {
       }
     }
   },
+  watch: {
+    message(newVal, oldVal) {
+      this.currentMessage = newVal
+    }
+  },
   methods: {
     sendMessage: function() {
+      // TODO clean up the message sending by using the actual value than v-modal
       axios.post('/api/messages',  {
         message: {
           chatroom_id: this.chatroomId, 
-          content: this.message, 
+          content: this.currentMessage, 
           speakerable_id: this.speaker.id, 
           speakerable_type: this.speaker.class_name
         }
       }).then(res => {
-          this.message = null
+          this.currentMessage = null
           console.log('sent message', res)
         }).catch( error => {
           console.log(error)
@@ -112,6 +147,7 @@ export default {
         received: (data) => {
           console.log('received message chat', data)
           this.chatroomMessages.push(data)
+          this.$emit('guessing-clue', data.content)
         }
     })
   }

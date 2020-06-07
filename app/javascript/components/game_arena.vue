@@ -6,18 +6,18 @@
           <div>{{currentGame.set.clues}}</div><div>{{currentGame.set.guessed_clues}}</div>
         </div>
       </div> -->
-      <div class="tile is-parent">
-        <div class="tile is-child timer-tile">
+      <div class="tile is-parent scoring-tile">
+        <div class="tile is-child timer-tile player-score">
           <b-taglist attached>
               <b-tag type="is-light" size="is-medium" class='light-tag'>{{passed}}</b-tag>
               <b-tag type="is-dark" size="is-medium">{{nominatedPlayer.player_name}}</b-tag>
               <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentRoundPlayerScore}}</b-tag>
           </b-taglist>
         </div>
-        <div class="tile is-child timer-tile">
+        <div class="tile is-child timer-tile timer-piece">
           <timer :time-limit="timeLimit" ref="gameTimer" @times-up="updateGame"></timer>
         </div>
-        <div class="tile is-child timer-tile" v-if="game.team_mode">
+        <div class="tile is-child timer-tile team-score" v-if="game.team_mode">
           <b-taglist attached>
             <b-tag type="is-dark" size="is-medium">{{currentTeam.name}}</b-tag>
             <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentTeam.scores | sumScore}}</b-tag>
@@ -35,6 +35,14 @@
             <b-button class="button is-dark" size="is-medium" @click="guessed" v-if="turnStarted">Guessed</b-button>
 <!--             <b-button class="button is-dark is-large" @click="updateGame">Update Game</b-button> -->
           </div>
+          <form @submit.prevent="sendGuess" v-else>
+            <b-field class="timer-tile">
+              <b-input placeholder="enter text" v-model="guess"></b-input>
+              <p class="control">
+                  <b-button class="button is-dark" v-on:keyup.enter="sendGuess" native-type="submit">guess</b-button>
+              </p>
+            </b-field>
+          </form>
         </div>
       </div>
     </div>
@@ -43,7 +51,7 @@
         <score-board :teams="scoreParties" :rounds="this.currentGame.rounds"></score-board>
       </div>
       <div class="tile is-child">
-        <chat :chatroom-id="game.chatroom.id" :game-mode="true" :with-title="false" class="chat-column"></chat>
+        <chat :chatroom-id="game.chatroom.id" ref="gameChatBox" :game-mode="true" :with-title="false" :with-input="false" :message="guess" @guessing-clue="guessingClue" class="chat-column"></chat>
       </div>
     </div>
   </div>
@@ -56,7 +64,7 @@ import scoreBoard from './score_board'
 import axios from 'axios'
 
 export default {
-  props: ['game', 'gameSession', 'gameSubscription', 'timerStart', 'guessedClue', 'currentRound', 'passed'],
+  props: ['game', 'gameSession', 'gameSubscription', 'timerStart', 'guessedClue', 'currentRound', 'passed', 'thisClue'],
   components: {
     'timer': timer,
     'chat': chat,
@@ -70,7 +78,8 @@ export default {
       turnStarted: false,
       timeLimit: 60,
       reveal: false,
-      noMorePass: false
+      noMorePass: false,
+      guess: ""
     }
   },
   computed: {
@@ -110,6 +119,7 @@ export default {
   watch: {
     timerStart (newVal, oldVal) {
       if(newVal) {
+        this.turnStarted = true
         this.$refs.gameTimer.startTimer()
       } else {
         this.$refs.gameTimer.stopTimer()
@@ -139,7 +149,7 @@ export default {
         this.turnStarted = true
         // this.$refs.gameTimer.startTimer()
         console.log('timer step 1 start')
-        this.gameSubscription.timerStart()
+        this.gameSubscription.turnStart()
       } else {
         console.log("passing clue")
         this.gameSubscription.cluesPassed(this.passed += 1)
@@ -168,6 +178,22 @@ export default {
         let guessed = this.clues.splice(this.randIndex, 1)[0];
         this.gameSubscription.clueGuessed(guessed)
         this.randIndex = Math.floor(Math.random() * this.clues.length)
+      }
+    },
+    sendGuess: function() {
+      // console.log('sending message', this.guess)
+      if(this.guess != null || this.guess != undefined || this.guess != "") {
+        this.$refs.gameChatBox.sendMessage()
+      }
+      this.guess = ""
+    },
+    guessingClue: function(guess) {
+      if(this.currentPlayer) {
+        if(this.currentClue.toLowerCase() == guess.toLowerCase()) {
+          this.guessed()
+        }
+      } else {
+        return
       }
     },
     updateGame: function() {
@@ -205,18 +231,19 @@ export default {
   border: 1px solid #363636;
 }
 
-.timer-outer-tile {
-  height: 100px;
-  max-height: 100px;
+.scoring-tile {
+  display: flex !important;
+  flex-wrap: wrap !important;
 }
 
 .timer-tile {
-  height: 100px;
-  max-height: 100px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  // height: 100px;
+  // max-height: 100px;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
+
 
 .chat-column {
   border: 1px solid grey;

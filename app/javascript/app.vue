@@ -2,7 +2,7 @@
   <div id="app">
     <app-header></app-header>
     <div class="container ">
-      <b-notification class="bottom-note" type="is-success" :active.sync="isActive" aria-close-label="Close notification" v-show="showNotification"><notification v-if="authenticated" v-on:new-note="showNote"></notification></b-notification>
+      <b-notification class="bottom-note" type="is-success" :active.sync="isActive" aria-close-label="Close notification" v-if="loadNotification"><notification v-show="showNotification" v-on:new-note="showNote"></notification></b-notification>
       <router-view :key="$route.path"></router-view>
     </div>
   </div>
@@ -20,7 +20,18 @@ export default {
   computed: {
     ...mapGetters(['authenticated']),
     showNotification: function() {
-      return this.$store.getters.authenticated && this.isActive
+      return this.authenticated && this.isActive
+    },
+    loadNotification: function() {
+      if(this.authenticated) {
+        if(this.$route.name != "chats" && this.$route.name != "game") {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        return false
+      }
     }
   },
   data: function () {
