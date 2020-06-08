@@ -36,6 +36,9 @@ const notJoinedGame = (to, from, next) => {
 		next(`/join_game/${to.params.game_id}`)
 	}
 }
+const gameStarted = (to, from, next) => {
+	if(to.)
+}
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -46,10 +49,9 @@ const router = new VueRouter({
 		{ path: '/video_chats', component: videoChats, beforeEnter: ifNotAuthenticated },
 		{ path: '/games', component: Games, beforeEnter: ifNotAuthenticated },
 		{ path: '/my_games', component: MyGames, beforeEnter: ifNotAuthenticated},
-		{ path: '/games/:gameComponent/:game_id', name: 'game', component: Game, props: true, beforeEnter: notJoinedGame },
+		{ path: '/games/:game_component/:game_id', name: 'game', component: Game, props: true, beforeEnter: notJoinedGame },
 		{ path: '/join_game', name: 'join_game_noid', component: JoinGame },
 		{ path: '/join_game/:game_id', name: 'join_game', component: JoinGame, props: true },
-		// { path: '/games/fish_bowl', component: FishBowl, beforeEnter: ifNotAuthenticated },
 		{ path: '/sign_up', name: 'registraton', component: Registration},
 		{ path: '/sign_in', name: 'signIn', component: SignIn }, 
 	]

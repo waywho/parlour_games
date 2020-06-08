@@ -35,6 +35,7 @@ import _ from 'lodash'
 import Buefy from 'buefy'
 import 'buefy/dist/buefy.css'
 // import '../../../node_modules/bulma/bulma.sass'
+export const bus = new Vue();
 
 document.addEventListener('DOMContentLoaded', () => {
 	Vue.use(Buefy, {
@@ -103,12 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	  }
 	})
 
-	
-	// wss://parlour-games-who.herokuapp.com/
-	// ws://localhost:5000/
-
+	// 'wss://parlour-games-who.herokuapp.com/cable'
+	// 'ws://localhost:5000/cable'
 	Vue.use(VueActionCable, {
-		connectionUrl: 'wss://parlour-games-who.herokuapp.com/cable'
+		connectionUrl: 'ws://localhost:5000/cable'
 	})
 	
 	const app = new Vue({

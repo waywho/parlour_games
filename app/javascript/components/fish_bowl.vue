@@ -20,7 +20,7 @@
       </div>
     </div>
   </div>
-    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed" :current-round="currentRound" :this-clue="thisClue"></component>
+    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed" :current-round="currentRound"></component>
   </div>
 </template>
 
@@ -28,12 +28,15 @@
 import clues from './clues'
 import gameArena from './game_arena'
 import endGame from './end_game'
+import WaitingRoom from './waiting_room';
+
 export default {
-	props: ['game', 'gameSession', 'currentHost', 'gameSubscription', 'timerStart', 'guessedClue', 'passed', 'thisClue'],
+	props: ['game', 'gameSession', 'currentHost', 'gameSubscription', 'timerStart', 'guessedClue', 'passed'],
   components: {
     'clues': clues,
     'game-arena': gameArena,
-    'end-game': endGame
+    'end-game': endGame,
+    'waiting_room': WaitingRoom
   },
   data: function () {
     return {

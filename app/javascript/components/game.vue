@@ -1,22 +1,16 @@
 <template>
   <div>
-    <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed" :this-clue="thisClue"></component>
+    <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed"></component>
   </div>
 </template>
 
 <script>
-import FishBowl from './fish_bowl';
-import WaitingRoom from './waiting_room';
 import gameAxios from '../axios/axios_game_update.js';
 import { mapGetters } from 'vuex';
 
 export default {
-  components: {
-    'fish_bowl': FishBowl,
-    'waiting_room': WaitingRoom
-  },
   props: {
-    gameComponent: {
+    game_component: {
       type: String,
       required: true
     },
@@ -32,7 +26,6 @@ export default {
       subscription: null,
       timerStart: false,
       guessedClue: null,
-      thisClue: null,
       passed: 0
     }
   },
@@ -90,9 +83,6 @@ export default {
           if(data.guessed_clue != null || data.guessed_clue != undefined) {
             this.guessedClue = data.guessed_clue
           }
-          // if(data.current_clue != null || data.current_clue != undefined) {
-          //   this.thisClue = data.current_clue
-          // }
           if(data.passed != null || data.passed != undefined) {
             this.passed = data.passed
           }
@@ -101,10 +91,6 @@ export default {
           console.log('starting timer from client', gameId)
           this.perform('turn_start', {game_id: gameId})
         },
-        // currentClue: function(currentClue) {
-        //   console.log('current clue', gameId)
-        //   this.perform('cureent_clue', {game_id: gameId, current_clue: currentClue})
-        // },
         clueGuessed: function(guessedClue) {
           this.perform('guessed_clue', {game_id: gameId, guessed_clue: guessedClue})
         },
