@@ -107,8 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	// wss://parlour-games-who.herokuapp.com/
 	// ws://localhost:5000/
 
+	let websocketConnection = process.env.WEBSOCKET_PATH
+
 	Vue.use(VueActionCable, {
-		connectionUrl: 'wss://parlour-games-who.herokuapp.com/cable'
+		connectionUrl: "/cable",
 	})
 	
 	const app = new Vue({
