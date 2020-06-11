@@ -1,9 +1,8 @@
 <template>
-  <div class="game-paper">
-     <textarea class="clue-input clue-box" placeholder="enter a clue" rows="6" v-model="currentClue"></textarea>
-    <div v-for="b in 4" class="folded-part">
-     
-    </div>
+  <div :class="['game-paper', withInput ? '' : 'no-border']">
+    <textarea v-if="withInput" class="clue-input" placeholder="enter a clue" rows="6" v-model="currentClue"></textarea>
+    <div class="clue-word" v-if="!withInput">{{currentClue}}</div>
+    <div v-for="b in 4" class="folded-part"></div>
     
   </div>
 </template>
@@ -11,7 +10,17 @@
 <script>
 
 export default {
-  props: ['clue'],
+  props: {
+    'clue': {
+      type: String,
+      required: false
+    },
+    'withInput': {
+      type: Boolean,
+      required: false,
+      default: true
+    }
+  },
   data: function () {
     return {
     }
@@ -59,16 +68,35 @@ textarea {
   padding-top: 25%;
 }
 
+.clue-word {
+  text-align: center;
+  position: absolute;
+  top: 0;
+  z-index: 99;
+  font-size: 30px;
+  font-weight: bold;
+  width: 100%;
+  height: 100%;
+  padding-top: 40%;
+}
+
 .game-paper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 350px;
   width: 350px;
   perspective: 800px;
   border: 1px solid $grey-light;
-  // box-shadow: 0px 0px 40px $grey-lightest;
   position: absolute;
   top: 0;
   z-index: -1;
   display: none;
+}
+
+.no-border {
+  border: 0px none !important;
+  box-shadow: 0px 0px 40px $grey-lightest;
 }
 
 .folded-part {

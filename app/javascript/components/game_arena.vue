@@ -1,11 +1,6 @@
 <template>
   <div class="tile">
     <div class="tile is-vertical is-7">
-<!--       <div class="tile is-parent">
-        <div class="tile is-child timer-tile">
-          <div>{{currentGame.set.clues}}</div><div>{{currentGame.set.guessed_clues}}</div>
-        </div>
-      </div> -->
       <div class="tile is-parent scoring-tile">
         <div class="tile is-child timer-tile player-score">
           <b-taglist attached>
@@ -24,33 +19,47 @@
           </b-taglist>
         </div>
       </div>
-      <div class='tile is-parent'>
-        <div class="tile is-child">
-          <div class="box clue-box">
-            <span v-if="currentPlayer">{{currentClue}}</span>
-            <span v-if="reveal && !currentPlayer">{{guessedClue}}</span>
-          </div>
-          <div class="control buttons-tile" v-if="currentPlayer">
-            <b-button class="button is-dark" size="is-medium" @click="start" :disabled="noMorePass">{{playButton}}</b-button>
-            <b-button class="button is-dark" size="is-medium" @click="guessed" v-if="turnStarted">Guessed</b-button>
-<!--             <b-button class="button is-dark is-large" @click="updateGame">Update Game</b-button> -->
-          </div>
-          <form @submit.prevent="sendGuess" v-else>
-            <b-field class="timer-tile">
-              <b-input placeholder="enter text" v-model="guess"></b-input>
-              <p class="control">
-                  <b-button class="button is-dark" v-on:keyup.enter="sendGuess" native-type="submit">guess</b-button>
-              </p>
-            </b-field>
-          </form>
+      <div class='tile is-parent is-vertical'>
+        <div class="tile is-child card-pot">
+        <div class="card-stack">
+          <game-paper :clue="currentClue" :withInput="false"></game-paper>
+          <div v-if="reveal && !currentPlayer" class="clue-word">{{guessedClue}}</div>
         </div>
+        </div>
+
+        <div class="control buttons-tile tile is-child" v-if="currentPlayer">
+          <b-button class="button is-dark" size="is-medium" @click="start" :disabled="noMorePass">{{playButton}}</b-button>
+          <b-button class="button is-dark" size="is-medium" @click="guessed" v-if="turnStarted">Guessed</b-button>
+<!--             <b-button class="button is-dark is-large" @click="updateGame">Update Game</b-button> -->
+        </div>
+
+        <form v-if="useChat" @submit.prevent="sendGuess" class="tile is-child" v-else>
+          <b-field class="timer-tile">
+            <b-input placeholder="enter text" v-model="guess"></b-input>
+            <p class="control">
+                <b-button class="button is-dark" v-on:keyup.enter="sendGuess" native-type="submit">guess</b-button>
+            </p>
+          </b-field>
+        </form>
+
       </div>
     </div>
     <div class="tile is-parent is-vertical">
-      <div calss="tile is-child score-board">
-        <score-board :teams="scoreParties" :rounds="this.currentGame.rounds"></score-board>
+      <div class="tile is-child title is-5 section-line">
+        Teams
       </div>
       <div class="tile is-child">
+        <div v-for="team in game.teams" :key="team.id" class="tags are-medium">
+          <div class="tag is-light"><b>{{team.name}}:</b></div> <player v-for="session in team.game_sessions" :key="session.id" :game-session="session" :currentHost="currentHost" :class="[nominatedPlayer.id == session.id ? 'is-dark' : 'is-light']"></player>
+        </div>
+      </div>
+      <div calss="tile is-child score-board">
+        <div class="tile is-child title is-5 section-line">
+          Score Board
+        </div>
+        <score-board :teams="scoreParties" :rounds="this.currentGame.rounds"></score-board>
+      </div>
+      <div v-if="useChat"  class="tile is-child">
         <chat :chatroom-id="game.chatroom.id" ref="gameChatBox" :game-mode="true" :with-title="false" :with-input="false" :message="guess" @guessing-clue="guessingClue" class="chat-column"></chat>
       </div>
     </div>
@@ -62,13 +71,51 @@ import timer from './timer'
 import chat from './chat'
 import scoreBoard from './score_board'
 import axios from 'axios'
+import player from './player'
+import gamePaper from './game_paper'
 
 export default {
-  props: ['game', 'gameSession', 'gameSubscription', 'timerStart', 'guessedClue', 'currentRound', 'passed'],
+  props: {
+    'game': {
+      type: Object,
+      required: false,
+    }, 
+    'gameSession': {
+      type: Object,
+      required: false,
+    }, 
+    'gameSubscription': {
+      type: Object,
+      required: false,
+    }, 
+    'timerStart': {
+      type: Boolean,
+      required: false,
+    }, 
+    'guessedClue': {
+      type: String,
+      required: false,
+    },
+    'passed': {
+      type: Number,
+      required: false,
+    }, 
+    'useChat': {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    'currentHost': {
+      type: Boolean,
+      required: false
+    }
+  },
   components: {
     'timer': timer,
     'chat': chat,
-    'score-board': scoreBoard
+    'score-board': scoreBoard,
+    'player': player,
+    'game-paper': gamePaper
   },
   data: function () {
     return {
@@ -114,7 +161,7 @@ export default {
       } else {
         return this.game.game_sessions
       }
-    }
+    },
   },
   watch: {
     timerStart (newVal, oldVal) {
@@ -234,6 +281,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.clue-word {
+  text-align: center;
+  position: absolute;
+  top: 0;
+  z-index: 99;
+  font-size: 30px;
+  font-weight: bold;
+  width: 100%;
+  height: 100%;
+  padding-top: 40%;
+}
 
 .light-tag {
   border: 1px solid #363636;
@@ -283,5 +341,9 @@ export default {
 .score-board {
   height: 50%;
   min-height: 50%;
+}
+
+.section-line {
+  border-bottom: 1px solid #636363
 }
 </style>

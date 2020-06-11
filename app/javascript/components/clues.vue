@@ -161,19 +161,6 @@ export default {
 
 <style scoped lang="scss">
 @import '../styles/global.scss';
-.card-pot {
-  height: 380px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card-stack {
-  position: relative;
-  width: 380px;
-  max-width: 380px;
-  height: 100%;
-}
 
 .center-tile {
   display: flex;
