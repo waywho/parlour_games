@@ -31,10 +31,7 @@ import moment from 'moment'
 import _ from 'lodash'
 
 // import VueDraggable from 'vue-draggable'
-
 import Buefy from 'buefy'
-import 'buefy/dist/buefy.css'
-// import '../../../node_modules/bulma/bulma.sass'
 
 document.addEventListener('DOMContentLoaded', () => {
 	Vue.use(Buefy, {

@@ -44,7 +44,7 @@ export const store = new Vuex.Store({
 		getToken: state => {
 			return state.token
 		},
-		getSession: state => {
+		gameSession: state => {
 			return JSON.parse(state.gameSession)
 		}
 	},
@@ -110,6 +110,10 @@ export const store = new Vuex.Store({
 		},
 		resetGameSession({commit, dispatch, state}, gameSession) {
 			localStorage.setItem('game_session', JSON.stringify(gameSession))
+			commit('setGameSession')
+		},
+		clearGameSession({commit, dispatch, state}) {
+			localStorage.removeItem('game_session')
 			commit('setGameSession')
 		},
 		updateGame({commit, dispatch, state}, game) {

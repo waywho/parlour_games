@@ -1,42 +1,47 @@
 <template>
   <div class="tile is-ancestor is-vertical">
     <div class="tile">
-    <div class="tile is-parent is-7">
-      <div class="tile is-child">
-        <h2 class="title is-3">{{game.name}}: Game {{game.id}}</h2>
-      </div>
-    </div>
-    <div class="tile is-parent">
-      <div class="tile is-child">
-        <div v-if="!game.ended"><i><b>Round:</b> {{currentRound.name}}</i>
-          <b-tooltip :label="currentRound.instructions" type="is-dark"
-            position="is-bottom" multilined is-large>
-            <button class="button is-dark is-small instruction-button">
-                Instructions
-            </button>
-          </b-tooltip>
+      <div class="tile is-parent is-7">
+        <div class="tile is-child">
+          <h2 class="title is-3">{{game.name}}: Game {{game.id}}</h2>
         </div>
-        <div class=""><b>Player:</b> {{gameSession.player_name}} </div>
+      </div>
+      <div class="tile is-parent">
+        <div class="tile is-child">
+          <div v-if="!game.ended"><i><b>Round:</b> {{currentRound.name}}</i>
+            <b-tooltip :label="currentRound.instructions" type="is-dark"
+              position="is-bottom" multilined is-large>
+              <button class="button is-dark is-small instruction-button">
+                  Instructions
+              </button>
+            </b-tooltip>
+          </div>
+          <div class=""><b>Player:</b> {{gameSession.player_name}} </div>
+        </div>
       </div>
     </div>
-  </div>
-    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed" :current-round="currentRound" :this-clue="thisClue"></component>
+    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed" :current-round="currentRound"></component>
+    <round-notice :game-round="currentRound" :new-round="newRound"></round-notice>
   </div>
 </template>
 
 <script>
-import clues from './clues'
-import gameArena from './game_arena'
-import endGame from './end_game'
+import clues from './clues';
+import gameArena from './game_arena';
+import endGame from './end_game';
+import roundNotice from './round_notice';
+
 export default {
-	props: ['game', 'gameSession', 'currentHost', 'gameSubscription', 'timerStart', 'guessedClue', 'passed', 'thisClue'],
+	props: ['game', 'gameSession', 'currentHost', 'gameSubscription', 'timerStart', 'guessedClue', 'passed'],
   components: {
     'clues': clues,
     'game-arena': gameArena,
-    'end-game': endGame
+    'end-game': endGame,
+    'round-notice': roundNotice
   },
   data: function () {
     return {
+      newRound: false,
       gameComponents: {
         0: {component: 'clues'},
         1: {component: 'gameArena'},
@@ -60,6 +65,11 @@ export default {
     },
     currentRound: function() {
       return this.game.rounds[this.game.set.current_round.round_number]
+    }
+  },
+  watch: {
+    currentRound(newVal) {
+      this.newRound = true
     }
   },
   created() {

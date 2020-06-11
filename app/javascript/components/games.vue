@@ -4,7 +4,7 @@
     <b-button v-for="game in games" type="is-dark" @click="startGameInvite(game)" expanded outlined>
       Start {{game | camel-to-space }}
     </b-button>
-     <b-modal :active.sync="isComponentModalActive" 
+    <b-modal :active.sync="isComponentModalActive" 
                  has-modal-card
                  trap-focus
                  aria-role="dialog"
@@ -19,6 +19,7 @@ import parlourAxios from '../axios/axios_parlour.js';
 import GameInvite from './game_invite_form';
 import { mapGetters } from 'vuex'
 import goToGame from '../mixins/goToGame';
+
 
 export default {
   components: {

@@ -43,6 +43,7 @@ module Api
     # PATCH/PUT /api/game_sessions/1
     def update
       if @game_session.update(game_session_params)
+        GameSessionRelayJob.perform_later(@game_session)
         render json: @game_session
       else
         render json: @game_session.errors, status: :unprocessable_entity
@@ -52,6 +53,7 @@ module Api
     # DELETE /api/game_sessions/1
     def destroy
       @game_session.destroy
+      GameSessionRelayJob.perform_later(@game_session) 
     end
 
     private

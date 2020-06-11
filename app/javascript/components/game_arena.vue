@@ -64,7 +64,7 @@ import scoreBoard from './score_board'
 import axios from 'axios'
 
 export default {
-  props: ['game', 'gameSession', 'gameSubscription', 'timerStart', 'guessedClue', 'currentRound', 'passed', 'thisClue'],
+  props: ['game', 'gameSession', 'gameSubscription', 'timerStart', 'guessedClue', 'currentRound', 'passed'],
   components: {
     'timer': timer,
     'chat': chat,
@@ -198,15 +198,23 @@ export default {
     },
     updateGame: function() {
       let player_index = this.currentGame.game_sessions.indexOf(this.nominatedPlayer)
+
       console.log('game update 2', this.currentGame)
+
       this.$refs.gameTimer.stopTimer()
+      this.turnStarted = false
+
       console.log('current player', this.currentPlayer)
+
       if (this.currentPlayer) {
         this.$store.dispatch('updateGame', {
           id: this.currentGame.id,
           set: this.currentGame.set,
           game_sessions_attributes: [
             this.currentGame.game_sessions[player_index]
+          ],
+          teams_attributes: [
+            this.currentTeam
           ]
         }).then(res => {
           console.log('dispatched update received', res)

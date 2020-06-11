@@ -5,7 +5,7 @@ class FishBowl < Game
 	before_update :play, if: :after_clues?
 
 	ROUNDS = { 
-					0 => { name: "Clues", instructions: "Please fill in up to 5 clues each person", score_round: false}, 
+					0 => { name: "Clues", instructions: "Please fill in more than 5 clues each person", score_round: false}, 
 					1 => { name: "Taboo", instructions: "Each player will have 60 seconds to provide verbal hints for their team to guess each clue. The verbal hints can not be any part of the clue. Team members can guess by typing in the answer, when matched, next clue will be drawn.", score_round: true}, 
 					2 => { name: "Charades", instructions: "Each player will have 60 seconds to act out the clues for their team to guess. Team members can guess by typing in the answer, when matched, next clue will be drawn", score_round: true}, 
 					3 => { name: "Password", instructions: "Each player will have 60 seconds to provide 1 keyword for their team to guess. Team members can guess by typing in the answer, when matched, next clue will be drawn", score_round: true}

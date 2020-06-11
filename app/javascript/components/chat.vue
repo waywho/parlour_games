@@ -97,7 +97,7 @@ export default {
     },
     speaker () {
       if(this.gameMode) {
-        return this.$store.getters.getSession
+        return this.$store.getters.gameSession
       } else {
         return this.$store.getters.currentUser
       }

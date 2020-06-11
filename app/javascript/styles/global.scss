@@ -1,3 +1,7 @@
+@import '~bulma';
+@import 'buefy/dist/buefy.css';
+@import '@creativebulma/bulma-divider';
+
 .is-space-between {
 	justify-content: space-between;
 }
@@ -19,5 +23,9 @@ a {
 }
 
 a:hover {
-  color: grey !important;
+  color: $grey !important;
+}
+
+.tag.is-outlined {
+	border: 1px solid $dark;
 }

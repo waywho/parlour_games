@@ -7,7 +7,15 @@ class GameSession < ApplicationRecord
 	accepts_nested_attributes_for :messages, allow_destroy: true
 
   before_create :setup_scores
-  after_create :default_player_name
+  before_create :default_player_name
+
+  attr_accessor :deleted
+
+  after_destroy :mark_as_deleted
+
+  def mark_as_deleted
+    self.deleted = true
+  end
 
   def team_name
   	team.name if team.present?
@@ -37,7 +45,7 @@ class GameSession < ApplicationRecord
   end
 
   def default_player_name
-    if playerable.present?
+    if playerable.present? && player_name.nil?
       self.update_attributes(player_name: playerable.name)
     end
   end

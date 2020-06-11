@@ -26,9 +26,7 @@
     </div>
     <div class="tile is-ancestor">
       <draggable class="tags are-large tile players-tile" v-model="game_sessions" group="players" key="original">
-        <div :class="['tag', session.host ? 'is-info' : 'is-dark', session.invitation_accepted ? '' : 'is-light']" v-for="session in game_sessions" :key="session.id">
-          {{session.player_name}}{{ session.host ? ' (host)' : ''}}
-        </div>
+        <player v-for="session in game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost"></player>
       </draggable>
       <div v-if="currentGame.teams.length > 1" class="tile is-vertical is-parent">
         <div v-for="(team, index) in sortedTeams" :key="team.id" class="box tile is-child">
@@ -36,9 +34,7 @@
             <input class="input" placeholder="Team Name" type="string" v-model="team.name" @change="gameUpdate"></input>
           </b-field>
           <draggable v-model="team.game_sessions" class="tags are-large team-box" group="players" @change="gameUpdate">
-            <div v-for="session in team.game_sessions" :class="['tag', session.host ? 'is-info' : 'is-dark', session.invitation_accepted ? '' : 'is-light']" :key="session.id">
-              {{session.player_name}}{{ session.host ? ' (host)' : ''}}
-            </div>
+            <player v-for="session in team.game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost"></player>
           </draggable>
         </div>
       </div>
@@ -49,7 +45,7 @@
 <script>
 import draggable from 'vuedraggable'
 import gameAxios from '../axios/axios_game_update.js';
-
+import player from './player';
 export default {
 	props: {
     game: {
@@ -59,13 +55,10 @@ export default {
     currentHost: {
       type: Boolean,
       required: true
-    },
-    gameSession: {
-      type: Object
     }
   },
   components: {
-    draggable,
+    draggable, player
   },
   data: function () {
     return {
@@ -97,9 +90,12 @@ export default {
     },
     allAccepted: function() {
       return _.every(this.currentGame.game_sessions, ['invitation_accepted', true ])
-    }
+    },
   },
   methods: {
+    playerOptions: function() {
+      alert('imclicked')
+    },
     startGame: function() {
       if(this.teamsAssigned) {
         console.log('starting game')
@@ -182,8 +178,26 @@ export default {
       channel: 'GameSessionsChannel', game: this.currentGame.id }, {
         connected: () => console.log('Connected to Game Session', this.currentGame.id),
         received: (data) => {
-          // console.log('received game session', data)
-          this.game_sessions.push(data)
+          console.log('received game session', data)
+          let session = _.find(this.game_sessions, { 'id': data.id })
+          console.log('find session', session)
+
+          if (session != null || session != undefined) {
+            var index = this.game_sessions.indexOf(session)
+            console.log('index', index)
+            if(data.deleted) {
+              console.log('deleted')
+              this.game_sessions.splice(index, 1)
+            } else {
+              console.log('new data')
+              console.log(this.game_sessions[index])
+              this.game_sessions.splice(index, 1)
+              this.game_sessions.push(data)
+            }
+          } else {
+            this.game_sessions.push(data)
+          }
+          
         }
     })
 
@@ -192,17 +206,11 @@ export default {
         connected: () => console.log('Connected to Game Channel', this.game.id),
         received: (data) => {
           // console.log('received game', data)
-          // if(data.teams != null) {
-          //   this.currentGame.teams = data.teams
-          // }
           
           if(data.game_sessions != null) {
             this.game_sessions = data.game_sessions
           }
-
           this.currentGame = JSON.parse(data.game)
-          
-          // this.currentGame.teams.forEach(team => { team["game_sessions"] = []})
         }
     })
     

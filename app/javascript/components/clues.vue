@@ -1,11 +1,25 @@
 <template>
   <div class="tile">
-    <div v-if="!cluesSubmitted" class="tile is-parent wrap-tile">
-      <div class="tile is-child is-2 box clue-box" v-for="(clue, index) in clues" :key="index">
-        <textarea class="textarea clue-input" placeholder="enter a clue" rows="10" v-model="clue.value"></textarea>
+    <div class="tile is-vertical" v-if="!cluesSubmitted">
+      <div class="tile is-parent card-pot">
+        <div class=" tile is-child card-stack">
+          <game-paper v-for="(c, index) in 3" :key="index" v-model="currentClue" :ref="'clue_' + index" :clue="currentClue" @input="enableButton"></game-paper>
+        </div>
       </div>
-      <b-button class="clue-button" type="is-dark" @click="submitClues" expanded>Add Clues into the FishBowl</b-button>
+
+      <div class="tile is-parent is-vertical">
+        <div class="tile is-child center-tile ">
+          <b-button class="clue-button" type="is-dark" @click="parkClue" :disabled="disableAdd">Next Clue</b-button>
+        </div>
+        <div class="tile is-child tags center-tile">
+          <span class="tag is-outlined" v-for="(clue, index) in cluesToAdd">{{clue}}</span>
+        </div>
+        <div class="tile is-child center-tile">
+          <b-button class="clue-button" type="is-dark" outlined @click="submitClues">I'm done! Add it all to the Fish Bowl</b-button>
+        </div>
+      </div>
     </div>
+
     <div class="tile is-vertical" v-else>
       <div class="tile is-parent is-vertical">
         <div class="tile is-child">
@@ -39,17 +53,25 @@
 
 <script>
 import gameAxios from '../axios/axios_game_update.js';
+import gameCard from './game_card';
+import gamePaper from './game_paper';
+import draggable from 'vuedraggable';
 
 export default {
 	props: ['game', 'currentHost', 'gameSession'],
   components: {
-    
+    'game-card': gameCard,
+    'game-paper': gamePaper,
+    'draggable': draggable
   },
   data: function () {
     return {
       currentGame: null,
-      clues: [],
-      clueNumbers: 5
+      clues: ["", "", ""],
+      cluesToAdd: [],
+      clueNumbers: 5,
+      currentClue: "",
+      disableAdd: true
     }
   },
   computed: {
@@ -82,6 +104,9 @@ export default {
     }
   },
   methods: {
+    enableButton: function() {
+      this.disableAdd = false
+    },
     startGame: function() {
       let startGame = false
       if(this.game.set.players_gone.length != this.game.game_sessions.length) {
@@ -101,9 +126,17 @@ export default {
         })
       }
     },
+    parkClue: function() {
+      if(this.currentClue != "" || this.currentClue != null || this.currentClue != undefined) {
+        this.cluesToAdd.push(this.currentClue)
+        this.currentClue = ""
+        this.disableAdd = true
+        this.$refs.clue_2[0].$el.children[0].focus()
+      }
+    },
     submitClues: function() {
-      var clueArray = this.clues.map(clue => {
-        return clue.value.trim()
+      var clueArray = this.cluesToAdd.map(clue => {
+        return clue.trim()
       })
       clueArray = _.uniq(clueArray)
       var filterClueArray = clueArray.filter(clue => {
@@ -118,9 +151,6 @@ export default {
     }
   },
   created() {
-    for(let i=0; i < this.clueNumbers; i++) {
-      this.clues.push({value: ""})
-    }
     this.currentGame = this.game
     console.log('host prop', this.currentHost)
     
@@ -129,28 +159,27 @@ export default {
 }
 </script>
 
-<style scoped>
-
-.clue-input {
-  border-color: white !important;
+<style scoped lang="scss">
+@import '../styles/global.scss';
+.card-pot {
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.wrap-tile {
-   flex-wrap: wrap;
-   justify-content: space-between;
+.card-stack {
+  position: relative;
+  width: 380px;
+  max-width: 380px;
+  height: 100%;
 }
 
-.card {
-  border: 1px solid grey;
-  border-radius: 5px;
+.center-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.clue-button {
-  margin-top: 100px;
-}
-
-.clue-box {
-  padding: 0px;
-}
 
 </style>

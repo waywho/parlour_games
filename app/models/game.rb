@@ -3,7 +3,7 @@ class Game < ApplicationRecord
 	after_create :generate_slug 
 
 	has_many :game_sessions, dependent: :destroy
-	has_many :teams
+	has_many :teams, dependent: :destroy
 	has_many :players, through: :game_sessions, source: :playerable, source_type: 'Player'
 	has_many :users, through: :game_sessions, source: :playerable, source_type: 'User'
 
