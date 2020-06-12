@@ -73,6 +73,7 @@ import scoreBoard from './score_board'
 import axios from 'axios'
 import player from './player'
 import gamePaper from './game_paper'
+import { bus } from '../packs/application'
 
 export default {
   props: {
@@ -195,11 +196,10 @@ export default {
     passed (newVal, oldVal) {
       return newVal
     },
-    game (newVal, oldVal) {
-      this.currentGame = newVal
-      this.turnStarted = false
-      this.resetClock()
-    },
+    // game (newVal, oldVal) {
+    //   this.currentGame = newVal
+
+    // },
     currentRound(newVal, oldVal) {
       if(newVal.name != oldVal.name) {
         this.resetClock()
@@ -289,6 +289,12 @@ export default {
   created () {
     this.currentGame = this.game
     this.clues = this.game.set.clues
+
+    bus.$on('gameUpdate', (game) => {
+      this.currentGame = game
+      this.turnStarted = false
+      this.resetClock()
+    })
 
     console.log('game gameSubscription', this.gameSubscription)
     console.log('current player', this.currentPlayer)

@@ -7,6 +7,7 @@ import FishBowl from './fish_bowl';
 import WaitingRoom from './waiting_room';
 import gameAxios from '../axios/axios_game_update.js';
 import { mapGetters } from 'vuex';
+import { bus } from '../packs/application'
 
 
 export default {
@@ -90,7 +91,8 @@ export default {
           console.log('game command received', data)
           if(data.game != null || data.game != undefined) {
             console.log('received game', JSON.parse(data.game))
-            this.game = JSON.parse(data.game)
+            // this.game = JSON.parse(data.game)
+            bus.$emit('gameUpdate', JSON.parse(data.game))
           }
           if(data.turn_start != null || data.turn_start != undefined) {
             this.turnStart = data.turn_start
