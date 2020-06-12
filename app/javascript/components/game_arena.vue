@@ -19,7 +19,7 @@
           </b-taglist>
         </div>
       </div>
-      <div class='tile is-parent is-vertical'>
+      <div class='tile is-parent is-vertical game-center'>
         <div class="tile is-child card-pot">
         <div class="card-stack">
           <game-paper :clue="currentClue" :withInput="false"></game-paper>
@@ -88,7 +88,7 @@ export default {
       type: Object,
       required: false,
     }, 
-    'timerStart': {
+    'turnStart': {
       type: Boolean,
       required: false,
     }, 
@@ -107,6 +107,10 @@ export default {
     },
     'currentHost': {
       type: Boolean,
+      required: false
+    },
+    'currentRound': {
+      type: Object,
       required: false
     }
   },
@@ -130,8 +134,13 @@ export default {
     }
   },
   computed: {
-    currentClue: function() {
-      return this.clues[this.randIndex]
+    currentClue: {
+      get: function() {
+        return this.clues[this.randIndex]
+      },
+      set: function(newVal) {
+        return newVal
+      }
     },
     playButton: function() {
       if(this.turnStarted) {
@@ -164,9 +173,13 @@ export default {
     },
   },
   watch: {
-    timerStart (newVal, oldVal) {
+    turnStart (newVal) {
+      console.log('what command? starting turn?', newVal)
+      this.turnStarted = newVal
+    },
+    turnStarted (newVal, oldVal) {
+      console.log('starting turn?', newVal)
       if(newVal) {
-        this.turnStarted = true
         this.$refs.gameTimer.startTimer()
       } else {
         this.$refs.gameTimer.stopTimer()
@@ -184,6 +197,13 @@ export default {
     },
     game (newVal, oldVal) {
       this.currentGame = newVal
+      this.turnStarted = false
+      this.resetClock()
+    },
+    currentRound(newVal, oldVal) {
+      if(newVal.name != oldVal.name) {
+        this.resetClock()
+      }
     }
   },
   methods: {
@@ -206,11 +226,11 @@ export default {
       }
     },
     resetClock: function() {
-
+      this.$refs.gameTimer.resetTimer()
     },
     updatePlayerScore: function(incre) {
       let player_index = this.currentGame.game_sessions.indexOf(this.nominatedPlayer)
-      this.currentGame.game_sessions[player_index].scores[this.currentRoundNum] += 1
+      this.nominatedPlayer.scores[this.currentRoundNum] += 1
       this.currentTeam.scores[this.currentRoundNum] += 1
       // this.nominatedPlayer.scores[this.currentRoundNum] += 1
       console.log('score update', this.currentGame.game_sessions[player_index].scores)
@@ -244,12 +264,8 @@ export default {
       }
     },
     updateGame: function() {
-      let player_index = this.currentGame.game_sessions.indexOf(this.nominatedPlayer)
-
       console.log('game update 2', this.currentGame)
-
       this.$refs.gameTimer.stopTimer()
-      this.turnStarted = false
 
       console.log('current player', this.currentPlayer)
 
@@ -258,7 +274,7 @@ export default {
           id: this.currentGame.id,
           set: this.currentGame.set,
           game_sessions_attributes: [
-            this.currentGame.game_sessions[player_index]
+            this.nominatedPlayer
           ],
           teams_attributes: [
             this.currentTeam
@@ -281,6 +297,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+
+.game-center {
+  min-height: 500px;
+}
+
 .clue-word {
   text-align: center;
   position: absolute;

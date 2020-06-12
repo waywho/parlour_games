@@ -1,5 +1,5 @@
 <template>
-  <div :class="['game-paper', withInput ? '' : 'no-border']">
+  <div class="game-paper" >
     <textarea v-if="withInput" class="clue-input" placeholder="enter a clue" rows="6" v-model="currentClue"></textarea>
     <div class="clue-word" v-if="!withInput">{{currentClue}}</div>
     <div v-for="b in 4" class="folded-part"></div>
@@ -85,9 +85,11 @@ textarea {
   align-items: center;
   justify-content: center;
   height: 350px;
+  min-height: 350px;
   width: 350px;
   perspective: 800px;
-  border: 1px solid $grey-light;
+  border: 1px solid #eaeaea;
+  box-shadow: 10px 10px 40px rgba(0,0,0,0.08);
   position: absolute;
   top: 0;
   z-index: -1;
@@ -122,6 +124,7 @@ textarea {
   &:nth-child(4) {
     right: 0;
     bottom: 0;
+    
   }
 }
 

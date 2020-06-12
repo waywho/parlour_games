@@ -1,8 +1,5 @@
 <template>
-  <span>
-    <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed"></component>
-    
-  </span>
+  <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost" :turn-start="turnStart" :guessed-clue="guessedClue" :passed="passed"></component>
 </template>
 
 <script>
@@ -32,7 +29,7 @@ export default {
       comp: null,
       game: null,
       subscription: null,
-      timerStart: false,
+      turnStart: false,
       guessedClue: null,
       passed: 0
     }
@@ -96,7 +93,7 @@ export default {
             this.game = JSON.parse(data.game)
           }
           if(data.turn_start != null || data.turn_start != undefined) {
-            this.timerStart = data.timer_start
+            this.turnStart = data.turn_start
           }
           if(data.guessed_clue != null || data.guessed_clue != undefined) {
             this.guessedClue = data.guessed_clue
