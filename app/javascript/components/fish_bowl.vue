@@ -8,20 +8,20 @@
       </div>
       <div class="tile is-parent">
         <div class="tile is-child">
-          <div v-if="!game.ended"><i><b>Round:</b> {{currentRound.name}}</i>
+          <div v-if="!game.ended"><b>Round: </b>
             <b-tooltip :label="currentRound.instructions" type="is-dark"
-              position="is-bottom" multilined is-large>
-              <button class="button is-dark is-small instruction-button">
-                  Instructions
-              </button>
+              position="is-bottom" multilined size="is-medium">
+              <div class="tag is-dark is-small instruction-button">
+                  {{currentRound.name}}
+              </div>
             </b-tooltip>
           </div>
-          <div class=""><b>Player:</b> {{gameSession.player_name}} </div>
+          <div class=""><b>Number of Clues Left:</b> {{numClues}} </div>
         </div>
       </div>
     </div>
-    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :timer-start="timerStart" :guessed-clue="guessedClue" :passed="passed" :current-round="currentRound"></component>
-    <round-notice :game-round="currentRound" :new-round="newRound"></round-notice>
+    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :turn-start="turnStart" :guessed-clue="guessedClue" :passed="passed" :current-round="currentRound"></component>
+    <round-notice :current-round="currentRound"></round-notice>
   </div>
 </template>
 
@@ -32,7 +32,7 @@ import endGame from './end_game';
 import roundNotice from './round_notice';
 
 export default {
-	props: ['game', 'gameSession', 'currentHost', 'gameSubscription', 'timerStart', 'guessedClue', 'passed'],
+	props: ['game', 'gameSession', 'currentHost', 'gameSubscription', 'turnStart', 'guessedClue', 'passed'],
   components: {
     'clues': clues,
     'game-arena': gameArena,
@@ -47,10 +47,20 @@ export default {
         1: {component: 'gameArena'},
         2: {component: 'gameArena'},
         3: {component: 'gameArena'}
-      }
+      },
+      clueNum: this.game.set.clues.length
     }
   },
   computed: {
+    numClues: {
+      get: function() {
+        return this.clueNum
+      },
+      set: function(newVal) {
+        console.log('got new val', newVal)
+        this.clueNum = newVal
+      }
+    },
     currentComponent: function() {
       // console.log('current round', this.game.set.current_round)
       // console.log('round name', this.game.rounds[this.game.set.current_round.round_number])
@@ -68,8 +78,9 @@ export default {
     }
   },
   watch: {
-    currentRound(newVal) {
-      this.newRound = true
+    guessedClue(newVal) {
+      console.log('got guessed clue', newVal)
+      this.numClues -= 1
     }
   },
   created() {
@@ -79,5 +90,8 @@ export default {
 </script>
 
 <style scoped>
-
+.instruction-button {
+  margin-left: 1em;
+  cursor: pointer;
+}
 </style>

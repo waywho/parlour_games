@@ -1,5 +1,5 @@
 <template>
-  <b-modal :active.sync="newRound" 
+  <b-modal :active.sync="isModalActive" 
                  has-modal-card
                  aria-role="dialog"
                  aria-modal
@@ -9,8 +9,8 @@
       <img :src="gameImage" alt="Fish Bowl" class="game-image">
       <div class="box round-label">
         
-        <div class="title is-4">{{gameRound.name}} Round</div>
-        <p>{{gameRound.instructions}}</p>
+        <div class="title is-4">{{currentRound.name}} Round</div>
+        <p>{{currentRound.instructions}}</p>
       </div>
     </div>
   </b-modal>
@@ -19,7 +19,7 @@
 <script>
 import fishBowlImage from '../assets/fish-bowl-filled-glow.png'
 export default {
-  props: ['gameRound', 'newRound'],
+  props: ['currentRound'],
   data: function () {
     return {
       isModalActive: false,
@@ -28,9 +28,9 @@ export default {
   },
   watch: {
     currentRound: function(newVal, oldVal) {
-   
+      if(newVal.name != oldVal.name) {
         this.isModalActive = true
-      
+      }
     }
   },
   methods: {

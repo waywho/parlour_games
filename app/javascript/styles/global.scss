@@ -29,3 +29,19 @@ a:hover {
 .tag.is-outlined {
 	border: 1px solid $dark;
 }
+
+
+.card-pot {
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-stack {
+  position: relative;
+  width: 350px;
+  max-width: 350px;
+  height: 100%;
+  overflow: visible;
+}
