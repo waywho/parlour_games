@@ -3,6 +3,7 @@
                  has-modal-card
                  aria-role="dialog"
                  aria-modal
+                 can-cancel
                  >
     <div class="modal-content">
     <!-- Any other Bulma elements you want -->
@@ -17,19 +18,24 @@
 </template>
 
 <script>
-import fishBowlImage from '../assets/fish-bowl-filled-glow.png'
+import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
 export default {
   props: ['currentRound'],
   data: function () {
     return {
       isModalActive: false,
-      gameImage: fishBowlImage
+      gameImage: fishbowlImage
     }
   },
   watch: {
     currentRound: function(newVal, oldVal) {
-      if(newVal.name != oldVal.name) {
+      if(newVal.name != oldVal.name || oldVal == undefined || oldVal == null) {
         this.isModalActive = true
+      }
+    },
+    isModalActive: function(newVal, oldVal) {
+      if(newVal) {
+        setTimeout(() => {this.isModalActive = false}, 1800)
       }
     }
   },
@@ -37,7 +43,9 @@ export default {
     
   },
   created () {
-    
+    if(this.currentRound.name == 'Clues') {
+      this.isModalActive = true
+    }
     
   }
 }
@@ -46,6 +54,8 @@ export default {
 <style scoped lang="scss">
 .modal-content {
   overflow: visible;
+  width: 90%;
+  margin: auto;
 }
 
 .round-label {

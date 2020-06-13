@@ -1,5 +1,5 @@
 <template>
-  <table class="table is-fullwidth">
+  <table class="table has-text-centered">
     <thead>
       <tr>
         <th>Team</th>

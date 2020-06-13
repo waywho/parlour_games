@@ -75,7 +75,7 @@ module Api
       def create_response(game_session)
         if game_session.save
           GameSessionRelayJob.perform_later(game_session)
-          render json: game_session, status: :created
+          render json: game_session, include: { game: { only: [:name]}}, status: :created
         else
           render json: game_session.errors, status: :unprocessable_entity
         end

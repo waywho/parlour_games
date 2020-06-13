@@ -33,6 +33,8 @@ import _ from 'lodash'
 // import VueDraggable from 'vue-draggable'
 import Buefy from 'buefy'
 
+export const bus = new Vue({})
+	
 document.addEventListener('DOMContentLoaded', () => {
 	Vue.use(Buefy, {
 		defaultFieldLabelPosition: 'on-border'
@@ -109,7 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	Vue.use(VueActionCable, {
 		connectionUrl: "/cable",
 	})
-	
+
+
 	const app = new Vue({
 	 render: h => h(App),
 	 router: router,

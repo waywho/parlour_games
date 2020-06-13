@@ -1,5 +1,5 @@
 <template>
-  <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost" :turn-start="turnStart" :guessed-clue="guessedClue" :passed="passed"></component>
+  <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost"></component>
 </template>
 
 <script>
@@ -7,6 +7,7 @@ import FishBowl from './fish_bowl';
 import WaitingRoom from './waiting_room';
 import gameAxios from '../axios/axios_game_update.js';
 import { mapGetters } from 'vuex';
+import { bus } from '../packs/application'
 
 
 export default {
@@ -28,10 +29,7 @@ export default {
     return {
       comp: null,
       game: null,
-      subscription: null,
-      turnStart: false,
-      guessedClue: null,
-      passed: 0
+      subscription: null
     }
   },
   computed: {
@@ -64,11 +62,11 @@ export default {
   },
   created () {
     // this.$store.dispatch('reloadGameSession', {player: {value: this.gameSession.player_name}, gameId: {value: this.game_id}, user: ""})
-    if(this.$store.getters.gameSession == null || this.$store.getters.gameSession == undefined) {
+    if(this.gameSession == null || this.gameSession == undefined) {
       this.$router.push({name: 'join_game', params: { game_id: this.game_id.toString() }})
-
       return
     }
+
     gameAxios.get(`${this.game_id}`)
       .then(res => {
         console.log('got game', res)
@@ -91,16 +89,21 @@ export default {
           if(data.game != null || data.game != undefined) {
             console.log('received game', JSON.parse(data.game))
             this.game = JSON.parse(data.game)
+            // bus.$emit('gameUpdate', JSON.parse(data.game))
           }
           if(data.turn_start != null || data.turn_start != undefined) {
-            this.turnStart = data.turn_start
+            if(data.turn_start) {
+              bus.$emit('startTimer')
+            }
           }
           if(data.guessed_clue != null || data.guessed_clue != undefined) {
-            this.guessedClue = data.guessed_clue
+            bus.$emit('showGuessed', data.guessed_clue)
+            // this.guessedClue = data.guessed_clue
           }
 
           if(data.passed != null || data.passed != undefined) {
-            this.passed = data.passed
+            console.log('clues pass', data.passed)
+            bus.$emit('cluesPassed', JSON.parse(data.passed))
           }
         },
         turnStart: function () {

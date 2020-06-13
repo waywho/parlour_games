@@ -6,8 +6,8 @@ class GameSession < ApplicationRecord
   has_many :messages, as: :speakerable
 	accepts_nested_attributes_for :messages, allow_destroy: true
 
-  before_create :setup_scores
-  before_create :default_player_name
+  after_create :setup_scores
+  after_create :default_player_name
 
   attr_accessor :deleted
 
@@ -42,11 +42,13 @@ class GameSession < ApplicationRecord
     self.game.rounds&.each do |key, round|
       scores[key] = 0 if round[:score_round]
     end
+    save
   end
 
   def default_player_name
     if playerable.present? && player_name.nil?
       self.update_attributes(player_name: playerable.name)
+      save
     end
   end
 end

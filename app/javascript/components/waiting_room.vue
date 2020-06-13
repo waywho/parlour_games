@@ -1,7 +1,7 @@
 <template>
   <div>
-  	<h2 class="title is-2">{{currentGame.name}} {{currentGame.id}}</h2>
-    <h3 class="subtitle is-4"><i>Waiting Room{{ currentGame.started ? ': this game has started' : ''}}</i></h3>
+  	<game-header :game="game" :game-image="gameImage" :image-size="'100px'"></game-header>
+    <h3 class="title is-4">Waiting Room{{ currentGame.started ? ': this game has started' : ''}}</h3>
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <div class="field tile is-child" v-if="currentHost">
@@ -29,7 +29,7 @@
         <player v-for="session in game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost"></player>
       </draggable>
       <div v-if="currentGame.teams.length > 1" class="tile is-vertical is-parent">
-        <div v-for="(team, index) in sortedTeams" :key="team.id" class="box tile is-child">
+        <div v-for="(team, index) in sortedTeams" :key="team.id" class="box tile is-child team-outline">
           <b-field label="Team" horizontal>
             <input class="input" placeholder="Team Name" type="string" v-model="team.name" @change="gameUpdate"></input>
           </b-field>
@@ -46,6 +46,9 @@
 import draggable from 'vuedraggable'
 import gameAxios from '../axios/axios_game_update.js';
 import player from './player';
+import gameHeader from './game_header';
+import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
+
 export default {
 	props: {
     game: {
@@ -58,18 +61,15 @@ export default {
     }
   },
   components: {
-    draggable, player
+    draggable, player, gameHeader
   },
   data: function () {
     return {
-      currentGame: {
-        team_mode: false,
-        teams: []
-      },
       game_sessions: [],
       teams: [],
       teamNumbers: null,
-      
+      currentGame: {},
+      gameImage: fishbowlImage
     }
   },
   computed: {
@@ -220,9 +220,12 @@ export default {
 </script>
 
 <style scoped>
-
+.team-outline {
+  border-radius: 15px;
+  border: 1px solid #636363;
+}
 .team-box {
-  min-height: 250px;
+  min-height: 150px;
   align-content: flex-start;
 }
 
