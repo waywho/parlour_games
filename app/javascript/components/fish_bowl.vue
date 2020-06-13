@@ -20,7 +20,7 @@
         </div>
       </div>
     </div>
-    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :turn-start="turnStart" :guessed-clue="guessedClue" :passed="passed" :current-round="currentRound"></component>
+    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :current-round="currentRound"></component>
     <round-notice :current-round="currentRound"></round-notice>
   </div>
 </template>
@@ -30,9 +30,10 @@ import clues from './clues';
 import gameArena from './game_arena';
 import endGame from './end_game';
 import roundNotice from './round_notice';
+import { bus } from '../packs/application';
 
 export default {
-	props: ['game', 'gameSession', 'currentHost', 'gameSubscription', 'turnStart', 'guessedClue', 'passed'],
+	props: ['game', 'gameSession', 'currentHost', 'gameSubscription'],
   components: {
     'clues': clues,
     'game-arena': gameArena,
@@ -77,14 +78,10 @@ export default {
       return this.game.rounds[this.game.set.current_round.round_number]
     }
   },
-  watch: {
-    guessedClue(newVal) {
-      console.log('got guessed clue', newVal)
-      this.numClues -= 1
-    }
-  },
   created() {
-    
+    bus.$on('showGuessed', (clue) => {
+      this.clueNum -= 1
+    })
   }
 }
 </script>

@@ -9,7 +9,6 @@ class GamesChannel < ApplicationCable::Channel
   def turn_start(data)
     ActionCable.server.broadcast "game:#{data['game_id']}",
       turn_start: true,
-      timer_start: true,
       game_id: data['game_id']
   end
 

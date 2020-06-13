@@ -62,14 +62,10 @@ export default {
   },
   data: function () {
     return {
-      currentGame: {
-        team_mode: false,
-        teams: []
-      },
       game_sessions: [],
       teams: [],
       teamNumbers: null,
-      
+      currentGame: {}
     }
   },
   computed: {

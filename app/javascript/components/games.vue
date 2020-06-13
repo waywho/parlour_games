@@ -1,9 +1,14 @@
 <template>
   <div>
     <h2 class="title is-2">Games</h2>
-    <b-button v-for="game in games" type="is-dark" @click="startGameInvite(game)" expanded outlined>
-      Start {{game | camel-to-space }}
-    </b-button>
+    <div class="columns">
+      <div class="column" v-for="game in games">
+        <button  class="button game-button is-outlined is-dark" @click="startGameInvite(game)" outlined>
+        <img :src="fishBowlImage" alt="Fish Bowl" class="game-image">
+        Start {{game | camel-to-space }}
+      </button>
+      </div>
+    </div>
     <b-modal :active.sync="isComponentModalActive" 
                  has-modal-card
                  trap-focus
@@ -19,7 +24,7 @@ import parlourAxios from '../axios/axios_parlour.js';
 import GameInvite from './game_invite_form';
 import { mapGetters } from 'vuex'
 import goToGame from '../mixins/goToGame';
-
+import fishBowlImage from '../assets/fish-bowl-filled-glow.png'
 
 export default {
   components: {
@@ -32,7 +37,8 @@ export default {
       users: null,
       currentGameName: null,
       currentGameId: null,
-      games: ['FishBowl']
+      games: ['FishBowl'],
+      fishBowlImage: fishBowlImage
     }
   },
   mixins: [goToGame],
@@ -77,5 +83,11 @@ export default {
 </script>
 
 <style scoped>
+.game-button {
+  height: 250px;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+}
 
 </style>

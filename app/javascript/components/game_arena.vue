@@ -2,6 +2,12 @@
   <div class="tile">
     <div class="tile is-vertical is-7">
       <div class="tile is-parent scoring-tile">
+        <div class="tile is-child">
+          {{game.set.clues}}<br />
+          {{game.set.guessed_clues}}
+        </div>
+      </div>
+      <div class="tile is-parent scoring-tile">
         <div class="tile is-child timer-tile player-score">
           <b-taglist attached>
               <b-tag type="is-light" size="is-medium" class='light-tag'>{{passed}}</b-tag>
@@ -22,8 +28,8 @@
       <div class='tile is-parent is-vertical game-center'>
         <div class="tile is-child card-pot">
         <div class="card-stack">
-          <game-paper :clue="currentClue" :withInput="false"></game-paper>
-          <div v-if="reveal && !currentPlayer" class="clue-word">{{guessedClue}}</div>
+          <game-paper :clue="showClue" :withInput="false"></game-paper>
+        
         </div>
         </div>
 
@@ -88,19 +94,7 @@ export default {
     'gameSubscription': {
       type: Object,
       required: false,
-    }, 
-    'turnStart': {
-      type: Boolean,
-      required: false,
-    }, 
-    'guessedClue': {
-      type: String,
-      required: false,
     },
-    'passed': {
-      type: Number,
-      required: false,
-    }, 
     'useChat': {
       type: Boolean,
       required: false,
@@ -128,20 +122,24 @@ export default {
       clues: null,
       randIndex: null,
       turnStarted: false,
-      timeLimit: 60,
+      timeLimit: 5,
       reveal: false,
       noMorePass: false,
-      guess: ""
+      guess: "",
+      guessedClue: null,
+      passed: 0
     }
   },
   computed: {
-    currentClue: {
-      get: function() {
-        return this.clues[this.randIndex]
-      },
-      set: function(newVal) {
-        return newVal
+    showClue: function() {
+      if(this.currentPlayer) {
+        return this.currentClue
+      } else {
+        return this.guessedClue
       }
+    },
+    currentClue: function() {
+      return this.currentGame.set.clues[this.randIndex]
     },
     playButton: function() {
       if(this.turnStarted) {
@@ -174,32 +172,11 @@ export default {
     },
   },
   watch: {
-    turnStart (newVal) {
-      console.log('what command? starting turn?', newVal)
-      this.turnStarted = newVal
+    game(newVal, oldVal) {
+      this.currentGame = newVal
+      this.turnStarted = false
+      this.resetClock()
     },
-    turnStarted (newVal, oldVal) {
-      console.log('starting turn?', newVal)
-      if(newVal) {
-        this.$refs.gameTimer.startTimer()
-      } else {
-        this.$refs.gameTimer.stopTimer()
-      }
-    },
-    guessedClue (newVal, oldVal) {
-      console.log('got guessed clue', newVal)
-      this.currentGame.set.guessed_clues.push(newVal)
-      this.updatePlayerScore(1)
-      this.reveal = true
-      setTimeout(() => {this.reveal = false}, 2000)
-    },
-    passed (newVal, oldVal) {
-      return newVal
-    },
-    // game (newVal, oldVal) {
-    //   this.currentGame = newVal
-
-    // },
     currentRound(newVal, oldVal) {
       if(newVal.name != oldVal.name) {
         this.resetClock()
@@ -211,7 +188,7 @@ export default {
       if(this.passed >= 3) {
         return
       }
-      this.randIndex = Math.floor(Math.random() * this.clues.length)
+      this.randIndex = Math.floor(Math.random() * this.currentGame.set.clues.length)
       if(!this.turnStarted) {
         this.turnStarted = true
         // this.$refs.gameTimer.startTimer()
@@ -236,15 +213,19 @@ export default {
       console.log('score update', this.currentGame.game_sessions[player_index].scores)
     },
     guessed: function() {
-      console.log('guessed', this.clues.length)
-      if(this.clues.length == 0) {
-        // update game, stop clock
-        this.$refs.gameTimer.stopTimer()
-        this.updateGame()
-      } else if (this.clues.length > 0) {
-        let guessed = this.clues.splice(this.randIndex, 1)[0];
-        this.gameSubscription.clueGuessed(guessed)
-        this.randIndex = Math.floor(Math.random() * this.clues.length)
+      console.log('guessed', this.currentGame.set.clues.length)
+      if (this.currentGame.set.clues.length > 0) {
+        let guessed = this.currentGame.set.clues.splice(this.randIndex, 1)[0];
+        
+        if(this.currentGame.set.clues.length == 0) {
+          this.currentGame.set.guessed_clues.push(guessed)
+          this.updatePlayerScore(1)
+          this.$refs.gameTimer.stopTimer()
+          this.updateGame()
+        } else {
+          this.gameSubscription.clueGuessed(guessed)
+          this.randIndex = Math.floor(Math.random() * this.currentGame.set.clues.length)
+        }
       }
     },
     sendGuess: function() {
@@ -265,8 +246,6 @@ export default {
     },
     updateGame: function() {
       console.log('game update 2', this.currentGame)
-      this.$refs.gameTimer.stopTimer()
-
       console.log('current player', this.currentPlayer)
 
       if (this.currentPlayer) {
@@ -288,12 +267,26 @@ export default {
   },
   created () {
     this.currentGame = this.game
-    this.clues = this.game.set.clues
+    // this.clues = this.game.set.clues
+    
+    bus.$on('startTimer', () => {
+      this.$refs.gameTimer.startTimer()
+    })
 
-    bus.$on('gameUpdate', (game) => {
-      this.currentGame = game
-      this.turnStarted = false
-      this.resetClock()
+    bus.$on('showGuessed', (clue) => {
+      this.currentGame.set.guessed_clues.push(clue)
+      this.updatePlayerScore(1)
+      this.guessedClue = clue
+      this.reveal = true
+      setTimeout(() => {
+        this.reveal = false
+        this.guessedClue = ""
+      }, 2000)
+    })
+
+    bus.$on('cluesPassed', (cluesPassed) => {
+      console.log('got passed')
+      this.passed = cluesPassed
     })
 
     console.log('game gameSubscription', this.gameSubscription)
@@ -312,7 +305,7 @@ export default {
   text-align: center;
   position: absolute;
   top: 0;
-  z-index: 99;
+  z-index: 20;
   font-size: 30px;
   font-weight: bold;
   width: 100%;

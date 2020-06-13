@@ -12,17 +12,21 @@ class FishBowl < Game
 				}
 	def start_game
 		if started == true
-			logger.debug("#{self}: starting game, #{self.set}")
+			logging("Game Step 0", "starting game, #{self.set}")
 			set["current_round"]["round_number"] = 0
-			teams.each_with_index do |team, index|
-				team.update_attributes(order: (index + 1))
+			if teams.present?
+				teams.each_with_index do |team, index|
+					team.update_attributes(order: (index + 1))
+					set["gone_players"][index + 1] = []
+				end
 			end
 		end
 	end
 
 	def play
-		logger.debug("#{self}: playing game, #{self.set}")
+		logging("Game Step 1", "playing game, #{self.set}")
 		if set["current_round"]["completed"] == true || set["clues"].empty?
+			set["current_round"]["completed"] = true
 			next_round
 		else
 			# next team
@@ -31,7 +35,7 @@ class FishBowl < Game
 	end
 
 	def next_round
-		logger.debug("#{self}: next round, #{self.set}")
+		logging("Game Step 2", "Next round, #{self.set}")
 		if set["current_round"]["round_number"] == rounds.keys.last
 			set["current_round"]["completed"] = true
 			set["current_turn"]["team"] = 0
@@ -39,7 +43,8 @@ class FishBowl < Game
 			self.ended = true
 		elsif !set["current_round"]["round_number"].nil?
 			if set["current_round"]["round_number"] > 0
-				set["clues"] = set["guessed_clues"]
+				set["clues"] = set["guessed_clues"].uniq
+				logging("Game Step 2", "Reset clues, #{self.set["clues"]}")
 				set["guessed_clues"] = []
 			end
 			set["current_round"]["round_number"] += 1
@@ -50,49 +55,59 @@ class FishBowl < Game
 	end
 
 	def next_turn
-		logger.debug("#{self}: next turn, #{self.set}")
+		logging("Game Step 3", "Next turn, #{self.set}")
+		team_number = set["current_turn"]["team"]
+
+		logging("Game Step 3.1", "Last Team Order, #{team_number}")
+		set["gone_players"][team_number.to_s] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
+
 		if team_mode
-			if set["current_turn"]["team"] == teams.length
+			if team_number == teams.length
 				set["current_turn"]["team"] = 1
 			else
 				set["current_turn"]["team"] += 1
 			end
+		else
+			set["gone_players"] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
 		end
 		next_player
 	end
 
-
 	def next_player
-		if team_mode
-			current_team = teams.where(order: set["current_turn"]["team"]).take
+		logging("Game Step 4", "Next player #{self.set}")
 
-			logger.debug("#{self}: team order #{set["current_turn"]["team"]}")
-			logger.debug("#{self}: current team #{current_team}, #{self.set}")
+		if team_mode
+			current_team_number = set["current_turn"]["team"].to_s
+			logging("Game Step 4.1", "Team order #{current_team_number}")
+
+			current_team = teams.where(order: current_team_number).take
+
+			logging("Game Step 4.2", "Found current team #{current_team}, #{self.set}")
 			
 			players = current_team.game_sessions.map(&:id)
+
+			logging("Game Step 4.3","Current team members #{players}")
+
+			logging("Game Step 4.4","Current team gone players #{set["gone_players"][current_team_number]}")
+			left_players = players - set["gone_players"][current_team_number]
 		else
 			players = game_sessions.map(&:id)
+
+			logging("Game Step 4.1", "current team members #{players}")
+			left_players = players - set["gone_players"]
 		end
-
-		logger.debug("#{self}: current team members #{players}")
-
-		if set["current_turn"]["nominated_player"].present?
-			set["current_turn"]["gone_players"] << set["current_turn"]["nominated_player"]
-		end
-
-		logger.debug("#{self}: players gone, #{self.set["current_turn"]["gone_players"]}")
-
-		left_players = players - set["current_turn"]["gone_players"]
-
-		logger.debug("#{self}: left players, #{left_players}")
 		
-		if left_players.empty?
+		if left_players.empty? && team_mode
 			left_players = players
-			set["current_turn"]["gone_players"] = []
+			set["gone_players"][current_team_number] = []
+		elsif left_players.empty?
+			left_players = players
+			set["gone_players"] = []
 		end
 
 		self.set["current_turn"]["nominated_player"] = left_players.first
-		logger.debug("#{self}: next player #{left_players.first}, #{self.set}")
+
+		logging("Game Step 4.5", "Found next player #{left_players.first}, #{self.set}")
 	end
 
 	def after_clues?
@@ -109,12 +124,17 @@ class FishBowl < Game
 
 	def populate_pot
 		old_set = self.set_was
-		logger.debug("Current Game set #{self.set}")
-		logger.debug("Current Game set keys #{self.set.keys}")
+		logging("Game Setup", "Previous Game set #{self.set_was}")
+		logging("Game Setup", "Current Game set keys #{self.set.keys}")
+		
 		self.set.keys.each do|key|
 			if ["clues", "players_gone"].include?(key)
 				old_set[key] += set[key]
-				old_set[key] = old_set[key].uniq.reject { |x| x == ""}
+				if key == "clues"
+					old_set[key] = old_set[key].uniq(&:downcase).reject { |x| x == ""}
+				else
+					old_set[key] = old_set[key].uniq.reject { |x| x == ""}
+				end
 			end
 		end
 		self.set = old_set
@@ -123,7 +143,7 @@ class FishBowl < Game
 	def only_clue_keys?
 		if set_changed?
 			keys_included = (self.set.keys - ["clues", "players_gone"]).empty?
-			logger.debug("Current Game set keys #{self.set.keys} only have 'clues', 'players_gone', #{keys_included}")
+			logger.tagged("#{self}") { logger.tagged("Game Setup Check")  { logger.debug("Checking current Game set keys #{self.set.keys} ONLY include 'clues', 'players_gone': #{keys_included}") } }
 			return keys_included
 		else
 			return false
@@ -131,6 +151,10 @@ class FishBowl < Game
 	end
 
 	private
+
+		def logging(game_step, message)
+			logger.tagged("#{self}") { logger.tagged(game_step)  { logger.debug(message) } }
+		end
 		def game_setup
 			self.set = { clues: [], 
 				guessed_clues: [],
@@ -138,8 +162,9 @@ class FishBowl < Game
 					round_number: nil,
 					completed: false
 				},
-				current_turn: { team: 0, nominated_player: nil, gone_players: [], time_left: nil },
+				current_turn: { team: 0, nominated_player: nil, time_left: nil },
 				# only user ids in array
+				gone_players: {},
 				players_gone: []
 			}
 		end

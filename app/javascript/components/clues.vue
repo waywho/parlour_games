@@ -15,7 +15,7 @@
           <span class="tag is-outlined" v-for="(clue, index) in cluesToAdd">{{clue}}</span>
         </div>
         <div class="tile is-child center-tile">
-          <b-button class="clue-button" type="is-dark" outlined @click="submitClues">I'm done! Add it all to the Fish Bowl</b-button>
+          <b-button class="clue-button" type="is-dark" outlined @click="submitClues">{{addButtonMessage}}</b-button>
         </div>
       </div>
     </div>
@@ -75,6 +75,13 @@ export default {
     }
   },
   computed: {
+    addButtonMessage: function() {
+      if(this.cluesToAdd == 0) {
+        return "I don't want to add any clues"
+      } else {
+        return `I'm done! Add it all to the ${this.game.name}!`
+      }
+    },
     cluesSubmitted: function() {
       if(_.includes(this.game.set.players_gone, this.gameSession.id)) {
         return true
@@ -135,6 +142,9 @@ export default {
       }
     },
     submitClues: function() {
+      if(this.currentClue != null || this.currentClue != undefined) {
+        this.cluesToAdd.push(this.currentClue)
+      }
       var clueArray = this.cluesToAdd.map(clue => {
         return clue.trim()
       })
@@ -143,7 +153,8 @@ export default {
         return clue != ""
       })
       console.log(filterClueArray)
-      gameAxios.put(this.game.id.toString(), {game: {set: {clues: clueArray, players_gone: [this.gameSession.id] }}})
+
+      gameAxios.put(this.game.id.toString(), {game: {set: {clues: filterClueArray, players_gone: [this.gameSession.id] }}})
         .then(res => {
           console.log('populate pot')
           // this.currentGame = res.data
