@@ -1,6 +1,7 @@
 <template>
-  <div class="tile">
-    <score-board :teams="game.teams" :rounds="game.rounds"></score-board>
+  <div class="tile is-ancestor is-vertical">
+    <game-header :game="game" :game-image="gameImage" :image-size="'150px'"></game-header>
+    <score-board :teams="game.teams" :rounds="game.rounds" class="is-fullwidth"></score-board>
        <div class="firework-rounded">
           <div class="firework-rounded-light"></div>
           <div class="firework-rounded-light"></div>
@@ -16,15 +17,19 @@
 
 <script>
 import scoreBoard from './score_board'
+import gameHeader from './game_header'
+import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
+
 export default {
   props: ['game'],
   data: function () {
     return {
-      
+      gameImage: fishbowlImage
     }
   },
   components: {
-    'score-board': scoreBoard
+    'score-board': scoreBoard,
+    'game-header': gameHeader
   },
   methods: {
     reMatch: function() {

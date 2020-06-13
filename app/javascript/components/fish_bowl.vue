@@ -1,28 +1,8 @@
 <template>
-  <div class="tile is-ancestor is-vertical">
-    <div class="tile">
-      <div class="tile is-parent is-7">
-        <div class="tile is-child">
-          <h2 class="title is-3">{{game.name}}: Game {{game.id}}</h2>
-        </div>
-      </div>
-      <div class="tile is-parent">
-        <div class="tile is-child">
-          <div v-if="!game.ended"><b>Round: </b>
-            <b-tooltip :label="currentRound.instructions" type="is-dark"
-              position="is-bottom" multilined size="is-medium">
-              <div class="tag is-dark is-small instruction-button">
-                  {{currentRound.name}}
-              </div>
-            </b-tooltip>
-          </div>
-          <div class=""><b>Number of Clues Left:</b> {{numClues}} </div>
-        </div>
-      </div>
-    </div>
+  <span class="">
     <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :current-round="currentRound"></component>
     <round-notice :current-round="currentRound"></round-notice>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -49,19 +29,10 @@ export default {
         2: {component: 'gameArena'},
         3: {component: 'gameArena'}
       },
-      clueNum: this.game.set.clues.length
+      clueNum: 0
     }
   },
   computed: {
-    numClues: {
-      get: function() {
-        return this.clueNum
-      },
-      set: function(newVal) {
-        console.log('got new val', newVal)
-        this.clueNum = newVal
-      }
-    },
     currentComponent: function() {
       // console.log('current round', this.game.set.current_round)
       // console.log('round name', this.game.rounds[this.game.set.current_round.round_number])
@@ -79,6 +50,7 @@ export default {
     }
   },
   created() {
+    this.clueNum = this.game.set.clues.length
     bus.$on('showGuessed', (clue) => {
       this.clueNum -= 1
     })

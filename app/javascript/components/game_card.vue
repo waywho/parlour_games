@@ -1,8 +1,6 @@
 <template>
-  <div
-    class="game-card"
-  ><textarea class="clue-input clue-box" placeholder="enter a clue" rows="6" v-model="clue"></textarea>
-    
+  <div class="game-card">
+    <textarea class="clue-input clue-box" placeholder="enter a clue" rows="6" v-model="clue"></textarea>
   </div>
 </template>
 

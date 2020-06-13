@@ -1,72 +1,93 @@
 <template>
-  <div class="tile">
-    <div class="tile is-vertical is-7">
-      <div class="tile is-parent scoring-tile">
-        <div class="tile is-child">
-          {{game.set.clues}}<br />
-          {{game.set.guessed_clues}}
+  <div class="columns is-gapless">
+    <div class="column is-two-thrids-desktop is-half-tablet">
+      <div class="columns is-mobile is-centered is-vcentered">
+        <div class="column center-tile is-full-size-mobile is-full-size-desktop">
+          <game-header class="game-header" :game="game" :game-image="gameImage"></game-header>
+          <div>
+            <div v-if="!game.ended"><b>Round: </b>
+              <b-tooltip :label="currentRound.instructions" type="is-dark"
+                position="is-bottom" multilined size="is-medium">
+                <div class="tag is-dark is-small instruction-button">
+                    {{currentRound.name}}
+                </div>
+              </b-tooltip>
+            </div>
+            <div><b>Number of Clues:</b> {{clueNum}} </div>
+          </div>
         </div>
       </div>
-      <div class="tile is-parent scoring-tile">
-        <div class="tile is-child timer-tile player-score">
-          <b-taglist attached>
-              <b-tag type="is-light" size="is-medium" class='light-tag'>{{passed}}</b-tag>
-              <b-tag type="is-dark" size="is-medium">{{nominatedPlayer.player_name}}</b-tag>
-              <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentRoundPlayerScore}}</b-tag>
-          </b-taglist>
-        </div>
-        <div class="tile is-child timer-tile timer-piece">
-          <timer :time-limit="timeLimit" ref="gameTimer" @times-up="updateGame"></timer>
-        </div>
-        <div class="tile is-child timer-tile team-score" v-if="game.team_mode">
-          <b-taglist attached>
+      <div class="columns is-mobile is-centered is-vcentered">
+        <div class="column center-tile is-full-size-mobile is-full-size-tablet is-full-size-desktop">
+          <b-taglist attached class="no-margin">
+            <b-tag type="is-light" size="is-medium" class='light-tag'>{{passed}}</b-tag>
+            <b-tag type="is-dark" size="is-medium">{{currentPlayer ? "Your turn" : nominatedPlayer.player_name}}</b-tag>
+            <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentRoundPlayerScore}}</b-tag>
+          </b-taglist>  
+          
+          <timer class="mx-4" :time-limit="timeLimit" ref="gameTimer" @times-up="updateGame"></timer>
+      
+          <b-taglist attached v-if="game.team_mode">
             <b-tag type="is-dark" size="is-medium">{{currentTeam.name}}</b-tag>
             <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentTeam.scores | sumScore}}</b-tag>
           </b-taglist>
         </div>
       </div>
-      <div class='tile is-parent is-vertical game-center'>
-        <div class="tile is-child card-pot">
-        <div class="card-stack">
-          <game-paper :clue="showClue" :withInput="false"></game-paper>
-        
+      <div class="columns is-mobile is-centered">
+        <div class="column is-four-fifths-tablet is-four-fifths-desktop">
+          <div class="card-pot">
+            <div class="card-stack">
+              <game-paper :clue="showClue" :withInput="false"></game-paper>
+            </div>
+          </div>
         </div>
-        </div>
-
-        <div class="control buttons-tile tile is-child" v-if="currentPlayer">
+      </div>
+      <div class="columns is-multiline is-centered" v-if="currentPlayer">
+        <div class="column is-three-fifths-desktop control has-text-centered">
           <b-button class="button is-dark" size="is-medium" @click="start" :disabled="noMorePass">{{playButton}}</b-button>
           <b-button class="button is-dark" size="is-medium" @click="guessed" v-if="turnStarted">Guessed</b-button>
 <!--             <b-button class="button is-dark is-large" @click="updateGame">Update Game</b-button> -->
         </div>
 
-        <form v-if="useChat" @submit.prevent="sendGuess" class="tile is-child" v-else>
-          <b-field class="timer-tile">
-            <b-input placeholder="enter text" v-model="guess"></b-input>
-            <p class="control">
-                <b-button class="button is-dark" v-on:keyup.enter="sendGuess" native-type="submit">guess</b-button>
-            </p>
-          </b-field>
-        </form>
+        <div class="column is-three-fifths-desktop" v-if="useChat">
+          <form  @submit.prevent="sendGuess" class="">
+            <b-field class="timer-tile">
+              <b-input placeholder="enter text" v-model="guess"></b-input>
+              <p class="control">
+                  <b-button class="button is-dark" v-on:keyup.enter="sendGuess" native-type="submit">guess</b-button>
+              </p>
+            </b-field>
+          </form>
+        </div>
+
 
       </div>
     </div>
-    <div class="tile is-parent is-vertical">
-      <div class="tile is-child title is-5 section-line">
-        Teams
-      </div>
-      <div class="tile is-child">
-        <div v-for="team in game.teams" :key="team.id" class="tags are-medium">
-          <div class="tag is-light"><b>{{team.name}}:</b></div> <player v-for="session in team.game_sessions" :key="session.id" :game-session="session" :currentHost="currentHost" :class="[nominatedPlayer.id == session.id ? 'is-dark' : 'is-light']"></player>
+    <div class="column is-one-third-tablet is-half-tablet">
+      <div class="columns is-multiline">
+        <div class="column is-full">
+          <div class="title is-5 section-line">
+            Teams
+          </div>
         </div>
-      </div>
-      <div calss="tile is-child score-board">
-        <div class="tile is-child title is-5 section-line">
-          Score Board
+        <div class="column is-full">
+          <div v-for="team in game.teams" :key="team.id" class="tags are-medium">
+            <span class="tag is-light"><b>{{team.name}}:</b></span> <player v-for="session in team.game_sessions" :key="session.id" :game-session="session" :currentHost="currentHost" :class="[nominatedPlayer.id == session.id ? 'is-dark' : 'is-light']"></player>
+          </div>
         </div>
-        <score-board :teams="scoreParties" :rounds="this.currentGame.rounds"></score-board>
-      </div>
-      <div v-if="useChat"  class="tile is-child">
-        <chat :chatroom-id="game.chatroom.id" ref="gameChatBox" :game-mode="true" :with-title="false" :with-input="false" :message="guess" @guessing-clue="guessingClue" class="chat-column"></chat>
+        <div class="column is-full">
+          <div class="title is-5 section-line">
+              Score Board
+          </div>
+        </div>
+        <div class="column is-full">
+          <score-board :teams="scoreParties" :rounds="this.currentGame.rounds" class="is-narrow"></score-board>
+        </div>
+        <div class="column is-full">
+          <div v-if="useChat"  class="tile is-child">
+            <chat :chatroom-id="game.chatroom.id" ref="gameChatBox" :game-mode="true" :with-title="false" :with-input="false" :message="guess" @guessing-clue="guessingClue" class="chat-column"></chat>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -80,6 +101,8 @@ import axios from 'axios'
 import player from './player'
 import gamePaper from './game_paper'
 import { bus } from '../packs/application'
+import gameHeader from './game_header'
+import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
 
 export default {
   props: {
@@ -114,10 +137,12 @@ export default {
     'chat': chat,
     'score-board': scoreBoard,
     'player': player,
-    'game-paper': gamePaper
+    'game-paper': gamePaper,
+    'game-header': gameHeader
   },
   data: function () {
     return {
+      gameImage: fishbowlImage,
       currentGame: null,
       clues: null,
       randIndex: null,
@@ -127,7 +152,8 @@ export default {
       noMorePass: false,
       guess: "",
       guessedClue: null,
-      passed: 0
+      passed: 0,
+      clueNum: 0
     }
   },
   computed: {
@@ -268,6 +294,7 @@ export default {
   created () {
     this.currentGame = this.game
     // this.clues = this.game.set.clues
+    this.clueNum = this.game.set.clues.length
     
     bus.$on('startTimer', () => {
       this.$refs.gameTimer.startTimer()
@@ -297,8 +324,12 @@ export default {
 
 <style scoped lang="scss">
 
-.game-center {
-  min-height: 500px;
+.no-margin {
+  margin-bottom: -0.5rem;
+}
+
+.game-header {
+  max-height: 70px;
 }
 
 .clue-word {
@@ -317,50 +348,24 @@ export default {
   border: 1px solid #363636;
 }
 
-.scoring-tile {
-  display: flex !important;
-  flex-wrap: wrap !important;
-}
 
-.timer-tile {
-  // height: 100px;
-  // max-height: 100px;
+.center-tile {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
 }
 
+.vertical-tile {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center !important;
+  align-items: center !important;
+}
 
 .chat-column {
   border: 1px solid grey;
   min-height: 100% !important;
   height: 100% !important;
-}
-
-.clue-box {
-  width: 35%;
-  height: 60%;
-  margin: auto;
-  min-height: 300px;
-  min-width: 250px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 48px;
-  line-height: 1 !important;
-}
-
-.buttons-tile {
-  padding-top: 20px;
-  margin: auto;
-  height: 50px;
-  max-height: 50px;
-  text-align: center !important;
-}
-
-.score-board {
-  height: 50%;
-  min-height: 50%;
 }
 
 .section-line {

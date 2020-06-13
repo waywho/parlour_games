@@ -1,6 +1,7 @@
 <template>
   <div class="tile">
     <div class="tile is-vertical" v-if="!cluesSubmitted">
+      <game-header :game="game" :game-image="gameImage" :image-size="'100px'"></game-header>
       <div class="tile is-parent card-pot">
         <div class=" tile is-child card-stack">
           <game-paper v-for="(c, index) in 3" :key="index" v-model="currentClue" :ref="'clue_' + index" :clue="currentClue" @input="enableButton"></game-paper>
@@ -56,13 +57,16 @@ import gameAxios from '../axios/axios_game_update.js';
 import gameCard from './game_card';
 import gamePaper from './game_paper';
 import draggable from 'vuedraggable';
+import gameHeader from './game_header';
+import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
 
 export default {
 	props: ['game', 'currentHost', 'gameSession'],
   components: {
     'game-card': gameCard,
     'game-paper': gamePaper,
-    'draggable': draggable
+    'draggable': draggable,
+    'game-header': gameHeader
   },
   data: function () {
     return {
@@ -71,7 +75,8 @@ export default {
       cluesToAdd: [],
       clueNumbers: 5,
       currentClue: "",
-      disableAdd: true
+      disableAdd: true,
+      gameImage: fishbowlImage
     }
   },
   computed: {

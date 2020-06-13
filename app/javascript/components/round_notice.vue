@@ -18,13 +18,13 @@
 </template>
 
 <script>
-import fishBowlImage from '../assets/fish-bowl-filled-glow.png'
+import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
 export default {
   props: ['currentRound'],
   data: function () {
     return {
       isModalActive: false,
-      gameImage: fishBowlImage
+      gameImage: fishbowlImage
     }
   },
   watch: {
@@ -54,6 +54,8 @@ export default {
 <style scoped lang="scss">
 .modal-content {
   overflow: visible;
+  width: 90%;
+  margin: auto;
 }
 
 .round-label {
