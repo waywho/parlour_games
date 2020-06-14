@@ -20,7 +20,7 @@
                  trap-focus
                  aria-role="dialog"
                  aria-modal>
-      <component :is="currentForm" :game_name="currentGameName" :game_id="currentGameId" v-on:send-invite="sendGameInvite" v-on:no-invite="noInvite"></component>
+      <component :is="currentForm" :game_name="newGameName" :game_id="newGameId" v-on:send-invite="sendGameInvite" v-on:no-invite="noInvite"></component>
     </b-modal>
   </div>
 </template>
@@ -41,8 +41,8 @@ export default {
       isComponentModalActive: false,
       currentForm: 'game-invite',
       users: null,
-      currentGameName: null,
-      currentGameId: null,
+      newGameName: null,
+      newGameId: null,
       games: [{name: 'FishBowl', description: "This is a great group game. Teams will guess the same clues through rounds of giving descriptions (Taboo), acting out (Charades), and single describing word (Password). "}],
       fishBowlImage: fishBowlImage
     }
@@ -63,21 +63,21 @@ export default {
 
         this.$store.dispatch('resetGameSession', host)
 
-        this.currentGameId = res.data.id 
-        this.currentGameName = this.$options.filters.camelToUnderscore(res.data.name)
+        this.newGameId = res.data.id 
+        this.newGameName = this.$options.filters.camelToUnderscore(res.data.name)
         this.isComponentModalActive = true
       })   
     },
     noInvite: function() {
       this.isComponentModalActive = false
-      this.goToGame(this.currentGameName, this.currentGameId)
+      this.goToGame(this.newGameName, this.newGameId)
     },
     sendGameInvite: function(userIds) {
       console.log('game invite user ids', userIds)
-      parlourAxios.post('/game_sessions', {user_ids: userIds, game_session: { game_id: this.currentGameId }})
+      parlourAxios.post('/game_sessions', {user_ids: userIds, game_session: { game_id: this.newGameId }})
         .then(res => {
         this.isComponentModalActive = false
-        this.goToGame(this.currentGameName, this.currentGameId)
+        this.goToGame(this.newGameName, this.newGameId)
       })
     }
   },
