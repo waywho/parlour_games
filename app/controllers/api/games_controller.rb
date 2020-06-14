@@ -53,10 +53,16 @@ module Api
           @game.update(game_params)
         end
       
-        if game_params[:team_mode] && @game.teams.empty?
+        if game_params[:team_mode] == true && @game.teams.empty?
           logger.debug "Teams to create #{team_params[:team][:numbers]}"
           team_params[:team][:numbers].to_i.times { Team.create(game: @game)}
-        elsif game_params[:team_mode].present? && game_params[:team_mode] == false
+        elsif game_params[:team_mode] == false
+          
+          @game.teams&.each do |team|
+            logger.debug "delete sessions associations"
+            team.game_sessions.clear
+          end
+          logger.debug "delete teams"
           @game.teams.destroy_all
         end
         GameSetupRelayJob.perform_later(@game)

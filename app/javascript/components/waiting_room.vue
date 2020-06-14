@@ -13,16 +13,19 @@
             </b-switch>
           </div>
           
-          <b-field label="Create Teams" v-if="currentGame.team_mode && currentHost">
+          <b-field label="How many teams" v-if="currentGame.team_mode && currentHost">
             <b-input placeholder="Number of teams" type="number" v-model="teamNumbers"></b-input>
             <p class="control">
                 <b-button class="button is-dark" @click='createTeams' :disabled="!currentHost">Create</b-button>
             </p>
           </b-field>
+          <div v-if="teamsCreated">Go ahead and drag players into your desired teams.</div>
         </div>
         <div v-else-if="currentGame.team_mode && !currentHost" class="column is-half">
           Number of teams: {{numberOfTeams}}
+          <div v-if="teamsCreated">Go ahead and drag players into your desired teams.</div>
         </div>
+
         <div class="column is-half">
           <b-button type="is-dark" @click="startGame" v-if="currentHost && !currentGame.started" :disabled="!allAccepted && teamsAssigned">Start Game</b-button>
         </div>
@@ -32,17 +35,19 @@
     <div class="column is-full">
       <div class="tile is-ancestor">
         <div class="tile is-parent">
-          <draggable class="tags are-large tile is-child box players-tile team-outline" v-model="game_sessions" group="players" key="original">
-            <div><b>Players</b></div><br />
+          <div class="tile is-child box team-outline">
+          <div class=""><b>Players</b></div><br />
+          <draggable class="tags are-large box players-tile" v-model="game_sessions" group="players" key="original">
+            
             <player v-for="session in game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost" class=""></player>
-          </draggable>
+          </draggable></div>
         </div>
         <div v-if="currentGame.teams.length > 1" class="tile is-parent is-vertical">
           <div v-for="(team, index) in sortedTeams" :key="team.id" class="box team-outline tile is-child">
             <b-field label="Team" horizontal>
-              <input class="input" placeholder="Team Name" type="string" v-model="team.name" @change="gameUpdate"></input>
+              <input class="input" placeholder="anyone can enter a team name" type="string" v-model="team.name" @change="gameUpdate"></input>
             </b-field>
-            <draggable v-model="team.game_sessions" class="tags are-large team-box" group="players" @change="gameUpdate">
+            <draggable v-model="team.game_sessions" class="tags are-large team-box" group="players" @change="gameUpdate" :key="'teamBox' + team.id">
               <player v-for="session in team.game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost"></player>
             </draggable>
           </div>
@@ -101,6 +106,9 @@ export default {
     allAccepted: function() {
       return _.every(this.currentGame.game_sessions, ['invitation_accepted', true ])
     },
+    teamsCreated: function() {
+      return this.currentGame.teams.length > 0
+    }
   },
   methods: {
     startGame: function() {
@@ -117,11 +125,12 @@ export default {
       
     },
     removeTeams: function() {
-      if(!this.currentGame.team_mode && this.currentGame.teams.length > 0) {
+      if(this.currentGame.team_mode == false && this.currentGame.teams.length > 0) {
         var changeTeamMode = confirm('Are you sure you want to delete teams?')
         console.log('change team mode to', this.currentGame.team_mode)
         if(changeTeamMode) {
           gameAxios.put(`${this.currentGame.id}`, { game: { team_mode: this.currentGame.team_mode }}).then( res => {
+            console.log('teams deleted')
             this.currentGame = res.data
             this.setTeam(res)
             
@@ -241,6 +250,7 @@ export default {
 
 .players-tile {
   align-content: center;
+  height: 75%;
 
 }
 </style>
