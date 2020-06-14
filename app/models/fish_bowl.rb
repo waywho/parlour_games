@@ -5,11 +5,14 @@ class FishBowl < Game
 	before_update :play, if: :after_clues?
 
 	ROUNDS = { 
-					0 => { name: "Clues", instructions: "Please fill in more than 5 clues each person", score_round: false}, 
+					0 => { name: "Clues", instructions: "Please add clues into the fishbowl. These clues will be used to be guessed by your fellow players through rounds of Taboo, Charades, and Password.", score_round: false}, 
 					1 => { name: "Taboo", instructions: "Each player will have 60 seconds to provide verbal hints for their team to guess each clue. The verbal hints can not be any part of the clue. Team members can guess by typing in the answer, when matched, next clue will be drawn.", score_round: true}, 
 					2 => { name: "Charades", instructions: "Each player will have 60 seconds to act out the clues for their team to guess. Team members can guess by typing in the answer, when matched, next clue will be drawn", score_round: true}, 
 					3 => { name: "Password", instructions: "Each player will have 60 seconds to provide 1 keyword for their team to guess. Team members can guess by typing in the answer, when matched, next clue will be drawn", score_round: true}
 				}
+
+	DESCRIPTION = "This is a great group game. Teams will guess the same clues through rounds of giving descriptions (Taboo), acting out (Charades), and single describing word (Password). "
+	
 	def start_game
 		if started == true
 			logging("Game Step 0", "starting game, #{self.set}")
@@ -165,7 +168,10 @@ class FishBowl < Game
 				current_turn: { team: 0, nominated_player: nil, time_left: nil },
 				# only user ids in array
 				gone_players: {},
-				players_gone: []
+				players_gone: [],
+				options: {
+					time_limit: 60
+				}
 			}
 		end
 end

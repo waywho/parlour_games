@@ -45,3 +45,16 @@ a:hover {
   height: 100%;
   overflow: visible;
 }
+
+.center-tile {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.vertical-tile {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center !important;
+  align-items: center !important;
+}

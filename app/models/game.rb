@@ -14,7 +14,7 @@ class Game < ApplicationRecord
 	self.inheritance_column = 'name'
 
 	def as_json(options={})
-		super(options.merge({ methods: [:name, :hosts, :rounds] }))
+		super(options.merge({ methods: [:name, :hosts, :rounds, :description] }))
 	end
 
 	def user_ids
@@ -27,6 +27,10 @@ class Game < ApplicationRecord
 
  	def rounds
 		self.class::ROUNDS
+	end
+
+	def description
+		self.class::DESCRIPTION
 	end
 
  	private

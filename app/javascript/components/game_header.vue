@@ -1,14 +1,32 @@
 <template>
     <div class="vertical-tile">
       <img :src="gameImage" alt="Fish Bowl" :class="['game-image', 'mx-4']" :style="`height:${imageSize}`">
-      <span class="is-size-7">{{game.id}}</span>
+      <span class="is-size-7" v-if="showId">{{game.id}}</span>
     </div>
 </template>
 
 <script>
 
 export default {
-  props: ['game', 'gameImage', 'imageSize'],
+  props: {
+    game: {
+      type: Object,
+      required: true,
+    },
+    gameImage: {
+      type: String,
+      required: false,
+    },
+    imageSize: {
+      type: String,
+      required: false,
+    },
+    showId: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
+  },
   data: function () {
     return {
       

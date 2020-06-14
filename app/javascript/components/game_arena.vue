@@ -102,7 +102,7 @@ import player from './player'
 import gamePaper from './game_paper'
 import { bus } from '../packs/application'
 import gameHeader from './game_header'
-import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
+import fishbowlImage from '../assets/fish-bowl-glow.png'
 
 export default {
   props: {
@@ -147,7 +147,7 @@ export default {
       clues: null,
       randIndex: null,
       turnStarted: false,
-      timeLimit: 5,
+      timeLimit: 60,
       reveal: false,
       noMorePass: false,
       guess: "",
@@ -295,6 +295,9 @@ export default {
     this.currentGame = this.game
     // this.clues = this.game.set.clues
     this.clueNum = this.game.set.clues.length
+    if(this.game.set.options.time_limit) {
+      this.timeLimit = this.game.set.options.time_limit
+    }
     
     bus.$on('startTimer', () => {
       this.$refs.gameTimer.startTimer()
@@ -346,20 +349,6 @@ export default {
 
 .light-tag {
   border: 1px solid #363636;
-}
-
-
-.center-tile {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-}
-
-.vertical-tile {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: center !important;
-  align-items: center !important;
 }
 
 .chat-column {

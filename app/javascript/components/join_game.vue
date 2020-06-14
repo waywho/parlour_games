@@ -2,6 +2,8 @@
   <div class="center-content">
     <h5 class="title is-5">Join <span v-if="game.name">{{game.name | camel-to-space}}: {{ formFields.gameId.value }}</span><span v-if="!game.name">Game</span></h5>
     <h6 class="subtitle is-6" v-if="host_names">hosted by: {{ host_names }}</h6>
+    <p v-if="game.description">{{game.description}}</p>
+    <br />
     <b-message type="is-dark" :active.sync="showError">
           {{errorMessage}}
     </b-message>

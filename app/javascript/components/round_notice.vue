@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
+import fishbowlImage from '../assets/fish-bowl-glow.png'
 export default {
   props: ['currentRound'],
   data: function () {

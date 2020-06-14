@@ -1,41 +1,51 @@
 <template>
-  <div>
-  	<game-header :game="game" :game-image="gameImage" :image-size="'100px'"></game-header>
-    <h3 class="title is-4">Waiting Room{{ currentGame.started ? ': this game has started' : ''}}</h3>
-    <div class="tile is-ancestor">
-      <div class="tile is-parent">
-        <div class="field tile is-child" v-if="currentHost">
-          <b-switch v-model="currentGame.team_mode" :disabled="!currentHost" @input="removeTeams" type="is-dark">
-              turn on team mode
-          </b-switch>
+  <div class="columns is-multiline is-mobile">
+    <div class="column is-full has-text-centered">
+  	 <game-header :game="game" :game-image="gameImage" :image-size="'100px'"></game-header>
+      <span class="title is-4">Waiting Room{{ currentGame.started ? ': this game has started' : ''}}</span>
+    </div>
+    <div class="column is-full">
+      <div class="columns">
+        <div class="field column is-half" v-if="currentHost">
+          <div class="field">
+            <b-switch v-model="currentGame.team_mode" :disabled="!currentHost" @input="removeTeams" type="is-dark">
+                turn on team mode
+            </b-switch>
+          </div>
+          
+          <b-field label="Create Teams" v-if="currentGame.team_mode && currentHost">
+            <b-input placeholder="Number of teams" type="number" v-model="teamNumbers"></b-input>
+            <p class="control">
+                <b-button class="button is-dark" @click='createTeams' :disabled="!currentHost">Create</b-button>
+            </p>
+          </b-field>
         </div>
-        <div v-if="currentGame.team_mode && !currentHost" class="tile is-child">
+        <div v-else-if="currentGame.team_mode && !currentHost" class="column is-half">
           Number of teams: {{numberOfTeams}}
         </div>
-        <b-field class="tile is-child" label="Create Teams" v-if="currentGame.team_mode && currentHost">
-          <b-input placeholder="Number of teams" type="number" v-model="teamNumbers"></b-input>
-          <p class="control">
-              <b-button class="button is-dark" @click='createTeams' :disabled="!currentHost">Create</b-button>
-          </p>
-        </b-field>
-        <div class="tile is-child buttons">
+        <div class="column is-half">
           <b-button type="is-dark" @click="startGame" v-if="currentHost && !currentGame.started" :disabled="!allAccepted && teamsAssigned">Start Game</b-button>
         </div>
-
       </div>
     </div>
-    <div class="tile is-ancestor">
-      <draggable class="tags are-large tile players-tile" v-model="game_sessions" group="players" key="original">
-        <player v-for="session in game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost"></player>
-      </draggable>
-      <div v-if="currentGame.teams.length > 1" class="tile is-vertical is-parent">
-        <div v-for="(team, index) in sortedTeams" :key="team.id" class="box tile is-child team-outline">
-          <b-field label="Team" horizontal>
-            <input class="input" placeholder="Team Name" type="string" v-model="team.name" @change="gameUpdate"></input>
-          </b-field>
-          <draggable v-model="team.game_sessions" class="tags are-large team-box" group="players" @change="gameUpdate">
-            <player v-for="session in team.game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost"></player>
+    
+    <div class="column is-full">
+      <div class="tile is-ancestor">
+        <div class="tile is-parent">
+          <draggable class="tags are-large tile is-child box players-tile team-outline" v-model="game_sessions" group="players" key="original">
+            <div><b>Players</b></div><br />
+            <player v-for="session in game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost" class=""></player>
           </draggable>
+        </div>
+        <div v-if="currentGame.teams.length > 1" class="tile is-parent is-vertical">
+          <div v-for="(team, index) in sortedTeams" :key="team.id" class="box team-outline tile is-child">
+            <b-field label="Team" horizontal>
+              <input class="input" placeholder="Team Name" type="string" v-model="team.name" @change="gameUpdate"></input>
+            </b-field>
+            <draggable v-model="team.game_sessions" class="tags are-large team-box" group="players" @change="gameUpdate">
+              <player v-for="session in team.game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost"></player>
+            </draggable>
+          </div>
         </div>
       </div>
     </div>
@@ -47,7 +57,7 @@ import draggable from 'vuedraggable'
 import gameAxios from '../axios/axios_game_update.js';
 import player from './player';
 import gameHeader from './game_header';
-import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
+import fishbowlImage from '../assets/fish-bowl-logo.png'
 
 export default {
 	props: {
@@ -93,9 +103,6 @@ export default {
     },
   },
   methods: {
-    playerOptions: function() {
-      alert('imclicked')
-    },
     startGame: function() {
       if(this.teamsAssigned) {
         console.log('starting game')
@@ -117,6 +124,7 @@ export default {
           gameAxios.put(`${this.currentGame.id}`, { game: { team_mode: this.currentGame.team_mode }}).then( res => {
             this.currentGame = res.data
             this.setTeam(res)
+            
           })
         } else {
           this.currentGame.team_mode = true
@@ -137,6 +145,8 @@ export default {
     setTeam: function(res) {
       if(res.data.team_mode) {
           this.teamNumbers = res.data.teams.length
+        } else {
+          this.teamNumbers = null
         }
     },
     gameUpdate: function() {
@@ -231,5 +241,6 @@ export default {
 
 .players-tile {
   align-content: center;
+
 }
 </style>

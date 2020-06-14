@@ -58,7 +58,7 @@ import gameCard from './game_card';
 import gamePaper from './game_paper';
 import draggable from 'vuedraggable';
 import gameHeader from './game_header';
-import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
+import fishbowlImage from '../assets/fish-bowl-logo.png'
 
 export default {
 	props: ['game', 'currentHost', 'gameSession'],

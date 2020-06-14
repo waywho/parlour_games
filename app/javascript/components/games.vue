@@ -2,11 +2,17 @@
   <div>
     <h2 class="title is-2">Games</h2>
     <div class="columns">
-      <div class="column" v-for="game in games">
-        <button  class="button game-button is-outlined is-dark" @click="startGameInvite(game)" outlined>
+      <div class="column center-tile vertical-tile" v-for="game in games">
+        <button  class="button game-button is-outlined is-dark" @click="startGameInvite(game.name)" outlined>
         <img :src="fishBowlImage" alt="Fish Bowl" class="game-image">
-        Start {{game | camel-to-space }}
+        Start {{game.name | camel-to-space }}
       </button>
+       <b-tooltip :label="game.description" type="is-light"
+          position="is-bottom" multilined size="is-medium">
+          <div class="tag is-light is-small">
+              more about the game
+          </div>
+        </b-tooltip>
       </div>
     </div>
     <b-modal :active.sync="isComponentModalActive" 
@@ -24,7 +30,7 @@ import parlourAxios from '../axios/axios_parlour.js';
 import GameInvite from './game_invite_form';
 import { mapGetters } from 'vuex'
 import goToGame from '../mixins/goToGame';
-import fishBowlImage from '../assets/fish-bowl-filled-glow.png'
+import fishBowlImage from '../assets/fish-bowl-glow.png'
 
 export default {
   components: {
@@ -37,7 +43,7 @@ export default {
       users: null,
       currentGameName: null,
       currentGameId: null,
-      games: ['FishBowl'],
+      games: [{name: 'FishBowl', description: "This is a great group game. Teams will guess the same clues through rounds of giving descriptions (Taboo), acting out (Charades), and single describing word (Password). "}],
       fishBowlImage: fishBowlImage
     }
   },

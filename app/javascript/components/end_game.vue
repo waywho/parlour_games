@@ -18,7 +18,7 @@
 <script>
 import scoreBoard from './score_board'
 import gameHeader from './game_header'
-import fishbowlImage from '../assets/fish-bowl-filled-glow.png'
+import fishbowlImage from '../assets/fish-bowl-logo.png'
 
 export default {
   props: ['game'],
