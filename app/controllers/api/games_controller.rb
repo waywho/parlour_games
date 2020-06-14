@@ -55,7 +55,7 @@ module Api
       
         if game_params[:team_mode] && @game.teams.empty?
           logger.debug "Teams to create #{team_params[:team][:numbers]}"
-          team_params[:team][:numbers].to_i.times { @game.teams.create }
+          team_params[:team][:numbers].to_i.times { Team.create(game: @game)}
         elsif game_params[:team_mode].present? && game_params[:team_mode] == false
           @game.teams.destroy_all
         end
