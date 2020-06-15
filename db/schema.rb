@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_14_121814) do
+ActiveRecord::Schema.define(version: 2020_06_09_211326) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
+  enable_extension "uuid-ossp"
 
   create_table "chatroom_users", force: :cascade do |t|
     t.bigint "chatroom_id"
@@ -27,7 +28,7 @@ ActiveRecord::Schema.define(version: 2020_06_14_121814) do
 
   create_table "chatrooms", force: :cascade do |t|
     t.string "gameaable_type"
-    t.bigint "gameaable_id"
+    t.uuid "gameaable_id"
     t.string "topic"
     t.boolean "public", default: true
     t.datetime "created_at", null: false
@@ -38,7 +39,7 @@ ActiveRecord::Schema.define(version: 2020_06_14_121814) do
   end
 
   create_table "game_sessions", force: :cascade do |t|
-    t.bigint "game_id"
+    t.uuid "game_id"
     t.bigint "team_id"
     t.boolean "host", default: false
     t.datetime "created_at", null: false
@@ -56,7 +57,7 @@ ActiveRecord::Schema.define(version: 2020_06_14_121814) do
     t.index ["team_id"], name: "index_game_sessions_on_team_id"
   end
 
-  create_table "games", force: :cascade do |t|
+  create_table "games", id: :uuid, default: -> { "uuid_generate_v4()" }, force: :cascade do |t|
     t.string "name"
     t.jsonb "set"
     t.datetime "created_at", null: false
@@ -64,10 +65,8 @@ ActiveRecord::Schema.define(version: 2020_06_14_121814) do
     t.boolean "started", default: false
     t.boolean "ended", default: false
     t.boolean "team_mode", default: false
-    t.string "slug"
     t.string "password_digest"
     t.index ["name"], name: "index_games_on_name"
-    t.index ["slug"], name: "index_games_on_slug", unique: true
   end
 
   create_table "messages", force: :cascade do |t|
@@ -94,7 +93,7 @@ ActiveRecord::Schema.define(version: 2020_06_14_121814) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "order"
-    t.bigint "game_id"
+    t.uuid "game_id"
     t.jsonb "scores"
     t.index ["game_id"], name: "index_teams_on_game_id"
     t.index ["name"], name: "index_teams_on_name"

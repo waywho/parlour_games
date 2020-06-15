@@ -1,7 +1,7 @@
 class CreateGameSessions < ActiveRecord::Migration[5.2]
   def change
     create_table :game_sessions do |t|
-      t.references :game, foreign_key: true
+      t.references :game, foreign_key: true, type: :uuid, index: true
       t.references :user, foreign_key: true
       t.references :team, foreign_key: true
       t.boolean :host, default: false

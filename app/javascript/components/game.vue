@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import FishBowl from './fish_bowl';
+import FishBowl from './fishbowl';
 import WaitingRoom from './waiting_room';
 import gameAxios from '../axios/axios_game_update.js';
 import { mapGetters } from 'vuex';

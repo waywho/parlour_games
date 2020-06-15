@@ -1,6 +1,6 @@
 <template>
   <chat-form v-on:submit="$emit('send-invite', userIds)" v-on:close-modal="$parent.close()">
-    <header slot="form-header" class="modal-card-title">Invite Users to {{game_name | camel-to-space }}</header>
+    <header slot="form-header" class="modal-card-title">Invite Users to {{gameName | camel-to-space }}</header>
     <div slot="form-fields">
        <p class="content"><b>Select users to invite:</b> <span class="tag is-medium is-outlined is-success" v-for="user in selectedUsers">{{ user.name }}<button class="delete" @click="$refs.userSelectInput.removeUser(user)"></button></span></p>
         <user-select-input ref="userSelectInput" v-on:users-select="selectUsers" v-on:users-remove="selectUsers"></user-select-input>
@@ -20,7 +20,7 @@ export default {
     'chat-form': chatForm,
     'user-select-input': userSelect
   },
-  props: ['game_name', 'game_id'],
+  props: ['gameName', 'gameId'],
   data: function () {
     return {
       selectedUsers: [],
@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     invitePath() {
-      return `http://parlourgames.club/games/${this.game_name}/${this.game_id}`
+      return `http://parlourgames.club/games/${this.gameName}/${this.gameId}`
     }
   },
   methods: {

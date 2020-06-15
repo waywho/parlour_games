@@ -1,7 +1,7 @@
 module Api
   class GamesController < ApplicationController
     before_action :set_game, only: [:show, :update, :destroy, :setup]
-
+    before_action :authenticate_user, only: [:create, :destroy]
     # GET /games
     def index
       logger.debug "User IP: #{request.remote_ip}"

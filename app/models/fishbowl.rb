@@ -1,4 +1,4 @@
-class FishBowl < Game
+class Fishbowl < Game
 	before_create :game_setup
 	before_update :start_game, if: :started_changed?
 	before_update :populate_pot, if: :only_clue_keys?
