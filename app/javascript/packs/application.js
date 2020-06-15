@@ -32,7 +32,7 @@ import _ from 'lodash'
 
 // import VueDraggable from 'vue-draggable'
 import Buefy from 'buefy'
-
+import '../styles/global.scss'
 export const bus = new Vue({})
 	
 document.addEventListener('DOMContentLoaded', () => {
