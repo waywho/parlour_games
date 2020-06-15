@@ -31,7 +31,7 @@ const notJoinedGame = (to, from, next) => {
 	console.log('destination', to)
 	// console.log(store.getters.gameSession.game_id)
 	if(store.getters.gameSession == null || store.getters.gameSession == undefined) {
-		next(`/join_game`)
+		next(`/join_game/${to.params.game_id}`)
 	} else if(to.params.game_id == store.getters.gameSession.game_id) {
 		next()
 	} else {

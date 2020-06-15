@@ -1,14 +1,14 @@
 <template>
   <div class="center-content">
     <h5 class="title is-5">Join <span v-if="game.name">{{game.name | camel-to-space}}: {{ formFields.gameId.value }}</span><span v-if="!game.name">Game</span></h5>
-    <h6 class="subtitle is-6" v-if="host_names">hosted by: {{ host_names }}</h6>
+    <h6 class="subtitle is-6" v-if="hostNames">hosted by: {{ hostNames }}</h6>
     <p v-if="game.description">{{game.description}}</p>
     <br />
     <b-message type="is-dark" :active.sync="showError">
           {{errorMessage}}
     </b-message>
-    <b-field v-show="!game_id || game_ended" label="Enter Game ID" :type="formFields.gameId.classType" :message="formFields.gameId.message">
-      <b-input placeholder="Game ID" v-model="formFields.gameId.value" :type="formFields.gameId.type" @blur="getGame(formFields.gameId.value)"></b-input>
+    <b-field v-show="!gameId || gameEnded" label="Enter Game Code" :type="formFields.gameId.classType" :message="formFields.gameId.message">
+      <b-input placeholder="Game Code" v-model="formFields.gameId.value" :type="formFields.gameId.type" @blur="getGame(formFields.gameId.value)"></b-input>
     </b-field>
     <b-field label="Enter a name..."  :type="formFields.player.classType" :message="formFields.player.message" @input="checkPlayerName" @blur="checkPlayerName">
       <b-input placeholder="Player name" v-model="formFields.player.value" :type="formFields.player.type" @input="checkPlayerName"></b-input>
@@ -40,12 +40,13 @@ export default {
   mixins: [FormErrorHandlingMixin, goToGame],
   data: function () {
     return {
+      gameId: null,
       errorMessage: null,
       showError: false,
       rejoin: false,
       disableJoin: false,
       formFields: {
-        gameId: { value: null, type: 'number', message: null, classType: null},
+        gameId: { value: null, type: 'string', message: null, classType: null},
         player: { value: null, type: 'string', message: null, classType: null}
       },
       game: {
@@ -72,11 +73,14 @@ export default {
       gameSession: 'gameSession',
       currentUser: 'currentUser'
     }),
-    host_names: function() {
+    hostNames: function() {
       return _.map(this.game.hosts, "name").join(", ")
     },
-    game_ended: function() {
+    gameEnded: function() {
       return this.game.ended
+    },
+    showId: function() {
+      return gameEnded
     }
   },
   methods: {
@@ -143,33 +147,39 @@ export default {
       
       if(this.formFields.player.value != null || this.formFields.player.value != undefined ) { this.formFields.player.value = null}
 
-        gameAxios.get(`${id}`)
-          .then(res => {
-            console.log('get game', res)
-            this.game = res.data
-            this.formFields.gameId.value = this.game.id
-            if(this.game_ended) {
-              this.errorMessage = "This game has finished, please enter another game code"
+      gameAxios.get(`${id}`)
+        .then(res => {
+          console.log('get game', res)
+          this.game = res.data
+          this.formFields.gameId.value = this.game.id
+          if(this.gameEnded) {
+            this.errorMessage = "This game has finished, please enter another game code"
+            this.showError = true
+          } else if(this.gameSession != null || this.gameSession != undefined) {
+            if(this.gameSession.game_id == this.game.id) {
+              this.formFields.player.value = this.gameSession.player_name
+              this.rejoin = true
+              this.errorMessage = "Looks like you were part of this game already, would you like to join again?"
               this.showError = true
-            } else if(this.gameSession != null || this.gameSession != undefined) {
-              if(this.gameSession.game_id == this.game.id) {
-                this.formFields.player.value = this.gameSession.player_name
-                this.rejoin = true
-                this.errorMessage = "Looks like you were part of this game already, would you like to join again?"
-                this.showError = true
-              }
             }
-          })
+          }
+        })
+        .catch(error => {
+          console.log('cant find')
+          this.formFields.gameId.value = `${id}`
+          this.errorMessage = "Cannot find game with that code. Please enter another code."
+          this.showError = true
+          
+        })
       
     }
   },
   mounted() {
     // already a signed in user, or has a game session
     if(this.game_id !== null && this.game_id !== undefined) {
-      this.formFields.gameId.value = this.game_id
       this.getGame(this.game_id)
     } else if (this.gameSession != null || this.gameSession != undefined) {
-      this.getGame(this.gameSession.game_id)
+      this.getGame(this.gameSession.gameId)
     }    
   }
 }
