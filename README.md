@@ -1,7 +1,6 @@
-# README
+# Parlour Games
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is the codebase for parlourgames.club. This project was created during Lockdown 2020. The intent is to let people enjoy fun party games online.
 
 Things you may want to cover:
 
