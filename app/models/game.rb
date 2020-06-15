@@ -1,6 +1,6 @@
 class Game < ApplicationRecord
 	after_create :create_chatroom
-	after_create :generate_slug 
+	before_create :generate_slug 
 
 	has_many :game_sessions, dependent: :destroy
 	has_many :teams, dependent: :destroy
