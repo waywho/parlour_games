@@ -1,6 +1,6 @@
 # Parlour Games
 
-This is the codebase for parlourgames.club. This project was created during Lockdown 2020. The intent is to let people enjoy fun party games online.
+This is the codebase for parlourgames.club. This project was created during Lockdown 2020. The intent is to let people enjoy fun party games online. 
 
 Things you may want to cover:
 
