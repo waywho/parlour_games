@@ -201,6 +201,7 @@ export default {
     game(newVal, oldVal) {
       this.currentGame = newVal
       this.turnStarted = false
+      this.passed = 0
       this.resetClock()
     },
     currentRound(newVal, oldVal) {

@@ -1,6 +1,6 @@
 class CreateGames < ActiveRecord::Migration[5.2]
   def change
-    create_table :games, id: :uuid do |t|
+    create_table :games, id: :uuid, default: -> { "uuid_generate_v4()" } do |t|
       t.string :name
       t.jsonb :set
       t.text :description

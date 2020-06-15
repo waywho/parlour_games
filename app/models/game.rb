@@ -1,6 +1,5 @@
 class Game < ApplicationRecord
 	after_create :create_chatroom
-	before_create :generate_slug 
 
 	has_many :game_sessions, dependent: :destroy
 	has_many :teams, dependent: :destroy
@@ -39,7 +38,4 @@ class Game < ApplicationRecord
  		Chatroom.create(gameaable: self, topic: "#{self.name}:#{self.id}", public: false)
  	end
 
- 	def generate_slug
- 		self.update_attributes(slug: "#{SecureRandom.urlsafe_base64(10)}#{self.id}")
- 	end
 end
