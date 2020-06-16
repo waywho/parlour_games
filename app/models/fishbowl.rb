@@ -14,7 +14,7 @@ class Fishbowl < Game
 	DESCRIPTION = "This is a great group game. Teams will guess the same clues through rounds of giving descriptions (Taboo), acting out (Charades), and single describing word (Password). "
 	
 	def start_game
-		if started == true
+		if started
 			logging("Game Step 0", "starting game, #{self.set}")
 			set["current_round"]["round_number"] = 0
 			if teams.present?
@@ -57,61 +57,7 @@ class Fishbowl < Game
 		end
 	end
 
-	def next_turn
-		logging("Game Step 3", "Next turn, #{self.set}")
-		team_number = set["current_turn"]["team"]
-
-		logging("Game Step 3.1", "Last Team Order, #{team_number}")
-		set["gone_players"][team_number.to_s] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
-		set["current_turn"]["passed"] = 0
-		if team_mode
-			if team_number == teams.length
-				set["current_turn"]["team"] = 1
-			else
-				set["current_turn"]["team"] += 1
-			end
-		else
-			set["gone_players"] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
-		end
-		next_player
-	end
-
-	def next_player
-		logging("Game Step 4", "Next player #{self.set}")
-		set["current_turn"]["completed"] = false
-		if team_mode
-			current_team_number = set["current_turn"]["team"].to_s
-			logging("Game Step 4.1", "Team order #{current_team_number}")
-
-			current_team = teams.where(order: current_team_number).take
-
-			logging("Game Step 4.2", "Found current team #{current_team}, #{self.set}")
-			
-			players = current_team.game_sessions.map(&:id)
-
-			logging("Game Step 4.3","Current team members #{players}")
-
-			logging("Game Step 4.4","Current team gone players #{set["gone_players"][current_team_number]}")
-			left_players = players - set["gone_players"][current_team_number]
-		else
-			players = game_sessions.map(&:id)
-
-			logging("Game Step 4.1", "current team members #{players}")
-			left_players = players - set["gone_players"]
-		end
-		
-		if left_players.empty? && team_mode
-			left_players = players
-			set["gone_players"][current_team_number] = []
-		elsif left_players.empty?
-			left_players = players
-			set["gone_players"] = []
-		end
-
-		self.set["current_turn"]["nominated_player"] = left_players.first
-
-		logging("Game Step 4.5", "Found next player #{left_players.first}, #{self.set}")
-	end
+	
 
 	def after_clues?
 		if set["current_round"]["round_number"].nil?
@@ -154,10 +100,6 @@ class Fishbowl < Game
 	end
 
 	private
-
-		def logging(game_step, message)
-			logger.tagged("#{self}") { logger.tagged(game_step)  { logger.debug(message) } }
-		end
 		def game_setup
 			self.set = { clues: [], 
 				current_clue: nil,

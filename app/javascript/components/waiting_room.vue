@@ -187,13 +187,7 @@ export default {
         .then(res => {
           // console.log('game setup', res)
         })
-    },
-    createSetup: function() {
-      gameAxios.put(`${this.currentGame.id}`, {game: {}})
-      .then(res => {
-        // console.log('game started', res)
-      })
-    } 
+    }
   },
   created () {
     // console.log('where is my game', this.game)

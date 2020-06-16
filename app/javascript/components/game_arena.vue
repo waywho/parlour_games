@@ -148,7 +148,6 @@ export default {
       randIndex: null,
       turnStarted: false,
       timeLimit: 60,
-      noMorePass: false,
       guess: "",
       guessedClue: null,
       clueNum: 0
@@ -194,6 +193,9 @@ export default {
         return this.game.game_sessions
       }
     },
+    noMorePass: function() {
+      return this.currentGame.set.current_turn.passed >= 3
+    }
   },
   watch: {
     game(newVal, oldVal) {
@@ -222,9 +224,6 @@ export default {
         console.log("passing clue")
         this.currentGame.set.current_turn.passed += 1
         this.updateGame()
-        if(this.currentGame.set.current_turn.passed == 3) {
-          this.noMorePass = true
-        }
       }
     },
     resetClock: function() {
