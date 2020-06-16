@@ -31,7 +31,7 @@ class Fishbowl < Game
 		if set["current_round"]["completed"] == true || set["clues"].empty?
 			set["current_round"]["completed"] = true
 			next_round
-		else
+		elsif set["current_turn"]["completed"] == true
 			# next team
 			next_turn
 		end
@@ -63,7 +63,7 @@ class Fishbowl < Game
 
 		logging("Game Step 3.1", "Last Team Order, #{team_number}")
 		set["gone_players"][team_number.to_s] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
-
+		set["current_turn"]["passed"] = 0
 		if team_mode
 			if team_number == teams.length
 				set["current_turn"]["team"] = 1
@@ -78,7 +78,7 @@ class Fishbowl < Game
 
 	def next_player
 		logging("Game Step 4", "Next player #{self.set}")
-
+		set["current_turn"]["completed"] = false
 		if team_mode
 			current_team_number = set["current_turn"]["team"].to_s
 			logging("Game Step 4.1", "Team order #{current_team_number}")
@@ -160,12 +160,13 @@ class Fishbowl < Game
 		end
 		def game_setup
 			self.set = { clues: [], 
+				current_clue: nil,
 				guessed_clues: [],
 				current_round: { 
 					round_number: nil,
 					completed: false
 				},
-				current_turn: { team: 0, nominated_player: nil, time_left: nil },
+				current_turn: { team: 0, nominated_player: nil, passed: 0, time_left: 0, completed: false },
 				# only user ids in array
 				gone_players: {},
 				players_gone: [],

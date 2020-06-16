@@ -37,9 +37,9 @@
         <div class="tile is-parent">
           <div class="tile is-child box team-outline">
           <div class=""><b>Players</b></div><br />
-          <draggable class="tags are-large box players-tile" v-model="game_sessions" group="players" key="original">
+          <draggable class="tags are-large box players-tile" v-model="gameSessions" group="players" key="original">
             
-            <player v-for="session in game_sessions" dragger :game-session="session" :key="session.id" :current-host="currentHost" class=""></player>
+            <player v-for="session in gameSessions" dragger :game-session="session" :key="session.id" :current-host="currentHost" class=""></player>
           </draggable></div>
         </div>
         <div v-if="currentGame.teams.length > 1" class="tile is-parent is-vertical">
@@ -80,7 +80,6 @@ export default {
   },
   data: function () {
     return {
-      game_sessions: [],
       teams: [],
       teamNumbers: null,
       currentGame: {},
@@ -88,6 +87,16 @@ export default {
     }
   },
   computed: {
+    gameSessions: {
+      get: function() { 
+        return this.currentGame.game_sessions.filter(session => {
+              return session.team_id == null
+            })
+      },
+      set: function(val) {
+        this.currentGame.game_sessions = val
+      }
+    },
     sortedTeams: function() {
       return _.sortBy(this.currentGame.teams, ['created_at'])
     },
@@ -97,7 +106,7 @@ export default {
     teamsAssigned: function() {
       if(!this.currentGame.team_mode) {
         return true
-      } else if(this.currentGame.team_mode && this.game_sessions.length == 0) {
+      } else if(this.currentGame.team_mode && this.gameSessions.length == 0) {
         return true
       } else {
         return false
@@ -108,6 +117,12 @@ export default {
     },
     teamsCreated: function() {
       return this.currentGame.teams.length > 0
+    }
+  },
+  watch: {
+    game: function(newVal, oldVal) {
+      console.log('game update waiting', newVal)
+      this.currentGame = newVal
     }
   },
   methods: {
@@ -183,55 +198,10 @@ export default {
   created () {
     // console.log('where is my game', this.game)
     this.currentGame = this.game
-    this.websocket = this.$cable.useGlobalConnection(this.$store.state.token)
-    this.game_sessions = this.currentGame.game_sessions.filter(session => {
-              return session.team_id == null
-            })
+
     if(this.currentGame.team_mode) {
       this.teamNumbers = this.currentGame.teams.length
     }
-    // this.currentGame.teams = this.currentGame.teams
-    // this.websocket = this.$cable.useGlobalConnection(this.$store.state.token)
-    
-    this.subscription = this.websocket.subscriptions.create({
-      channel: 'GameSessionsChannel', game: this.currentGame.id }, {
-        connected: () => console.log('Connected to Game Session', this.currentGame.id),
-        received: (data) => {
-          console.log('received game session', data)
-          let session = _.find(this.game_sessions, { 'id': data.id })
-          console.log('find session', session)
-
-          if (session != null || session != undefined) {
-            var index = this.game_sessions.indexOf(session)
-            console.log('index', index)
-            if(data.deleted) {
-              console.log('deleted')
-              this.game_sessions.splice(index, 1)
-            } else {
-              console.log('new data')
-              console.log(this.game_sessions[index])
-              this.game_sessions.splice(index, 1)
-              this.game_sessions.push(data)
-            }
-          } else {
-            this.game_sessions.push(data)
-          }
-          
-        }
-    })
-
-    this.subscription = this.websocket.subscriptions.create({
-      channel: 'GamesChannel', game: this.game.id }, {
-        connected: () => console.log('Connected to Game Channel', this.game.id),
-        received: (data) => {
-          // console.log('received game', data)
-          
-          if(data.game_sessions != null) {
-            this.game_sessions = data.game_sessions
-          }
-          this.currentGame = JSON.parse(data.game)
-        }
-    })
     
 
   }

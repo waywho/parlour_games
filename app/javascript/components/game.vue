@@ -12,7 +12,7 @@ import { bus } from '../packs/application'
 
 export default {
   components: {
-    'fish_bowl': FishBowl,
+    'fishbowl': FishBowl,
     'waiting_room': WaitingRoom
   },
   props: {
@@ -113,9 +113,6 @@ export default {
 
         clueGuessed: function(guessedClue) {
           this.perform('guessed_clue', {game_id: gameId, guessed_clue: guessedClue})
-        },
-        cluesPassed: function(passed) {
-          this.perform('passed', {game_id: gameId, passed: passed})
         }
     })
     
