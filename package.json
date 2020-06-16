@@ -11,6 +11,7 @@
     "vue": "^2.6.11",
     "vue-action-cable": "^1.1.0",
     "vue-chat-scroll": "^1.4.0",
+    "vue-cookie-law": "^1.13.3",
     "vue-jwt-decode": "^0.1.0",
     "vue-loader": "^15.9.1",
     "vue-moment": "^4.1.0",

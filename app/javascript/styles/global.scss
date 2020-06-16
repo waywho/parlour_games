@@ -58,3 +58,15 @@ a:hover {
   justify-content: center !important;
   align-items: center !important;
 }
+
+.Cookie--base .Cookie__button {
+  background-color: #363636 !important;
+  color: white !important;
+  border-radius: 4px !important;
+}
+
+.Cookie--base .Cookie__button:hover {
+  background-color: grey !important;
+  color: #363636 !important;
+}
+
