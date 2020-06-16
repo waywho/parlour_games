@@ -35,7 +35,7 @@ export default {
     },
     isModalActive: function(newVal, oldVal) {
       if(newVal) {
-        setTimeout(() => {this.isModalActive = false}, 1800)
+        setTimeout(() => {this.isModalActive = false}, 2000)
       }
     }
   },

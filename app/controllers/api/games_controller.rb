@@ -33,19 +33,6 @@ module Api
       end
     end
 
-    # def setup
-    #   if game_params[:team_mode].present? && game_params[:team_mode]
-    #     teams = []
-    #     game_params[:team_numbers].to_i.times { @game.teams.build }
-    #     logger.debug "Teams to create #{game_params[:team][:numbers]}"
-    #   else
-    #     teams = game_params[:teams]
-    #   end
-      
-    #   GameSetupRelayJob.perform_later({game: @game, teams: teams.to_json})
-    #   render json: @game.teams, status: :ok
-    # end
-
     # PATCH/PUT /games/1
     def update
       begin
@@ -65,10 +52,11 @@ module Api
           logger.debug "delete teams"
           @game.teams.destroy_all
         end
-        GameSetupRelayJob.perform_later(@game)
+        GameRelayJob.perform_later(@game)
         game_json_response
 
       rescue StandardError => ex
+        logger.debug "Error updating, #{ex}"
         render json: @game.errors, status: :unprocessable_entity
       end
     end

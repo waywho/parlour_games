@@ -13,19 +13,19 @@
                 </div>
               </b-tooltip>
             </div>
-            <div><b>Number of Clues:</b> {{clueNum}} </div>
+            <div><b>Number of clues {{ game.set.guessed_clues.length > 0 ? "left" : ""}}:</b> {{clueNum}} </div>
           </div>
         </div>
       </div>
       <div class="columns is-mobile is-centered is-vcentered">
         <div class="column center-tile is-full-size-mobile is-full-size-tablet is-full-size-desktop">
           <b-taglist attached class="no-margin">
-            <b-tag type="is-light" size="is-medium" class='light-tag'>{{passed}}</b-tag>
+            <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentGame.set.current_turn.passed}}</b-tag>
             <b-tag type="is-dark" size="is-medium">{{currentPlayer ? "Your turn" : nominatedPlayer.player_name}}</b-tag>
             <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentRoundPlayerScore}}</b-tag>
           </b-taglist>  
           
-          <timer class="mx-4" :time-limit="timeLimit" ref="gameTimer" @times-up="updateGame"></timer>
+          <timer class="mx-4" :time-limit="timeLimit" ref="gameTimer" @times-up="completeTurn"></timer>
       
           <b-taglist attached v-if="game.team_mode">
             <b-tag type="is-dark" size="is-medium">{{currentTeam.name}}</b-tag>
@@ -148,11 +148,9 @@ export default {
       randIndex: null,
       turnStarted: false,
       timeLimit: 60,
-      reveal: false,
       noMorePass: false,
       guess: "",
       guessedClue: null,
-      passed: 0,
       clueNum: 0
     }
   },
@@ -200,9 +198,7 @@ export default {
   watch: {
     game(newVal, oldVal) {
       this.currentGame = newVal
-      this.turnStarted = false
-      this.passed = 0
-      this.resetClock()
+      this.clueNum = this.currentGame.set.clues.length
     },
     currentRound(newVal, oldVal) {
       if(newVal.name != oldVal.name) {
@@ -212,7 +208,8 @@ export default {
   },
   methods: {
     start: function() {
-      if(this.passed >= 3) {
+      if(this.currentGame.set.current_turn.passed >= 3) {
+        console.log('more than 3')
         return
       }
       this.randIndex = Math.floor(Math.random() * this.currentGame.set.clues.length)
@@ -223,8 +220,9 @@ export default {
         this.gameSubscription.turnStart()
       } else {
         console.log("passing clue")
-        this.gameSubscription.cluesPassed(this.passed += 1)
-        if(this.passed == 3) {
+        this.currentGame.set.current_turn.passed += 1
+        this.updateGame()
+        if(this.currentGame.set.current_turn.passed == 3) {
           this.noMorePass = true
         }
       }
@@ -240,20 +238,23 @@ export default {
       console.log('score update', this.currentGame.game_sessions[player_index].scores)
     },
     guessed: function() {
-      console.log('guessed', this.currentGame.set.clues.length)
-      if (this.currentGame.set.clues.length > 0) {
-        let guessed = this.currentGame.set.clues.splice(this.randIndex, 1)[0];
-        
-        if(this.currentGame.set.clues.length == 0) {
-          this.currentGame.set.guessed_clues.push(guessed)
-          this.updatePlayerScore(1)
-          this.$refs.gameTimer.stopTimer()
-          this.updateGame()
-        } else {
-          this.gameSubscription.clueGuessed(guessed)
-          this.randIndex = Math.floor(Math.random() * this.currentGame.set.clues.length)
-        }
+      console.log('guessed 1', this.currentGame.set.clues.length)
+
+      let guessed = this.currentGame.set.clues.splice(this.randIndex, 1)[0];
+      this.currentGame.set.guessed_clues.push(guessed)
+      this.updatePlayerScore(1)
+      this.clueNum -= 1
+      this.gameSubscription.clueGuessed(guessed)
+
+      console.log('guessed 2', this.currentGame.set.clues.length)
+
+      if(this.currentGame.set.clues.length == 0) { 
+        this.$refs.gameTimer.stopTimer()
+        this.completeTurn()
+      } else {
+        this.randIndex = Math.floor(Math.random() * this.currentGame.set.clues.length)
       }
+      
     },
     sendGuess: function() {
       // console.log('sending message', this.guess)
@@ -270,6 +271,13 @@ export default {
       } else {
         return
       }
+    },
+    completeTurn: function() {
+      this.currentGame.set.current_turn.completed = true
+      this.turnStarted = false
+      this.resetClock()
+      this.updateGame()
+
     },
     updateGame: function() {
       console.log('game update 2', this.currentGame)
@@ -305,19 +313,15 @@ export default {
     })
 
     bus.$on('showGuessed', (clue) => {
-      this.currentGame.set.guessed_clues.push(clue)
-      this.updatePlayerScore(1)
-      this.guessedClue = clue
-      this.reveal = true
-      setTimeout(() => {
-        this.reveal = false
-        this.guessedClue = ""
-      }, 2000)
-    })
+      if(!this.currentPlayer) {
+        this.updatePlayerScore(1)
+        this.guessedClue = clue
+        this.clueNum -= 1
+        setTimeout(() => {
+          this.guessedClue = ""
+        }, 2000)
+      }
 
-    bus.$on('cluesPassed', (cluesPassed) => {
-      console.log('got passed')
-      this.passed = cluesPassed
     })
 
     console.log('game gameSubscription', this.gameSubscription)

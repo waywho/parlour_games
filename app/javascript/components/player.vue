@@ -109,9 +109,12 @@ export default {
       if(leaveGame) {
         axios.delete(`/api/game_sessions/${this.gameSession.id}`)
         .then(res => {
-          console.log('leave game', res.data)
-          this.$store.dispatch('clearGameSession')
-          this.$router.push({name: 'join_game_noid'})
+          if(!this.currentHost) {
+            console.log('leave game', res.data)
+            this.$store.dispatch('clearGameSession')
+            this.$router.push({name: 'join_game_noid'})
+          }
+
         })
       }
       

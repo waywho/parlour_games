@@ -43,7 +43,7 @@ module Api
     # PATCH/PUT /api/game_sessions/1
     def update
       if @game_session.update(game_session_params)
-        GameSessionRelayJob.perform_later(@game_session)
+        broadcast_to_game(@game_session)
         render json: @game_session
       else
         render json: @game_session.errors, status: :unprocessable_entity
@@ -53,7 +53,7 @@ module Api
     # DELETE /api/game_sessions/1
     def destroy
       @game_session.destroy
-      GameSessionRelayJob.perform_later(@game_session) 
+      broadcast_to_game(@game_session)
     end
 
     private
@@ -74,11 +74,16 @@ module Api
 
       def create_response(game_session)
         if game_session.save
-          GameSessionRelayJob.perform_later(game_session)
+          broadcast_to_game(game_session)
           render json: game_session, include: { game: { only: [:name]}}, status: :created
         else
           render json: game_session.errors, status: :unprocessable_entity
         end
+      end
+
+      def broadcast_to_game(game_session)
+        game = Game.find(game_session.game_id)
+        GameRelayJob.perform_later(game)
       end
   end
 end

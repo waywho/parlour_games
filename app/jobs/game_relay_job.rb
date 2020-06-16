@@ -1,4 +1,4 @@
-class GameSetupRelayJob < ApplicationJob
+class GameRelayJob < ApplicationJob
   queue_as :default
 
   def perform(game)
