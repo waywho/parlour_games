@@ -33,8 +33,6 @@ import _ from 'lodash'
 // import VueDraggable from 'vue-draggable'
 import Buefy from 'buefy'
 import '../styles/global.scss'
-import VueProgrammaticInvisibleGoogleRecaptcha from 'vue-programmatic-invisible-google-recaptcha'
-
 
 export const bus = new Vue({})
 	
