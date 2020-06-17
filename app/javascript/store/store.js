@@ -3,13 +3,20 @@ import Vuex from 'vuex';
 import VueJwtDecode from 'vue-jwt-decode'
 import axios from 'axios';
 import gameAxios from '../axios/axios_game_update.js';
+import fishbowlImage from '../assets/fish-bowl-glow.png';
+import fishbowlLogo from '../assets/fish-bowl-logo.png'
+import ghostImage from '../assets/smileys-filled.png'
+import ghostLogo from '../assets/smileys-logo.png'
 
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
 	state: {
 		token: localStorage.getItem('auth_token'),
-		gameSession: localStorage.getItem('game_session')
+		gameSession: localStorage.getItem('game_session'),
+		games: [{name: 'Fishbowl', description: "This is a fun group game. Teams will guess the same clues through rounds of giving descriptions (Taboo), acting out (Charades), and single describing word (Password). ", image: fishbowlImage, logo: fishbowlLogo },
+        {name: 'Ghost', description: "This is a game where players take turns adding letters to a growing word fragment. The first to complete a valid word looses the round.", image: ghostImage, logo: ghostLogo}
+     ],
 	},
 	getters: {
 		currentUser: (state, getters) => {
@@ -18,6 +25,12 @@ export const store = new Vuex.Store({
 			} else {
 				return null
 			}
+		},
+		getGames: (state, getters) => {
+			return state.games
+		},
+		gameInfo: (state) => (gameName) => {
+			return _.find(state.games, {name: gameName})
 		},
 		authenticated: (state, getters) => {
 			if(state.token != null && getters.tokenValid) {

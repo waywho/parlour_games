@@ -2,7 +2,8 @@ class GameSession < ApplicationRecord
   belongs_to :game
   belongs_to :playerable, polymorphic: true, optional: true
   belongs_to :team, optional: true
-  belongs_to :fishbowl, foreign_key: :game_id
+  belongs_to :fishbowl, foreign_key: :game_id, optional: true
+  belongs_to :ghost, foreign_key: :game_id, optional: true
   has_many :messages, as: :speakerable
 	accepts_nested_attributes_for :messages, allow_destroy: true
 

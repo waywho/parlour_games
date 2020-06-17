@@ -8,11 +8,13 @@ import WaitingRoom from './waiting_room';
 import gameAxios from '../axios/axios_game_update.js';
 import { mapGetters } from 'vuex';
 import { bus } from '../packs/application'
+import Ghost from './ghost';
 
 
 export default {
   components: {
     'fishbowl': FishBowl,
+    'ghost': Ghost,
     'waiting_room': WaitingRoom
   },
   props: {
@@ -47,7 +49,7 @@ export default {
   },
   watch: {
     game: function(newVal, oldVal) {
-      if(this.gameSession.game_id == newVal.id && newVal.set.current_round.round_number != null) { 
+      if(this.gameSession.game_id == newVal.id && newVal.started) { 
         this.comp = this.$options.filters.camelToUnderscore(newVal.name);
       } else {
         this.comp = 'waiting_room'

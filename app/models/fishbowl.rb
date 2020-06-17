@@ -113,7 +113,8 @@ class Fishbowl < Game
 				gone_players: {},
 				players_gone: [],
 				options: {
-					time_limit: 60
+					time_limit: 60,
+					team_mode: true
 				}
 			}
 		end

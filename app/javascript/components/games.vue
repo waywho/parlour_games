@@ -4,7 +4,7 @@
     <div class="columns">
       <div class="column center-tile vertical-tile" v-for="game in games">
         <button  class="button game-button is-outlined is-dark" @click="startGameInvite(game.name)" outlined>
-        <img :src="fishBowlImage" alt="Fishbowl" class="game-image">
+        <img :src="game.image" :alt="game.name" class="game-image">
         Start {{game.name | camel-to-space }}
       </button>
        <b-tooltip :label="game.description" type="is-light"
@@ -30,7 +30,6 @@ import parlourAxios from '../axios/axios_parlour.js';
 import GameInvite from './game_invite_form';
 import { mapGetters } from 'vuex'
 import goToGame from '../mixins/goToGame';
-import fishBowlImage from '../assets/fish-bowl-glow.png'
 
 export default {
   components: {
@@ -43,24 +42,24 @@ export default {
       users: null,
       newGameName: null,
       newGameId: null,
-      games: [{name: 'Fishbowl', description: "This is a great group game. Teams will guess the same clues through rounds of giving descriptions (Taboo), acting out (Charades), and single describing word (Password). "}],
-      fishBowlImage: fishBowlImage
     }
   },
   mixins: [goToGame],
   computed: {
     ...mapGetters({
-      currentUser: 'currentUser'
+      currentUser: 'currentUser',
+      games: 'getGames'
     })
   },
   methods: {
     startGameInvite: function(gameName) {
      parlourAxios.post('/games', {game: {name: gameName} })
       .then(res => {
+        console.log('host session', res)
         const host = res.data.hosts.filter(host => {
           return host.playerable_id == this.$store.getters.currentUser.id
         })[0]
-
+        console.log('host session', host)
         this.$store.dispatch('resetGameSession', host)
 
         this.newGameId = res.data.id 
