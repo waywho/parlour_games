@@ -5,22 +5,22 @@
       <b-message v-if="message.show" :type="message.type" aria-close-label="Close message">
         {{message.content}}
       </b-message>
-      <form @submit.prevent="checkBot">
+      <form @submit.prevent="onSubmit">
         <b-field v-for="field, key, id in formFields" :id="key" :key="key" :label="key | camel-to-space" :type="formFields[key].classType" :message="formFields[key].message">
           <b-input v-model="formFields[key].value" :type="formFields[key].type"></b-input>
         </b-field>
-        <vue-programmatic-invisible-google-recaptcha
-            ref="invisibleRecaptcha1"
-            :sitekey="siteKey"
-            :elementId="'invisibleRecaptcha1'"
-            :badgePosition="'left'"
-            :showBadgeMobile="false"
-            :showBadgeDesktop="false"
-            @recaptcha-callback="onSubmit"
-        ></vue-programmatic-invisible-google-recaptcha>
-        <div class="buttons">
+        <invisible-recaptcha 
+          :sitekey="siteKey" 
+          :validate="loadButton" 
+          :callback="onSubmit"
+          class="button is-dark" type="submit" 
+          id="captcha-btn" 
+          :disabled="loading">
+             Create
+        </invisible-recaptcha>
+<!--         <div class="buttons">
           <b-button native-type="submit" type="is-dark">Create</b-button>
-        </div>
+        </div> -->
       </form>
     </div>
   </div>
@@ -29,12 +29,14 @@
 <script>
 import axios from 'axios';
 import FormErrorHandlingMixin from '../mixins/FormErrorHandlingMixin'
+import InvisibleRecaptcha from 'vue-invisible-recaptcha';
 
 export default {
   name: 'registration',
   mixins: [FormErrorHandlingMixin],
   data () {
     return {
+      loading: false,
       siteKey: "6LeM5qUZAAAAANv6TeUlvKGWPXhxmSSAcVO_HMeY",
       formFields: {
         name: { value: '', type: 'name', message: null, classType: null},
@@ -44,11 +46,14 @@ export default {
       }
     }
   },
+  components: {
+    'invisible-recaptcha': InvisibleRecaptcha
+  },
   methods: {
-    checkBot: function() {
-      this.$refs.invisibleRecaptcha1.execute()
+    loadButton: function() {
+      this.loading = true
     },
-    onSubmit () {
+    onSubmit (recaptchaToken) {
       this.clearErrors();
       if(this.requiredFieldsErrors(['email', 'password', 'passwordConfirmation'])) {
         return
