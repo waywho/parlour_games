@@ -5,11 +5,19 @@
       <b-message v-if="message.show" :type="message.type" aria-close-label="Close message">
         {{message.content}}
       </b-message>
-      <form @submit.prevent="onSubmit">
+      <form @submit.prevent="checkBot">
         <b-field v-for="field, key, id in formFields" :id="key" :key="key" :label="key | camel-to-space" :type="formFields[key].classType" :message="formFields[key].message">
           <b-input v-model="formFields[key].value" :type="formFields[key].type"></b-input>
         </b-field>
-
+        <vue-programmatic-invisible-google-recaptcha
+            ref="invisibleRecaptcha1"
+            :sitekey="siteKey"
+            :elementId="'invisibleRecaptcha1'"
+            :badgePosition="'left'"
+            :showBadgeMobile="false"
+            :showBadgeDesktop="false"
+            @recaptcha-callback="onSubmit"
+        ></vue-programmatic-invisible-google-recaptcha>
         <div class="buttons">
           <b-button native-type="submit" type="is-dark">Create</b-button>
         </div>
@@ -27,6 +35,7 @@ export default {
   mixins: [FormErrorHandlingMixin],
   data () {
     return {
+      siteKey: "6LeM5qUZAAAAANv6TeUlvKGWPXhxmSSAcVO_HMeY",
       formFields: {
         name: { value: '', type: 'name', message: null, classType: null},
         email: { value: '', type: 'email', message: null, classType: null},
@@ -36,7 +45,10 @@ export default {
     }
   },
   methods: {
-     onSubmit () {
+    checkBot: function() {
+      this.$refs.invisibleRecaptcha1.execute()
+    },
+    onSubmit () {
       this.clearErrors();
       if(this.requiredFieldsErrors(['email', 'password', 'passwordConfirmation'])) {
         return
