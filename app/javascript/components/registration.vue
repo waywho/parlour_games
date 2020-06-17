@@ -53,7 +53,8 @@ export default {
     loadButton: function() {
       this.loading = true
     },
-    onSubmit (recaptchaToken) {
+    onSubmit: function () {
+      console.log("i'm submitting")
       this.clearErrors();
       if(this.requiredFieldsErrors(['email', 'password', 'passwordConfirmation'])) {
         return
