@@ -36,9 +36,7 @@ import '../styles/global.scss'
 
 export const bus = new Vue({})
 	
-document.addEventListener('DOMContentLoaded', () => {
-	Vue.component('vue-programmatic-invisible-google-recaptcha', VueProgrammaticInvisibleGoogleRecaptcha)
-	
+document.addEventListener('DOMContentLoaded', () => {	
 	Vue.use(Buefy, {
 		defaultFieldLabelPosition: 'on-border'
 	})
