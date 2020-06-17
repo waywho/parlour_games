@@ -9,10 +9,18 @@
         <b-field v-for="field, key, id in formFields" :id="key" :key="key" :label="key | camel-to-space" :type="formFields[key].classType" :message="formFields[key].message">
           <b-input v-model="formFields[key].value" :type="formFields[key].type"></b-input>
         </b-field>
-
-        <div class="buttons">
+        <invisible-recaptcha 
+          :sitekey="siteKey" 
+          :validate="loadButton" 
+          :callback="onSubmit"
+          class="button is-dark" type="submit" 
+          id="captcha-btn" 
+          :disabled="loading">
+             Create
+        </invisible-recaptcha>
+<!--         <div class="buttons">
           <b-button native-type="submit" type="is-dark">Create</b-button>
-        </div>
+        </div> -->
       </form>
     </div>
   </div>
@@ -21,12 +29,15 @@
 <script>
 import axios from 'axios';
 import FormErrorHandlingMixin from '../mixins/FormErrorHandlingMixin'
+import InvisibleRecaptcha from 'vue-invisible-recaptcha';
 
 export default {
   name: 'registration',
   mixins: [FormErrorHandlingMixin],
   data () {
     return {
+      loading: false,
+      siteKey: "6LeM5qUZAAAAANv6TeUlvKGWPXhxmSSAcVO_HMeY",
       formFields: {
         name: { value: '', type: 'name', message: null, classType: null},
         email: { value: '', type: 'email', message: null, classType: null},
@@ -35,8 +46,14 @@ export default {
       }
     }
   },
+  components: {
+    'invisible-recaptcha': InvisibleRecaptcha
+  },
   methods: {
-     onSubmit () {
+    loadButton: function() {
+      this.loading = true
+    },
+    onSubmit (recaptchaToken) {
       this.clearErrors();
       if(this.requiredFieldsErrors(['email', 'password', 'passwordConfirmation'])) {
         return
