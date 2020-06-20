@@ -6,7 +6,7 @@
     </div>
     <div class="column is-full">
       <div class="columns">
-        <div class="field column is-half" v-if="currentHost && game.set.options.game_mode">
+        <div class="field column is-half" v-if="currentHost && game.set.options.team_mode">
           <div class="field">
             <b-switch v-model="currentGame.team_mode" :disabled="!currentHost" @input="removeTeams" type="is-dark">
                 turn on team mode
@@ -21,7 +21,7 @@
           </b-field>
           <div v-if="teamsCreated">Go ahead and drag players into your desired teams.</div>
         </div>
-        <div v-else-if="game.set.options.game_mode && currentGame.team_mode && !currentHost" class="column is-half">
+        <div v-else-if="game.set.options.team_mode && currentGame.team_mode && !currentHost" class="column is-half">
           Number of teams: {{numberOfTeams}}
           <div v-if="teamsCreated">Go ahead and drag players into your desired teams.</div>
         </div>
