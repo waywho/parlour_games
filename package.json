@@ -12,6 +12,7 @@
     "vue-action-cable": "^1.1.0",
     "vue-chat-scroll": "^1.4.0",
     "vue-cookie-law": "^1.13.3",
+    "vue-fitty": "^0.1.8",
     "vue-invisible-recaptcha": "^0.2.1",
     "vue-jwt-decode": "^0.1.0",
     "vue-loader": "^15.9.1",

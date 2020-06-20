@@ -10,21 +10,28 @@
       <img :src="gameImage" alt="Fish Bowl" class="game-image">
       <div class="box round-label">
         
-        <div class="title is-4">{{currentRound.name}} Round</div>
-        <p>{{currentRound.instructions}}</p>
+        <div class="title is-4">{{currentRound.name}}</div>
+        <p v-if="instructionArray" v-html="currentRound.instructions.join('<br/>')"></p>
+        <p v-else>{{currentRound.instructions}}</p>
       </div>
     </div>
   </b-modal>
 </template>
 
 <script>
-import fishbowlImage from '../assets/fish-bowl-glow.png'
+
 export default {
-  props: ['currentRound'],
+  props: ['currentRound', 'gameImage'],
   data: function () {
     return {
-      isModalActive: false,
-      gameImage: fishbowlImage
+      isModalActive: false
+    }
+  },
+  computed: {
+    instructionArray: function() {
+      // console.log('inst', this.currentRound.instructions)
+      // console.log("array", typeof(this.currentRound.instructions))
+      return typeof(this.currentRound.instructions) == 'object'
     }
   },
   watch: {
@@ -35,7 +42,7 @@ export default {
     },
     isModalActive: function(newVal, oldVal) {
       if(newVal) {
-        setTimeout(() => {this.isModalActive = false}, 2000)
+        setTimeout(() => {this.isModalActive = false}, 3000)
       }
     }
   },

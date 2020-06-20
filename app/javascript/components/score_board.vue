@@ -2,7 +2,7 @@
   <table class="table has-text-centered">
     <thead>
       <tr>
-        <th>Team</th>
+        <th>Rounds</th>
         <th v-for="round in rounds" v-if="round.score_round">{{ round.name }}</th>
         <th>Total</th>
       </tr>

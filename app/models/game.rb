@@ -40,9 +40,11 @@ class Game < ApplicationRecord
 
 
  	def next_turn
+ 		logger.debug "this problem?"
 		logging("Game Step 3", "Next turn, #{self.set}")
+		logger.debug "not the problem"
 		# reset turn passing number and completed
-		set["current_turn"]["passed"] = 0
+		set["current_turn"]["passed"] = 0 if set["current_turn"]["passed"].present?
 		set["current_turn"]["completed"] = false
 		if team_mode
 			# find current team

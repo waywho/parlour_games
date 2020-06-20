@@ -19,11 +19,7 @@
       </div>
       <div class="columns is-mobile is-centered is-vcentered">
         <div class="column center-tile is-full-size-mobile is-full-size-tablet is-full-size-desktop">
-          <b-taglist attached class="no-margin">
-            <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentGame.set.current_turn.passed}}</b-tag>
-            <b-tag type="is-dark" size="is-medium">{{currentPlayer ? "Your turn" : nominatedPlayer.player_name}}</b-tag>
-            <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentRoundPlayerScore}}</b-tag>
-          </b-taglist>  
+          <player-turn :passing="true" :game="currentGame" :nominated-player="nominatedPlayer" :current-player="currentPlayer"></player-turn>
           
           <timer class="mx-4" :time-limit="timeLimit" ref="gameTimer" @times-up="completeTurn"></timer>
       
@@ -94,51 +90,55 @@
 </template>
 
 <script>
-import timer from './timer'
-import chat from './chat'
-import scoreBoard from './score_board'
-import axios from 'axios'
-import player from './player'
-import gamePaper from './game_paper'
-import { bus } from '../packs/application'
-import gameHeader from './game_header'
-import fishbowlImage from '../assets/fish-bowl-glow.png'
+import timer from './timer';
+import chat from './chat';
+import scoreBoard from './score_board';
+import axios from 'axios';
+import player from './player';
+import gamePaper from './game_paper';
+import { bus } from '../packs/application';
+import gameHeader from './game_header';
+import fishbowlImage from '../assets/fish-bowl-glow.png';
+import playerTurn from './player_turn';
+import gameBehaviours from '../mixins/gameBehaviours'
 
 export default {
   props: {
-    'game': {
+    game: {
       type: Object,
       required: false,
     }, 
-    'gameSession': {
+    gameSession: {
       type: Object,
       required: false,
     }, 
-    'gameSubscription': {
+    gameSubscription: {
       type: Object,
       required: false,
     },
-    'useChat': {
+    useChat: {
       type: Boolean,
       required: false,
       default: false
     },
-    'currentHost': {
+    currentHost: {
       type: Boolean,
       required: false
     },
-    'currentRound': {
+    currentRound: {
       type: Object,
       required: false
     }
   },
+  mixins: [gameBehaviours],
   components: {
     'timer': timer,
     'chat': chat,
     'score-board': scoreBoard,
     'player': player,
     'game-paper': gamePaper,
-    'game-header': gameHeader
+    'game-header': gameHeader,
+    'player-turn': playerTurn
   },
   data: function () {
     return {
@@ -171,20 +171,8 @@ export default {
         return "Start"
       }
     },
-    nominatedPlayer: function() {
-      return _.find(this.game.game_sessions, { id: this.game.set.current_turn.nominated_player })
-    },
-    currentPlayer: function() {
-      return this.nominatedPlayer.id == this.gameSession.id
-    },
-    currentRoundPlayerScore: function() {
-      return this.nominatedPlayer.scores[this.currentRoundNum]
-    },
     currentTeam: function() {
       return  _.find(this.game.teams, { order: this.game.set.current_turn.team })
-    },
-    currentRoundNum: function() {
-      return this.game.set.current_round.round_number
     },
     scoreParties: function() {
       if(this.game.team_mode) {
@@ -349,10 +337,6 @@ export default {
   width: 100%;
   height: 100%;
   padding-top: 40%;
-}
-
-.light-tag {
-  border: 1px solid #363636;
 }
 
 .chat-column {

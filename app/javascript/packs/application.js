@@ -33,10 +33,13 @@ import _ from 'lodash'
 // import VueDraggable from 'vue-draggable'
 import Buefy from 'buefy'
 import '../styles/global.scss'
+import Fitty from 'vue-fitty' 
 
 export const bus = new Vue({})
 	
-document.addEventListener('DOMContentLoaded', () => {	
+document.addEventListener('DOMContentLoaded', () => {
+	Vue.use(Fitty)
+	
 	Vue.use(Buefy, {
 		defaultFieldLabelPosition: 'on-border'
 	})

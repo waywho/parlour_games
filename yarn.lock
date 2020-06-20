@@ -1605,7 +1605,7 @@ buefy@0.8.20:
   resolved "https://registry.yarnpkg.com/buefy/-/buefy-0.8.20.tgz#75708800548220654575903d031a81fc8575b7f3"
   integrity sha512-pg8Cn0m9cjqp2/vaKT4VIfU8KIumuX/gAT1GtearXRs56+kKqAPx3j9O8cm9W6P4jPUCHajKX6H8AqD0ram2Bg==
   dependencies:
-    bulma "0.9.0"
+    bulma "0.7.5"
 
 buffer-from@^1.0.0:
   version "1.1.1"
@@ -3164,6 +3164,11 @@ findup-sync@3.0.0:
     is-glob "^4.0.0"
     micromatch "^3.0.4"
     resolve-dir "^1.0.1"
+
+fitty@^2.2.6:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/fitty/-/fitty-2.3.0.tgz#abf8a59987a8e01fe00bd09a4ce91570b183d830"
+  integrity sha512-a4axS2xr0Lcp95We4hIrAvpgdzp6WHPaHp9neb5kMdjefCsNLoD4lPx69yKtKe60X/ZMEJznsPot6C1Tw5KZOA==
 
 flatted@^2.0.1:
   version "2.0.1"
@@ -7702,6 +7707,14 @@ vue-cookie-law@^1.13.3:
   dependencies:
     tiny-cookie "^2.1.1"
 
+vue-fitty@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/vue-fitty/-/vue-fitty-0.1.8.tgz#78b90308ea4386a0c99170809b6b847e1e6801b5"
+  integrity sha512-sjU8iivVn3Bp0GpGjuxcLZqfoKqLyXvUENgYgPXyplzWweL+D+ViaTmY5N1BIayUw/RtcxKHhqSxWibKbafWUQ==
+  dependencies:
+    fitty "^2.2.6"
+    vue "^2.5.22"
+
 vue-hot-reload-api@^2.3.0:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.4.tgz#532955cc1eb208a3d990b3a9f9a70574657e08f2"
@@ -7773,7 +7786,7 @@ vue@^1.0.21:
   dependencies:
     envify "^3.4.0"
 
-vue@^2.3.3, vue@^2.6.11:
+vue@^2.3.3, vue@^2.5.22, vue@^2.6.11:
   version "2.6.11"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.11.tgz#76594d877d4b12234406e84e35275c6d514125c5"
   integrity sha512-VfPwgcGABbGAue9+sfrD4PuwFar7gPb1yl1UK1MwXoQPAw0BKSqWfoYCT/ThFrdEVWoI51dBuyCoiNU9bZDZxQ==
