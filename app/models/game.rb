@@ -72,7 +72,7 @@ class Game < ApplicationRecord
 
 
 		if team_mode
-			current_team_number = set["current_turn"]["team"].to_s
+			current_team_number = set["current_turn"]["team"]
 			logging("Game Step 4.1", "Team order #{current_team_number}")
 
 			current_team = teams.where(order: current_team_number.to_i).take
@@ -83,7 +83,7 @@ class Game < ApplicationRecord
 
 			logging("Game Step 4.3","Current team members #{players}")
 
-			logging("Game Step 4.4","Current team gone players #{set["gone_players"][current_team_number]}")
+			logging("Game Step 4.4","Current team gone players #{set['gone_players'][current_team_number]}")
 			left_players = players - set["gone_players"][current_team_number]
 		else
 			players = game_sessions.map(&:id)

@@ -110,7 +110,7 @@ class Fishbowl < Game
 				},
 				current_turn: { team: 0, nominated_player: nil, passed: 0, time_left: 0, completed: false },
 				# only user ids in array
-				gone_players: [],
+				gone_players: {},
 				players_gone: [],
 				options: {
 					time_limit: 60,
