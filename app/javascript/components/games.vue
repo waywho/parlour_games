@@ -48,24 +48,31 @@ export default {
   computed: {
     ...mapGetters({
       currentUser: 'currentUser',
-      games: 'getGames'
+      games: 'getGames',
+      authenticated: 'authenticated'
     })
   },
   methods: {
     startGameInvite: function(gameName) {
-     parlourAxios.post('/games', {game: {name: gameName} })
-      .then(res => {
-        console.log('host session', res)
-        const host = res.data.hosts.filter(host => {
-          return host.playerable_id == this.$store.getters.currentUser.id
-        })[0]
-        console.log('host session', host)
-        this.$store.dispatch('resetGameSession', host)
+      if (this.authenticated) {
+        parlourAxios.post('/games', {game: {name: gameName} })
+          .then(res => {
+            console.log('host session', res)
+            const host = res.data.hosts.filter(host => {
+              return host.playerable_id == this.$store.getters.currentUser.id
+            })[0]
+            console.log('host session', host)
+            this.$store.dispatch('resetGameSession', host)
 
-        this.newGameId = res.data.id 
-        this.newGameName = this.$options.filters.camelToUnderscore(res.data.name)
-        this.isComponentModalActive = true
-      })   
+            this.newGameId = res.data.id 
+            this.newGameName = this.$options.filters.camelToUnderscore(res.data.name)
+            this.isComponentModalActive = true
+          })
+      } else {
+        this.$router.push({name: 'registration'})
+      }
+
+      
     },
     noInvite: function() {
       this.isComponentModalActive = false

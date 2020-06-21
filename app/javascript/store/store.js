@@ -65,6 +65,9 @@ export const store = new Vuex.Store({
 		setToken (state, payload) {
 			state.token = payload
 		},
+		resetToken (state, payload) {
+			state.token = localStorage.getItem('auth_token')
+		},
 		setGameSession (state, payload) {
 			state.gameSession = localStorage.getItem('game_session')
 		}
@@ -106,6 +109,14 @@ export const store = new Vuex.Store({
 		          // commit('setToken', null);
 		          reject(error)
 		        })
+			})
+		},
+		destroyToken({commit, dispatch, state}) {
+			return new Promise((resolve, reject) => {
+				localStorage.removeItem('auth_token')
+				commit('resetToken')
+
+				resolve()
 			})
 		},
 		reloadGameSession({commit, dispatch, state}, payload) {

@@ -3,13 +3,16 @@
     <template slot="start">
       <b-navbar-item><router-link to="/">Parlour Games</router-link></b-navbar-item>
       <b-navbar-item v-if="authorisedLinks"><router-link to="/chats">Chats</router-link></b-navbar-item>
-      <b-navbar-item v-if="authorisedLinks"><router-link to="/games">Games</router-link></b-navbar-item>
-      <b-navbar-item v-if="authorisedLinks"><router-link to="/my_games">My Games</router-link></b-navbar-item>
+      <b-navbar-item><router-link to="/games">Games</router-link></b-navbar-item>
+      
     </template>
     <template slot="end">
       <b-navbar-item v-if="!authorisedLinks"><router-link to="/sign_in">Sign In</router-link></b-navbar-item>
       <b-navbar-item v-if="!authorisedLinks"><router-link to="/sign_up">Register</router-link></b-navbar-item>
-      <b-navbar-item v-if="authorisedLinks">{{currentUser.name}} {{currentUser.sub}}</b-navbar-item>
+      <b-navbar-dropdown :label="currentUser.name" v-if="authorisedLinks">
+        <b-navbar-item v-if="authorisedLinks"><router-link to="/my_games">My Games</router-link></b-navbar-item>
+        <b-navbar-item v-if="authorisedLinks" @click="signOut">Sign Out</b-navbar-item>
+      </b-navbar-dropdown>
     </template>
   </b-navbar>
 </template>
@@ -29,8 +32,14 @@ export default {
       authorisedLinks: 'authenticated'
     })
   },
-  getters: {
+  methods: {
+    signOut: function() {
+      this.$store.dispatch('destroyToken')
+        .then(res => {
+          this.$router.push({name: 'signIn'})
 
+        })
+    }
   }
 }
 </script>

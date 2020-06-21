@@ -46,7 +46,7 @@ const router = new VueRouter({
 		{ path: '/', component: landingPage },
 		{ path: '/chats', name: 'chats', component: Chatrooms, beforeEnter: ifNotAuthenticated },
 		{ path: '/video_chats', component: videoChats, beforeEnter: ifNotAuthenticated },
-		{ path: '/games', component: Games, beforeEnter: ifNotAuthenticated },
+		{ path: '/games', component: Games },
 		{ path: '/my_games', component: MyGames, beforeEnter: ifNotAuthenticated},
 		{ path: '/games/:gameComponent/:game_id', name: 'game', component: Game, props: true, beforeEnter: notJoinedGame },
 		{ path: '/join_game', name: 'join_game_noid', component: JoinGame },
