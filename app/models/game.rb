@@ -81,11 +81,15 @@ class Game < ApplicationRecord
 			
 			players = current_team.game_sessions.map(&:id)
 
-			logging("Game Step 4.3","Current team members #{players}")
+			logging("Game Step 4.3", "Current team members #{players}")
 
-			logging("Game Step 4.4","Current team gone players #{set['gone_players'][current_team_number]}")
-			logging("current team number #{current_team_number}")
-			left_players = players - set["gone_players"][current_team_number]
+			logging("Game Step 4.4", "Current team gone players #{set['gone_players'][current_team_number]}")
+			logging("Game Step 4.4", "current team number #{current_team_number}")
+			if set["gone_players"][current_team_number].present?
+				left_players = players - set["gone_players"][current_team_number]
+			else
+				left_players = players
+			end
 		else
 			players = game_sessions.map(&:id)
 
