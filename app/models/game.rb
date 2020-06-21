@@ -84,6 +84,7 @@ class Game < ApplicationRecord
 			logging("Game Step 4.3","Current team members #{players}")
 
 			logging("Game Step 4.4","Current team gone players #{set['gone_players'][current_team_number]}")
+			logging("current team number #{current_team_number}")
 			left_players = players - set["gone_players"][current_team_number]
 		else
 			players = game_sessions.map(&:id)
