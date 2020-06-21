@@ -14,7 +14,7 @@ require 'rails_helper'
 
 RSpec.describe "/api/game_sessions", type: :request do
   # This should return the minimal set of attributes required to create a valid
-  # Api::GameSession. As you add validations to Api::GameSession, be sure to
+  # GameSession. As you add validations to GameSession, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
     skip("Add a hash of attributes valid for your model")
@@ -34,7 +34,7 @@ RSpec.describe "/api/game_sessions", type: :request do
 
   describe "GET /index" do
     it "renders a successful response" do
-      Api::GameSession.create! valid_attributes
+      GameSession.create! valid_attributes
       get api_game_sessions_url, headers: valid_headers, as: :json
       expect(response).to be_successful
     end
@@ -42,7 +42,7 @@ RSpec.describe "/api/game_sessions", type: :request do
 
   describe "GET /show" do
     it "renders a successful response" do
-      game_session = Api::GameSession.create! valid_attributes
+      game_session = GameSession.create! valid_attributes
       get api_game_session_url(api_game_session), as: :json
       expect(response).to be_successful
     end
@@ -50,11 +50,11 @@ RSpec.describe "/api/game_sessions", type: :request do
 
   describe "POST /create" do
     context "with valid parameters" do
-      it "creates a new Api::GameSession" do
+      it "creates a new GameSession" do
         expect {
           post api_game_sessions_url,
                params: { api_game_session: valid_attributes }, headers: valid_headers, as: :json
-        }.to change(Api::GameSession, :count).by(1)
+        }.to change(GameSession, :count).by(1)
       end
 
       it "renders a JSON response with the new api_game_session" do
@@ -66,11 +66,11 @@ RSpec.describe "/api/game_sessions", type: :request do
     end
 
     context "with invalid parameters" do
-      it "does not create a new Api::GameSession" do
+      it "does not create a new GameSession" do
         expect {
           post api_game_sessions_url,
                params: { api_game_session: invalid_attributes }, as: :json
-        }.to change(Api::GameSession, :count).by(0)
+        }.to change(GameSession, :count).by(0)
       end
 
       it "renders a JSON response with errors for the new api_game_session" do
@@ -89,7 +89,7 @@ RSpec.describe "/api/game_sessions", type: :request do
       }
 
       it "updates the requested api_game_session" do
-        game_session = Api::GameSession.create! valid_attributes
+        game_session = GameSession.create! valid_attributes
         patch api_game_session_url(api_game_session),
               params: { api_game_session: invalid_attributes }, headers: valid_headers, as: :json
         game_session.reload
@@ -97,7 +97,7 @@ RSpec.describe "/api/game_sessions", type: :request do
       end
 
       it "renders a JSON response with the api_game_session" do
-        game_session = Api::GameSession.create! valid_attributes
+        game_session = GameSession.create! valid_attributes
         patch api_game_session_url(api_game_session),
               params: { api_game_session: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
@@ -107,7 +107,7 @@ RSpec.describe "/api/game_sessions", type: :request do
 
     context "with invalid parameters" do
       it "renders a JSON response with errors for the api_game_session" do
-        game_session = Api::GameSession.create! valid_attributes
+        game_session = GameSession.create! valid_attributes
         patch api_game_session_url(api_game_session),
               params: { api_game_session: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
@@ -118,10 +118,10 @@ RSpec.describe "/api/game_sessions", type: :request do
 
   describe "DELETE /destroy" do
     it "destroys the requested api_game_session" do
-      game_session = Api::GameSession.create! valid_attributes
+      game_session = GameSession.create! valid_attributes
       expect {
         delete api_game_session_url(api_game_session), headers: valid_headers, as: :json
-      }.to change(Api::GameSession, :count).by(-1)
+      }.to change(GameSession, :count).by(-1)
     end
   end
 end

@@ -12,9 +12,9 @@ require 'rails_helper'
 # of tools you can use to make these specs even more expressive, but we're
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
-RSpec.describe "/games", type: :request do
+RSpec.describe "/api/messages", type: :request do
   # This should return the minimal set of attributes required to create a valid
-  # Game. As you add validations to Game, be sure to
+  # Message. As you add validations to Message, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
     skip("Add a hash of attributes valid for your model")
@@ -26,7 +26,7 @@ RSpec.describe "/games", type: :request do
 
   # This should return the minimal set of values that should be in the headers
   # in order to pass any filters (e.g. authentication) defined in
-  # GamesController, or in your router and rack
+  # MessagesController, or in your router and rack
   # middleware. Be sure to keep this updated too.
   let(:valid_headers) {
     {}
@@ -34,48 +34,48 @@ RSpec.describe "/games", type: :request do
 
   describe "GET /index" do
     it "renders a successful response" do
-      Game.create! valid_attributes
-      get games_url, headers: valid_headers, as: :json
+      Message.create! valid_attributes
+      get api_messages_url, headers: valid_headers, as: :json
       expect(response).to be_successful
     end
   end
 
   describe "GET /show" do
     it "renders a successful response" do
-      game = Game.create! valid_attributes
-      get game_url(game), as: :json
+      message = Message.create! valid_attributes
+      get message_url(message), as: :json
       expect(response).to be_successful
     end
   end
 
   describe "POST /create" do
     context "with valid parameters" do
-      it "creates a new Game" do
+      it "creates a new Message" do
         expect {
-          post games_url,
-               params: { game: valid_attributes }, headers: valid_headers, as: :json
-        }.to change(Game, :count).by(1)
+          post api_messages_url,
+               params: { message: valid_attributes }, headers: valid_headers, as: :json
+        }.to change(Message, :count).by(1)
       end
 
-      it "renders a JSON response with the new game" do
-        post games_url,
-             params: { game: valid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with the new message" do
+        post api_messages_url,
+             params: { message: valid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
 
     context "with invalid parameters" do
-      it "does not create a new Game" do
+      it "does not create a new Message" do
         expect {
-          post games_url,
-               params: { game: invalid_attributes }, as: :json
-        }.to change(Game, :count).by(0)
+          post api_messages_url,
+               params: { message: invalid_attributes }, as: :json
+        }.to change(Message, :count).by(0)
       end
 
-      it "renders a JSON response with errors for the new game" do
-        post games_url,
-             params: { game: invalid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with errors for the new message" do
+        post api_messages_url,
+             params: { message: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -88,28 +88,28 @@ RSpec.describe "/games", type: :request do
         skip("Add a hash of attributes valid for your model")
       }
 
-      it "updates the requested game" do
-        game = Game.create! valid_attributes
-        patch game_url(game),
-              params: { game: invalid_attributes }, headers: valid_headers, as: :json
-        game.reload
+      it "updates the requested message" do
+        message = Message.create! valid_attributes
+        patch message_url(message),
+              params: { message: invalid_attributes }, headers: valid_headers, as: :json
+        message.reload
         skip("Add assertions for updated state")
       end
 
-      it "renders a JSON response with the game" do
-        game = Game.create! valid_attributes
-        patch game_url(game),
-              params: { game: invalid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with the message" do
+        message = Message.create! valid_attributes
+        patch message_url(message),
+              params: { message: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq("application/json")
       end
     end
 
     context "with invalid parameters" do
-      it "renders a JSON response with errors for the game" do
-        game = Game.create! valid_attributes
-        patch game_url(game),
-              params: { game: invalid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with errors for the message" do
+        message = Message.create! valid_attributes
+        patch message_url(message),
+              params: { message: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -117,11 +117,11 @@ RSpec.describe "/games", type: :request do
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested game" do
-      game = Game.create! valid_attributes
+    it "destroys the requested message" do
+      message = Message.create! valid_attributes
       expect {
-        delete game_url(game), headers: valid_headers, as: :json
-      }.to change(Game, :count).by(-1)
+        delete message_url(message), headers: valid_headers, as: :json
+      }.to change(Message, :count).by(-1)
     end
   end
 end

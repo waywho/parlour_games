@@ -12,21 +12,29 @@ require 'rails_helper'
 # of tools you can use to make these specs even more expressive, but we're
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
-RSpec.describe "/messages", type: :request do
+RSpec.describe "/api/users", type: :request do
   # This should return the minimal set of attributes required to create a valid
-  # Message. As you add validations to Message, be sure to
+  # User. As you add validations to User, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    {
+    name: "MyString",
+    email: "MyString",
+    password_digest: "MyString",
+    admin: false,
+    avatar: "MyString",
+    }
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    {
+      name: 'Bad Attributes'
+    }
   }
 
   # This should return the minimal set of values that should be in the headers
   # in order to pass any filters (e.g. authentication) defined in
-  # MessagesController, or in your router and rack
+  # UsersController, or in your router and rack
   # middleware. Be sure to keep this updated too.
   let(:valid_headers) {
     {}
@@ -34,48 +42,48 @@ RSpec.describe "/messages", type: :request do
 
   describe "GET /index" do
     it "renders a successful response" do
-      Message.create! valid_attributes
-      get messages_url, headers: valid_headers, as: :json
+      User.create! valid_attributes
+      get api_users_url, headers: valid_headers, as: :json
       expect(response).to be_successful
     end
   end
 
   describe "GET /show" do
     it "renders a successful response" do
-      message = Message.create! valid_attributes
-      get message_url(message), as: :json
+      user = User.create! valid_attributes
+      get user_url(user), as: :json
       expect(response).to be_successful
     end
   end
 
   describe "POST /create" do
     context "with valid parameters" do
-      it "creates a new Message" do
+      it "creates a new User" do
         expect {
-          post messages_url,
-               params: { message: valid_attributes }, headers: valid_headers, as: :json
-        }.to change(Message, :count).by(1)
+          post api_users_url,
+               params: { user: valid_attributes }, headers: valid_headers, as: :json
+        }.to change(User, :count).by(1)
       end
 
-      it "renders a JSON response with the new message" do
-        post messages_url,
-             params: { message: valid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with the new user" do
+        post api_users_url,
+             params: { user: valid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
 
     context "with invalid parameters" do
-      it "does not create a new Message" do
+      it "does not create a new User" do
         expect {
-          post messages_url,
-               params: { message: invalid_attributes }, as: :json
-        }.to change(Message, :count).by(0)
+          post api_users_url,
+               params: { user: invalid_attributes }, as: :json
+        }.to change(User, :count).by(0)
       end
 
-      it "renders a JSON response with errors for the new message" do
-        post messages_url,
-             params: { message: invalid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with errors for the new user" do
+        post api_users_url,
+             params: { user: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -88,28 +96,28 @@ RSpec.describe "/messages", type: :request do
         skip("Add a hash of attributes valid for your model")
       }
 
-      it "updates the requested message" do
-        message = Message.create! valid_attributes
-        patch message_url(message),
-              params: { message: invalid_attributes }, headers: valid_headers, as: :json
-        message.reload
+      it "updates the requested user" do
+        user = User.create! valid_attributes
+        patch user_url(user),
+              params: { user: invalid_attributes }, headers: valid_headers, as: :json
+        user.reload
         skip("Add assertions for updated state")
       end
 
-      it "renders a JSON response with the message" do
-        message = Message.create! valid_attributes
-        patch message_url(message),
-              params: { message: invalid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with the user" do
+        user = User.create! valid_attributes
+        patch user_url(user),
+              params: { user: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq("application/json")
       end
     end
 
     context "with invalid parameters" do
-      it "renders a JSON response with errors for the message" do
-        message = Message.create! valid_attributes
-        patch message_url(message),
-              params: { message: invalid_attributes }, headers: valid_headers, as: :json
+      it "renders a JSON response with errors for the user" do
+        user = User.create! valid_attributes
+        patch user_url(user),
+              params: { user: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -117,11 +125,11 @@ RSpec.describe "/messages", type: :request do
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested message" do
-      message = Message.create! valid_attributes
+    it "destroys the requested user" do
+      user = User.create! valid_attributes
       expect {
-        delete message_url(message), headers: valid_headers, as: :json
-      }.to change(Message, :count).by(-1)
+        delete user_url(user), headers: valid_headers, as: :json
+      }.to change(User, :count).by(-1)
     end
   end
 end
