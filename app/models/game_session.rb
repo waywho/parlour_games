@@ -12,6 +12,7 @@ class GameSession < ApplicationRecord
 
   attr_accessor :deleted
 
+  validates :player_name, presence: true
   after_destroy :mark_as_deleted
 
   def mark_as_deleted

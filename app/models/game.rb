@@ -12,6 +12,11 @@ class Game < ApplicationRecord
 	accepts_nested_attributes_for :teams, :game_sessions, allow_destroy: true
 	self.inheritance_column = 'name'
 
+	ROUNDS = { }
+
+	DESCRIPTION = ""
+	
+
 	def as_json(options={})
 		super(options.merge({ methods: [:name, :hosts, :rounds, :description] }))
 	end
@@ -32,12 +37,6 @@ class Game < ApplicationRecord
 		self.class::DESCRIPTION
 	end
 
- 	private
-
- 	def create_chatroom
- 		Chatroom.create(gameaable: self, topic: "#{self.name}:#{self.id}", public: false)
- 	end
-
 
  	def next_turn
  		logger.debug "this problem?"
@@ -52,7 +51,7 @@ class Game < ApplicationRecord
 			logging("Game Step 3.1", "Last Team Order, #{team_number}")
 
 			# put last player into 'gone' list according to team
-			set["gone_players"][team_number.to_s] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
+			set["players_gone"][team_number] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
 
 			# check if we are at the end of the teams
 			if team_number == teams.length
@@ -62,7 +61,7 @@ class Game < ApplicationRecord
 			end
 		else
 			# put last player into 'gone' list without team
-			set["gone_players"] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
+			set["players_gone"] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
 		end
 		next_player
 	end
@@ -72,40 +71,37 @@ class Game < ApplicationRecord
 
 
 		if team_mode
-			current_team_number = set["current_turn"]["team"]
-			logging("Game Step 4.1", "Team order #{current_team_number}")
+			new_team_number = set["current_turn"]["team"]
+			logging("Game Step 4.1", "Team order #{new_team_number}")
 
-			current_team = teams.where(order: current_team_number.to_i).take
+			new_team = teams.where(order: new_team_number).take
 
-			logging("Game Step 4.2", "Found current team #{current_team}, #{self.set}")
+			logging("Game Step 4.2", "Found current team #{new_team}, #{self.set}")
 			
-			players = current_team.game_sessions.map(&:id)
+			players = new_team.game_sessions.map(&:id)
 
 			logging("Game Step 4.3", "Current team members #{players}")
+			logging("Game Step 4.4", "current team number #{new_team_number}")
+			logging("Game Step 4.4", "Current team gone players #{set['players_gone'][new_team_number]}")
 
-			logging("Game Step 4.4", "Current team gone players #{set['gone_players'][current_team_number]}")
-			logging("Game Step 4.4", "current team number #{current_team_number}")
-			if set["gone_players"][current_team_number].present?
-				left_players = players - set["gone_players"][current_team_number]
-			else
-				left_players = players
-			end
+			left_players = players - set["players_gone"][new_team_number]
+
 		else
 			players = game_sessions.map(&:id)
 
 			logging("Game Step 4.1", "current team members #{players}")
-			left_players = players - set["gone_players"]
+			left_players = players - set["players_gone"]
 		end
 		
 		if left_players.empty? && team_mode
 			left_players = players
-			set["gone_players"][current_team_number] = []
-		elsif left_players.empty?
+			set["players_gone"][new_team_number] = []
+		elsif left_players.empty? && !team_mode
 			left_players = players
-			set["gone_players"] = []
+			set["players_gone"] = []
 		end
 
-		self.set["current_turn"]["nominated_player"] = left_players.first
+		set["current_turn"]["nominated_player"] = left_players.first
 
 		logging("Game Step 4.5", "Found next player #{left_players.first}, #{self.set}")
 	end
@@ -115,4 +111,7 @@ class Game < ApplicationRecord
 		logger.tagged("#{self.name}") { logger.tagged(game_step)  { logger.debug(message) } }
 	end
 
+ 	def create_chatroom
+ 		Chatroom.create(gameaable: self, topic: "#{self.name}:#{self.id}", public: false)
+ 	end
 end

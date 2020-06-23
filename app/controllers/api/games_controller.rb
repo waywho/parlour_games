@@ -22,14 +22,16 @@ module Api
 
     # POST /games
     def create
+      begin
       @game = game_params[:name].constantize.create
       @game.game_sessions.create(playerable: current_user, host: true, invitation_accepted: true)
       logger.debug "Game created: #{@game.inspect}"
 
       if @game.persisted?
         game_json_response(:created)
-      else
-        render json: @game.errors, status: :unprocessable_entity
+      end
+      rescue StandardError => ex
+        render json: ex, status: :unprocessable_entity
       end
     end
 

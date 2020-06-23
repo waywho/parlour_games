@@ -1,6 +1,7 @@
 module Api
   class MessagesController < ApplicationController
     before_action :authenticate_user, except: [:create, :show]
+    before_action :authenticate_admin, only: [:index]
     before_action :set_message, only: [:show, :update, :destroy]
 
     # GET /messages

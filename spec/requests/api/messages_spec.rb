@@ -17,11 +17,13 @@ RSpec.describe "/api/messages", type: :request do
   # Message. As you add validations to Message, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    attributes_for(:message, :for_user)
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    {
+      content: nil
+    }
   }
 
   # This should return the minimal set of values that should be in the headers
@@ -29,37 +31,54 @@ RSpec.describe "/api/messages", type: :request do
   # MessagesController, or in your router and rack
   # middleware. Be sure to keep this updated too.
   let(:valid_headers) {
-    {}
+    {'HTTP_ACCEPT' => "application/json" }
   }
+
+  def user_token(user)
+    token = Knock::AuthToken.new(payload: { sub: user.id }).token
+    return {
+        'HTTP_ACCEPT' => "application/json",
+        'Authorization': "Bearer #{token}"
+      }
+  end
 
   describe "GET /index" do
     it "renders a successful response" do
-      Message.create! valid_attributes
-      get api_messages_url, headers: valid_headers, as: :json
+      user = FactoryBot.create(:admin_user)
+      token_headers = user_token(user)
+      FactoryBot.create(:message, :for_user)
+      get api_messages_url, headers: token_headers, as: :json
       expect(response).to be_successful
     end
   end
 
   describe "GET /show" do
     it "renders a successful response" do
-      message = Message.create! valid_attributes
-      get message_url(message), as: :json
+      message = FactoryBot.create(:message, :for_user)
+      get api_message_url(message), as: :json
       expect(response).to be_successful
     end
   end
 
   describe "POST /create" do
+    before(:each) do
+      chatroom = FactoryBot.create(:chatroom)
+      user = FactoryBot.create(:user)
+      @message_attributes = {chatroom_id: chatroom.id, speakerable_type: 'User', speakerable_id: user.id, content: 'speak' }
+    end
     context "with valid parameters" do
       it "creates a new Message" do
+
+        
         expect {
           post api_messages_url,
-               params: { message: valid_attributes }, headers: valid_headers, as: :json
+               params: { message: @message_attributes }, headers: valid_headers, as: :json
         }.to change(Message, :count).by(1)
       end
 
       it "renders a JSON response with the new message" do
         post api_messages_url,
-             params: { message: valid_attributes }, headers: valid_headers, as: :json
+             params: { message: @message_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -83,23 +102,31 @@ RSpec.describe "/api/messages", type: :request do
   end
 
   describe "PATCH /update" do
+    before(:each) do
+      @user = FactoryBot.create(:user)
+      @message = FactoryBot.create(:message, :for_user, speakerable: @user)
+      @token_headers = user_token(@user)
+    end
+
     context "with valid parameters" do
-      let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+      let(:new_attributes) { 
+        {
+          content: 'I MISSPOKE'
+        }
       }
 
       it "updates the requested message" do
-        message = Message.create! valid_attributes
-        patch message_url(message),
-              params: { message: invalid_attributes }, headers: valid_headers, as: :json
-        message.reload
-        skip("Add assertions for updated state")
+        
+        patch api_message_url(@message),
+              params: { message: new_attributes }, headers: @token_headers, as: :json
+        @message.reload
+        expect(@message.content).to eq("I MISSPOKE")
       end
 
       it "renders a JSON response with the message" do
-        message = Message.create! valid_attributes
-        patch message_url(message),
-              params: { message: invalid_attributes }, headers: valid_headers, as: :json
+        
+        patch api_message_url(@message),
+              params: { message: new_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq("application/json")
       end
@@ -107,9 +134,9 @@ RSpec.describe "/api/messages", type: :request do
 
     context "with invalid parameters" do
       it "renders a JSON response with errors for the message" do
-        message = Message.create! valid_attributes
-        patch message_url(message),
-              params: { message: invalid_attributes }, headers: valid_headers, as: :json
+        
+        patch api_message_url(@message),
+              params: { message: invalid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -118,9 +145,12 @@ RSpec.describe "/api/messages", type: :request do
 
   describe "DELETE /destroy" do
     it "destroys the requested message" do
-      message = Message.create! valid_attributes
+      user = FactoryBot.create(:user)
+      message = FactoryBot.create(:message, :for_user, speakerable: user)
+      token_headers = user_token(user)
+
       expect {
-        delete message_url(message), headers: valid_headers, as: :json
+        delete api_message_url(message), headers: token_headers, as: :json
       }.to change(Message, :count).by(-1)
     end
   end

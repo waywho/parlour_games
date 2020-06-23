@@ -17,41 +17,58 @@ RSpec.describe "/api/users", type: :request do
   # User. As you add validations to User, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    {
-    name: "MyString",
-    email: "MyString",
-    password_digest: "MyString",
-    admin: false,
-    avatar: "MyString",
-    }
+    attributes_for(:user)
   }
 
   let(:invalid_attributes) {
     {
-      name: 'Bad Attributes'
+      name: nil
     }
   }
 
+  def admin_token
+    admin_user = FactoryBot.create(:admin_user)
+    token = Knock::AuthToken.new(payload: { sub: admin_user.id }).token
+    return {
+        'HTTP_ACCEPT' => "application/json",
+        'Authorization': "Bearer #{token}"
+      }
+    
+  end
+
+  def user_token(user)
+    token = Knock::AuthToken.new(payload: { sub: user.id }).token
+    return {
+        'HTTP_ACCEPT' => "application/json",
+        'Authorization': "Bearer #{token}"
+      }
+  end
   # This should return the minimal set of values that should be in the headers
   # in order to pass any filters (e.g. authentication) defined in
   # UsersController, or in your router and rack
   # middleware. Be sure to keep this updated too.
   let(:valid_headers) {
-    {}
+    {
+      'HTTP_ACCEPT' => "application/json"
+    }
   }
 
   describe "GET /index" do
     it "renders a successful response" do
-      User.create! valid_attributes
-      get api_users_url, headers: valid_headers, as: :json
+      # User.create! valid_attributes
+      user = FactoryBot.create(:user)
+      token_headers = user_token(user)
+      get api_users_url, headers: token_headers, as: :json
       expect(response).to be_successful
     end
   end
 
   describe "GET /show" do
     it "renders a successful response" do
-      user = User.create! valid_attributes
-      get user_url(user), as: :json
+      # user = User.create! valid_attributes
+      user = FactoryBot.create(:user)
+      token_headers = user_token(user)
+      get api_user_url(user), headers: token_headers, as: :json
       expect(response).to be_successful
     end
   end
@@ -67,7 +84,7 @@ RSpec.describe "/api/users", type: :request do
 
       it "renders a JSON response with the new user" do
         post api_users_url,
-             params: { user: valid_attributes }, headers: valid_headers, as: :json
+             params: { user: valid_attributes}, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -93,21 +110,27 @@ RSpec.describe "/api/users", type: :request do
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        {
+          avatar: "NEW STRING"
+        }
       }
 
       it "updates the requested user" do
-        user = User.create! valid_attributes
-        patch user_url(user),
-              params: { user: invalid_attributes }, headers: valid_headers, as: :json
+        # user = User.create! valid_attributes
+        user = FactoryBot.create(:user)
+        token_headers = user_token(user)
+        patch api_user_url(user),
+              params: { user: new_attributes }, headers: token_headers, as: :json
         user.reload
-        skip("Add assertions for updated state")
+        expect(user.avatar).to eq("NEW STRING")
       end
 
       it "renders a JSON response with the user" do
-        user = User.create! valid_attributes
-        patch user_url(user),
-              params: { user: invalid_attributes }, headers: valid_headers, as: :json
+        # user = User.create! valid_attributes
+        user = FactoryBot.create(:user)
+        token_headers = user_token(user)
+        patch api_user_url(user),
+              params: { user: new_attributes }, headers: token_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq("application/json")
       end
@@ -115,9 +138,11 @@ RSpec.describe "/api/users", type: :request do
 
     context "with invalid parameters" do
       it "renders a JSON response with errors for the user" do
-        user = User.create! valid_attributes
-        patch user_url(user),
-              params: { user: invalid_attributes }, headers: valid_headers, as: :json
+        # user = User.create! valid_attributes
+        user = FactoryBot.create(:user)
+        token_headers = user_token(user)
+        patch api_user_url(user),
+              params: { user: invalid_attributes }, headers: token_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -126,9 +151,11 @@ RSpec.describe "/api/users", type: :request do
 
   describe "DELETE /destroy" do
     it "destroys the requested user" do
-      user = User.create! valid_attributes
+      # user = User.create! valid_attributes
+      user = FactoryBot.create(:user)
+      token_headers = user_token(user)
       expect {
-        delete user_url(user), headers: valid_headers, as: :json
+        delete api_user_url(user), headers: token_headers, as: :json
       }.to change(User, :count).by(-1)
     end
   end

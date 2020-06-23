@@ -17,11 +17,13 @@ RSpec.describe "/api/game_sessions", type: :request do
   # GameSession. As you add validations to GameSession, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    attributes_for(:game_session)  
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    {
+      player_name: nil
+    }
   }
 
   # This should return the minimal set of values that should be in the headers
@@ -29,12 +31,13 @@ RSpec.describe "/api/game_sessions", type: :request do
   # Api::GameSessionsController, or in your router and rack
   # middleware. Be sure to keep this updated too.
   let(:valid_headers) {
-    {}
+    {'HTTP_ACCEPT' => "application/json" }
   }
 
   describe "GET /index" do
     it "renders a successful response" do
-      GameSession.create! valid_attributes
+      game_session = FactoryBot.build(:game_session)
+      game_session.save
       get api_game_sessions_url, headers: valid_headers, as: :json
       expect(response).to be_successful
     end
@@ -42,24 +45,29 @@ RSpec.describe "/api/game_sessions", type: :request do
 
   describe "GET /show" do
     it "renders a successful response" do
-      game_session = GameSession.create! valid_attributes
-      get api_game_session_url(api_game_session), as: :json
+      game_session = FactoryBot.build(:game_session)
+      game_session.save
+      get api_game_session_url(game_session), as: :json
       expect(response).to be_successful
     end
   end
 
   describe "POST /create" do
     context "with valid parameters" do
+      before(:each) do
+        game = FactoryBot.create(:game)
+        @game_session_attributes = attributes_for(:game_session, game_id: game.id)
+      end
       it "creates a new GameSession" do
         expect {
           post api_game_sessions_url,
-               params: { api_game_session: valid_attributes }, headers: valid_headers, as: :json
+               params: { game_session: @game_session_attributes }, headers: valid_headers, as: :json
         }.to change(GameSession, :count).by(1)
       end
 
       it "renders a JSON response with the new api_game_session" do
         post api_game_sessions_url,
-             params: { api_game_session: valid_attributes }, headers: valid_headers, as: :json
+             params: { game_session: @game_session_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -69,13 +77,13 @@ RSpec.describe "/api/game_sessions", type: :request do
       it "does not create a new GameSession" do
         expect {
           post api_game_sessions_url,
-               params: { api_game_session: invalid_attributes }, as: :json
+               params: { game_session: invalid_attributes }, as: :json
         }.to change(GameSession, :count).by(0)
       end
 
       it "renders a JSON response with errors for the new api_game_session" do
         post api_game_sessions_url,
-             params: { api_game_session: invalid_attributes }, headers: valid_headers, as: :json
+             params: { game_session: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -83,23 +91,29 @@ RSpec.describe "/api/game_sessions", type: :request do
   end
 
   describe "PATCH /update" do
+    before(:each) do
+      @game_session = FactoryBot.build(:game_session)
+      @game_session.save
+    end
+
     context "with valid parameters" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        {
+          player_name: "Brilliant"
+        }
       }
 
       it "updates the requested api_game_session" do
-        game_session = GameSession.create! valid_attributes
-        patch api_game_session_url(api_game_session),
-              params: { api_game_session: invalid_attributes }, headers: valid_headers, as: :json
-        game_session.reload
-        skip("Add assertions for updated state")
+        
+        patch api_game_session_url(@game_session),
+              params: { game_session: new_attributes }, headers: valid_headers, as: :json
+        @game_session.reload
+        expect(@game_session.player_name).to eq("Brilliant")
       end
 
       it "renders a JSON response with the api_game_session" do
-        game_session = GameSession.create! valid_attributes
-        patch api_game_session_url(api_game_session),
-              params: { api_game_session: invalid_attributes }, headers: valid_headers, as: :json
+        patch api_game_session_url(@game_session),
+              params: { game_session: new_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq("application/json")
       end
@@ -107,9 +121,8 @@ RSpec.describe "/api/game_sessions", type: :request do
 
     context "with invalid parameters" do
       it "renders a JSON response with errors for the api_game_session" do
-        game_session = GameSession.create! valid_attributes
-        patch api_game_session_url(api_game_session),
-              params: { api_game_session: invalid_attributes }, headers: valid_headers, as: :json
+        patch api_game_session_url(@game_session),
+              params: { game_session: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -118,9 +131,10 @@ RSpec.describe "/api/game_sessions", type: :request do
 
   describe "DELETE /destroy" do
     it "destroys the requested api_game_session" do
-      game_session = GameSession.create! valid_attributes
+      game_session = FactoryBot.build(:game_session)
+      game_session.save
       expect {
-        delete api_game_session_url(api_game_session), headers: valid_headers, as: :json
+        delete api_game_session_url(game_session), headers: valid_headers, as: :json
       }.to change(GameSession, :count).by(-1)
     end
   end

@@ -30,11 +30,11 @@ module Api
         # render json: @user.errors, status: :unprocessable_entity
         render json: { errors: [
         {
-           status: '400',
-           title: 'Bad Request',
-           details: user.errors
+           status: '422',
+           title: 'Unprocessable Entity',
+           details: @user.errors
             }]
-        }, status: :bad_request
+        }, status: :unprocessable_entity
       end
     end
 

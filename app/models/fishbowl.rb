@@ -17,11 +17,14 @@ class Fishbowl < Game
 		if started
 			logging("Game Step 0", "starting game, #{self.set}")
 			set["current_round"]["round_number"] = 0
-			if teams.present?
+			if teams.present? && team_mode
+				set["players_gone"] = {}
 				teams.each_with_index do |team, index|
 					team.update_attributes(order: (index + 1))
-					set["gone_players"][index + 1] = []
+					set["players_gone"][index + 1] = []
 				end
+			else
+				set["players_gone"] = []
 			end
 		end
 	end
@@ -57,8 +60,6 @@ class Fishbowl < Game
 		end
 	end
 
-	
-
 	def after_clues?
 		if set["current_round"]["round_number"].nil?
 			return false
@@ -77,7 +78,7 @@ class Fishbowl < Game
 		logging("Game Setup", "Current Game set keys #{self.set.keys}")
 		
 		self.set.keys.each do|key|
-			if ["clues", "players_gone"].include?(key)
+			if ["clues", "players_done_clues"].include?(key)
 				old_set[key] += set[key]
 				if key == "clues"
 					old_set[key] = old_set[key].uniq(&:downcase).reject { |x| x == ""}
@@ -91,8 +92,8 @@ class Fishbowl < Game
 
 	def only_clue_keys?
 		if set_changed?
-			keys_included = (self.set.keys - ["clues", "players_gone"]).empty?
-			logger.tagged("#{self}") { logger.tagged("Game Setup Check")  { logger.debug("Checking current Game set keys #{self.set.keys} ONLY include 'clues', 'players_gone': #{keys_included}") } }
+			keys_included = (self.set.keys - ["clues", "players_done_clues"]).empty?
+			logger.tagged("#{self}") { logger.tagged("Game Setup Check")  { logger.debug("Checking current Game set keys #{self.set.keys} ONLY include 'clues', 'players_done_clues': #{keys_included}") } }
 			return keys_included
 		else
 			return false
@@ -110,11 +111,11 @@ class Fishbowl < Game
 				},
 				current_turn: { team: 0, nominated_player: nil, passed: 0, time_left: 0, completed: false },
 				# only user ids in array
-				gone_players: {},
-				players_gone: [],
+				players_gone: nil,
+				players_done_clues: [],
 				options: {
 					time_limit: 60,
-					team_mode: true
+					enable_team_mode: true
 				}
 			}
 		end

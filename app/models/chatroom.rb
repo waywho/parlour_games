@@ -4,6 +4,7 @@ class Chatroom < ApplicationRecord
   has_many :chatroom_users, dependent: :destroy
   has_many :users, through: :chatroom_users
 
+  validates :topic, presence: true, uniqueness: true
 
   def user_ids
   	users.map(&:id)

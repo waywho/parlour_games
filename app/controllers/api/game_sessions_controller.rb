@@ -27,8 +27,8 @@ module Api
       # need to secure this method for only authenticated host
       if params[:user_ids].present?
         params[:user_ids].each do |id|
-          user = User.find(id)
-          @game_session = user.game_sessions.build(game_session_params)
+          user = User.find_by_id(id)
+          @game_session = user&.game_sessions.build(game_session_params)
           create_response(@game_session)
           logger.debug "Game Session created #{@game_session.inspect}"
         end

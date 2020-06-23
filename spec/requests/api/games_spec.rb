@@ -17,11 +17,18 @@ RSpec.describe "/api/games", type: :request do
   # Game. As you add validations to Game, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    attributes_for(:game)
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    {
+      name: "BADGAME",
+      teams: "WHAT IS THIS?"
+    }
+  }
+
+  let(:invalid_update_attributes) {
+    skip("Add assertions for updated state")
   }
 
   # This should return the minimal set of values that should be in the headers
@@ -29,8 +36,16 @@ RSpec.describe "/api/games", type: :request do
   # GamesController, or in your router and rack
   # middleware. Be sure to keep this updated too.
   let(:valid_headers) {
-    {}
+    {'HTTP_ACCEPT' => "application/json"}
   }
+
+  def user_token(user)
+    token = Knock::AuthToken.new(payload: { sub: user.id }).token
+    return {
+        'HTTP_ACCEPT' => "application/json",
+        'Authorization': "Bearer #{token}"
+      }
+  end
 
   describe "GET /index" do
     it "renders a successful response" do
@@ -43,23 +58,28 @@ RSpec.describe "/api/games", type: :request do
   describe "GET /show" do
     it "renders a successful response" do
       game = Game.create! valid_attributes
-      get game_url(game), as: :json
+      get api_game_url(game), as: :json
       expect(response).to be_successful
     end
   end
 
   describe "POST /create" do
+    before(:each) do
+      user = FactoryBot.create(:user)
+      @token_headers = user_token(user)
+      @game = FactoryBot.create(:game)
+    end
     context "with valid parameters" do
       it "creates a new Game" do
         expect {
           post api_games_url,
-               params: { game: valid_attributes }, headers: valid_headers, as: :json
+               params: { game: valid_attributes }, headers: @token_headers, as: :json
         }.to change(Game, :count).by(1)
       end
 
       it "renders a JSON response with the new game" do
         post api_games_url,
-             params: { game: valid_attributes }, headers: valid_headers, as: :json
+             params: { game: valid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -75,7 +95,7 @@ RSpec.describe "/api/games", type: :request do
 
       it "renders a JSON response with errors for the new game" do
         post api_games_url,
-             params: { game: invalid_attributes }, headers: valid_headers, as: :json
+             params: { game: invalid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -85,21 +105,23 @@ RSpec.describe "/api/games", type: :request do
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        {
+          started: true
+        }
       }
 
       it "updates the requested game" do
         game = Game.create! valid_attributes
-        patch game_url(game),
-              params: { game: invalid_attributes }, headers: valid_headers, as: :json
+        patch api_game_url(game),
+              params: { game: new_attributes }, headers: valid_headers, as: :json
         game.reload
-        skip("Add assertions for updated state")
+        expect(game.started).to eq(true)
       end
 
       it "renders a JSON response with the game" do
         game = Game.create! valid_attributes
-        patch game_url(game),
-              params: { game: invalid_attributes }, headers: valid_headers, as: :json
+        patch api_game_url(game),
+              params: { game: new_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq("application/json")
       end
@@ -108,8 +130,8 @@ RSpec.describe "/api/games", type: :request do
     context "with invalid parameters" do
       it "renders a JSON response with errors for the game" do
         game = Game.create! valid_attributes
-        patch game_url(game),
-              params: { game: invalid_attributes }, headers: valid_headers, as: :json
+        patch api_game_url(game),
+              params: { game: invalid_update_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -117,10 +139,16 @@ RSpec.describe "/api/games", type: :request do
   end
 
   describe "DELETE /destroy" do
+    before(:each) do
+      user = FactoryBot.create(:user)
+      @token_headers = user_token(user)
+      @game = FactoryBot.create(:game)
+    end
+
     it "destroys the requested game" do
       game = Game.create! valid_attributes
       expect {
-        delete game_url(game), headers: valid_headers, as: :json
+        delete api_game_url(game), headers: @token_headers, as: :json
       }.to change(Game, :count).by(-1)
     end
   end

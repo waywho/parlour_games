@@ -69,7 +69,8 @@ export default {
             this.isComponentModalActive = true
           })
       } else {
-        this.$router.push({name: 'registration'})
+        console.log("not registered")
+        this.$router.push({path: '/sign_in'})
       }
 
       

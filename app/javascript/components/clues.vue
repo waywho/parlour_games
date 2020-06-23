@@ -88,7 +88,7 @@ export default {
       }
     },
     cluesSubmitted: function() {
-      if(_.includes(this.game.set.players_gone, this.gameSession.id)) {
+      if(_.includes(this.game.set.players_done_clues, this.gameSession.id)) {
         return true
       } else {
         return false
@@ -96,7 +96,7 @@ export default {
     },
     submittedPlayers: function() {
       let playerArr = []
-      let playersGone = this.game.set.players_gone
+      let playersGone = this.game.set.players_done_clues
       _.forEach(this.game.game_sessions, function(session) {
         if(_.includes(playersGone, session.id)) {
           playerArr.push(session)
@@ -106,7 +106,7 @@ export default {
     },
     notSubmittedPlayers: function() {
       let playerArr = []
-      let playersGone = this.game.set.players_gone
+      let playersGone = this.game.set.players_done_clues
       _.forEach(this.game.game_sessions, function(session) {
         if(!_.includes(playersGone, session.id)) {
           playerArr.push(session)
@@ -121,7 +121,7 @@ export default {
     },
     startGame: function() {
       let startGame = false
-      if(this.game.set.players_gone.length < this.game.game_sessions.length) {
+      if(this.game.set.players_done_clues.length < this.game.game_sessions.length) {
         startGame = confirm('Are you sure you want to start? Not all players have submitted their clues?')
       } else {
         startGame = true
@@ -159,7 +159,7 @@ export default {
       })
       console.log(filterClueArray)
 
-      gameAxios.put(this.game.id.toString(), {game: {set: {clues: filterClueArray, players_gone: [this.gameSession.id] }}})
+      gameAxios.put(this.game.id.toString(), {game: {set: {clues: filterClueArray, players_done_clues: [this.gameSession.id] }}})
         .then(res => {
           console.log('populate pot')
           // this.currentGame = res.data

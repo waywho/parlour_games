@@ -17,11 +17,13 @@ RSpec.describe "/api/chatrooms", type: :request do
   # Chatroom. As you add validations to Chatroom, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    attributes_for(:chatroom)
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    {
+      topic: nil
+    }
   }
 
   # This should return the minimal set of values that should be in the headers
@@ -29,13 +31,26 @@ RSpec.describe "/api/chatrooms", type: :request do
   # ChatroomsController, or in your router and rack
   # middleware. Be sure to keep this updated too.
   let(:valid_headers) {
-    {}
+    {'HTTP_ACCEPT' => "application/json"}
   }
+
+  def user_token(user)
+    token = Knock::AuthToken.new(payload: { sub: user.id }).token
+    return {
+        'HTTP_ACCEPT' => "application/json",
+        'Authorization': "Bearer #{token}"
+      }
+  end
+
+  before(:each) do
+    user = FactoryBot.create(:user)
+    @token_headers = user_token(user)
+  end
 
   describe "GET /index" do
     it "renders a successful response" do
       Chatroom.create! valid_attributes
-      get api_chatrooms_url, headers: valid_headers, as: :json
+      get api_chatrooms_url, headers: @token_headers, as: :json
       expect(response).to be_successful
     end
   end
@@ -43,7 +58,7 @@ RSpec.describe "/api/chatrooms", type: :request do
   describe "GET /show" do
     it "renders a successful response" do
       chatroom = Chatroom.create! valid_attributes
-      get chatroom_url(chatroom), as: :json
+      get api_chatroom_url(chatroom), as: :json
       expect(response).to be_successful
     end
   end
@@ -53,13 +68,13 @@ RSpec.describe "/api/chatrooms", type: :request do
       it "creates a new Chatroom" do
         expect {
           post api_chatrooms_url,
-               params: { chatroom: valid_attributes }, headers: valid_headers, as: :json
+               params: { chatroom: valid_attributes }, headers: @token_headers, as: :json
         }.to change(Chatroom, :count).by(1)
       end
 
       it "renders a JSON response with the new chatroom" do
         post api_chatrooms_url,
-             params: { chatroom: valid_attributes }, headers: valid_headers, as: :json
+             params: { chatroom: valid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
@@ -75,7 +90,7 @@ RSpec.describe "/api/chatrooms", type: :request do
 
       it "renders a JSON response with errors for the new chatroom" do
         post api_chatrooms_url,
-             params: { chatroom: invalid_attributes }, headers: valid_headers, as: :json
+             params: { chatroom: invalid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -85,21 +100,23 @@ RSpec.describe "/api/chatrooms", type: :request do
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        {
+          topic: "NOTABLE"
+        }
       }
 
       it "updates the requested chatroom" do
         chatroom = Chatroom.create! valid_attributes
-        patch chatroom_url(chatroom),
-              params: { chatroom: invalid_attributes }, headers: valid_headers, as: :json
+        patch api_chatroom_url(chatroom),
+              params: { chatroom: new_attributes }, headers: @token_headers, as: :json
         chatroom.reload
-        skip("Add assertions for updated state")
+        expect(chatroom.topic).to eq("NOTABLE")
       end
 
       it "renders a JSON response with the chatroom" do
         chatroom = Chatroom.create! valid_attributes
-        patch chatroom_url(chatroom),
-              params: { chatroom: invalid_attributes }, headers: valid_headers, as: :json
+        patch api_chatroom_url(chatroom),
+              params: { chatroom: new_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to eq("application/json")
       end
@@ -108,8 +125,8 @@ RSpec.describe "/api/chatrooms", type: :request do
     context "with invalid parameters" do
       it "renders a JSON response with errors for the chatroom" do
         chatroom = Chatroom.create! valid_attributes
-        patch chatroom_url(chatroom),
-              params: { chatroom: invalid_attributes }, headers: valid_headers, as: :json
+        patch api_chatroom_url(chatroom),
+              params: { chatroom: invalid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to eq("application/json")
       end
@@ -120,7 +137,7 @@ RSpec.describe "/api/chatrooms", type: :request do
     it "destroys the requested chatroom" do
       chatroom = Chatroom.create! valid_attributes
       expect {
-        delete chatroom_url(chatroom), headers: valid_headers, as: :json
+        delete api_chatroom_url(chatroom), headers: @token_headers, as: :json
       }.to change(Chatroom, :count).by(-1)
     end
   end

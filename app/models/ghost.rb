@@ -185,7 +185,7 @@ class Ghost < Game
 				completed: false
 			},
 			current_turn: {nominated_player: nil, challenge_lost: false},
-			gone_players: [],
+			players_gone: [],
 			player_ghosts: {},
 			options: {
 				language: 'English',
