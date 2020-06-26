@@ -1,10 +1,10 @@
 class Team < ApplicationRecord
 	has_many :game_sessions
 	accepts_nested_attributes_for :game_sessions
-	has_many :users, through: :game_sessions
+	has_many :users, through: :game_sessions, class_name: 'User'
 	belongs_to :game
-	has_one :chatroom, as: :gameable
-	before_create :setup_scores
+	has_one :chatroom, as: :gameaable
+	include ScoreSetup
 
 	def as_json(options={})
   	super(options.merge({ methods: [:scores] }))
@@ -22,15 +22,6 @@ class Team < ApplicationRecord
 	# 	end
 	# 	total
 	# end
-
-	def setup_scores
-    self.scores = {}
-    logger.debug "create scores #{scores}"
-    logger.debug "find game #{game}"
-    self.game&.rounds&.each do |key, round|
-      scores[key] = 0 if round[:score_round]
-    end
-  end
 end
 
 

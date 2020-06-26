@@ -3,7 +3,7 @@ class User < ApplicationRecord
 	accepts_nested_attributes_for :game_sessions, allow_destroy: true
 	has_many :teams, through: :game_sessions
 	has_many :games, through: :game_sessions
-	has_many :fish_bowls, through: :game_sessions
+	has_many :fishbowls, through: :game_sessions
 	
 	has_many :messages, as: :speakerable
 	accepts_nested_attributes_for :messages, allow_destroy: true

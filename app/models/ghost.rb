@@ -7,7 +7,7 @@ class Ghost < Game
 	before_update :lost_turn, if: :lost_challenge
 
 	ROUNDS = {
-		1 => { name: "1", score_round: true }
+		1  => { name: "1", score_round: true }
 	}
 	DESCRIPTION = ""
 	LANGUAGES = {
@@ -47,6 +47,7 @@ class Ghost < Game
 			logger.debug "finding array #{result_array} #{result_array.nil?}"
 			logger.debug "ghost array #{ghost_arry}"
 			
+			# look for possible words for challenge list
 			challenge
 
 			if result_array.empty?

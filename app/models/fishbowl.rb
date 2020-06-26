@@ -17,15 +17,6 @@ class Fishbowl < Game
 		if started
 			logging("Game Step 0", "starting game, #{self.set}")
 			set["current_round"]["round_number"] = 0
-			if teams.present? && team_mode
-				set["players_gone"] = {}
-				teams.each_with_index do |team, index|
-					team.update_attributes(order: (index + 1))
-					set["players_gone"][index + 1] = []
-				end
-			else
-				set["players_gone"] = []
-			end
 		end
 	end
 
@@ -109,13 +100,20 @@ class Fishbowl < Game
 					round_number: nil,
 					completed: false
 				},
-				current_turn: { team: 0, nominated_player: nil, passed: 0, time_left: 0, completed: false },
+				current_turn: { 
+					team: 0, 
+					nominated_player: nil, 
+					passed: 0, 
+					time_left: 0, 
+					completed: false 
+				},
 				# only user ids in array
 				players_gone: nil,
 				players_done_clues: [],
 				options: {
 					time_limit: 60,
-					enable_team_mode: true
+					enable_team_mode: true,
+					enable_chat: false
 				}
 			}
 		end

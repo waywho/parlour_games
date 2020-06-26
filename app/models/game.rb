@@ -1,5 +1,7 @@
 class Game < ApplicationRecord
 	after_create :create_chatroom
+	before_create :game_setup
+	before_update :setup_teams, if: :started_changed?
 
 	has_many :game_sessions, dependent: :destroy
 	has_many :teams, dependent: :destroy
@@ -37,6 +39,9 @@ class Game < ApplicationRecord
 		self.class::DESCRIPTION
 	end
 
+	def scoring_rounds
+		rounds&.select { |k, v| v[:score_round] }
+	end
 
  	def next_turn
  		logger.debug "this problem?"
@@ -51,7 +56,7 @@ class Game < ApplicationRecord
 			logging("Game Step 3.1", "Last Team Order, #{team_number}")
 
 			# put last player into 'gone' list according to team
-			set["players_gone"][team_number] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
+			set["players_gone"][team_number.to_s] << set["current_turn"]["nominated_player"] if set["current_turn"]["nominated_player"].present?
 
 			# check if we are at the end of the teams
 			if team_number == teams.length
@@ -69,7 +74,6 @@ class Game < ApplicationRecord
 	def next_player
 		logging("Game Step 4", "Next player #{self.set}")
 
-
 		if team_mode
 			new_team_number = set["current_turn"]["team"]
 			logging("Game Step 4.1", "Team order #{new_team_number}")
@@ -78,24 +82,33 @@ class Game < ApplicationRecord
 
 			logging("Game Step 4.2", "Found current team #{new_team}, #{self.set}")
 			
-			players = new_team.game_sessions.map(&:id)
+			players = new_team.game_sessions.sort_by(&:id).map(&:id)
 
 			logging("Game Step 4.3", "Current team members #{players}")
 			logging("Game Step 4.4", "current team number #{new_team_number}")
-			logging("Game Step 4.4", "Current team gone players #{set['players_gone'][new_team_number]}")
+			logging("Game Step 4.4", "Current team gone players #{set['players_gone'][new_team_number.to_s]}")
 
-			left_players = players - set["players_gone"][new_team_number]
+			if set["players_gone"][new_team_number.to_s].present?
+				left_players = players - set["players_gone"][new_team_number.to_s]
+			else
+				left_players = players
+			end
 
 		else
-			players = game_sessions.map(&:id)
+			players = game_sessions.sort_by(&:id).map(&:id)
 
 			logging("Game Step 4.1", "current team members #{players}")
-			left_players = players - set["players_gone"]
+
+			if set["players_gone"].present?
+				left_players = players - set["players_gone"]
+			else
+				left_players = players
+			end
 		end
 		
 		if left_players.empty? && team_mode
 			left_players = players
-			set["players_gone"][new_team_number] = []
+			set["players_gone"][new_team_number.to_s] = []
 		elsif left_players.empty? && !team_mode
 			left_players = players
 			set["players_gone"] = []
@@ -114,4 +127,37 @@ class Game < ApplicationRecord
  	def create_chatroom
  		Chatroom.create(gameaable: self, topic: "#{self.name}:#{self.id}", public: false)
  	end
+
+ 	def setup_teams
+ 		if started
+	 		if teams.present? && team_mode
+					set["players_gone"] = {}
+					teams.each_with_index do |team, index|
+						team.update_attributes(order: (index + 1))
+						set["players_gone"][index + 1] = []
+					end
+				else
+					set["players_gone"] = []
+			end
+		end
+ 	end
+
+ 	def game_setup
+			self.set = {
+				current_round: { 
+					round_number: nil,
+					completed: false
+				},
+				current_turn: { 
+					team: 0, 
+					nominated_player: nil, 
+					passed: 0, 
+					time_left: 0, 
+					completed: false 
+				},
+				# only user ids in array
+				players_gone: nil,
+				
+			}
+	end
 end

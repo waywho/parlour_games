@@ -1,5 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe GameRelayJob, type: :job do
-  pending "add some examples to (or delete) #{__FILE__}"
+  it "matches with enqued job" do
+  	ActiveJob::Base.queue_adapter = :test
+  	expect {
+  		GameRelayJob.perform_later
+  	}.to have_enqueued_job(GameRelayJob)
+  end
 end

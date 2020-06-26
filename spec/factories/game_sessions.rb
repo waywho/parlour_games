@@ -3,9 +3,8 @@ FactoryBot.define do
     game
     team
     host { false }
-    player_name { "MyString" }
+    sequence(:player_name) { |n| "MyString#{n}" }
     ip_address { "MyString" }
-    scores { nil }
 
     trait :for_user do
     	association :playerable, factory: :user

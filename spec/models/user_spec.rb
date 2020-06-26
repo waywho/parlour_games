@@ -17,4 +17,14 @@ RSpec.describe User, type: :model do
   	user = FactoryBot.build(:user, password: nil)
   	expect(user).to_not be_valid
   end
+
+  describe "Associations" do
+  	it { should have_many(:teams) }
+  	it { should have_many(:games) }
+  	it { should have_many(:fishbowls) }
+  	it { should have_many(:game_sessions) }
+  	it { should have_many(:messages) }
+  	it { should have_many(:chatroom_users) }
+  	it { should have_many(:chatrooms) }
+  end
 end

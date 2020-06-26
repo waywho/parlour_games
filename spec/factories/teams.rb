@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :team do
-    name { "MyString" }
+    sequence(:name)  { |n| "MyTeam#{n}" }
+    game
   end
 end

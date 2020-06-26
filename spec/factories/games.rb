@@ -11,7 +11,11 @@ FactoryBot.define do
     end
   end
 
-  factory :fishbowl, parent: :game do
+  factory :fishbowl, parent: :game, class: 'Fishbowl' do
   	name { "Fishbowl" }
+  end
+
+  factory :ghost, parent: :game, class: 'Ghost' do
+    name { "Ghost" }
   end
 end
