@@ -172,7 +172,7 @@ export default {
       }
     },
     currentTeam: function() {
-      return  _.find(this.game.teams, { order: this.game.set.current_turn.team })
+      return  _.find(this.game.teams, { order: this.game.current_turn.team })
     },
     scoreParties: function() {
       if(this.game.team_mode) {
@@ -182,7 +182,7 @@ export default {
       }
     },
     noMorePass: function() {
-      return this.currentGame.set.current_turn.passed >= 3
+      return this.currentGame.current_turn.passed >= 3
     }
   },
   watch: {
@@ -198,7 +198,7 @@ export default {
   },
   methods: {
     start: function() {
-      if(this.currentGame.set.current_turn.passed >= 3) {
+      if(this.currentGame.current_turn.passed >= 3) {
         console.log('more than 3')
         return
       }
@@ -210,7 +210,7 @@ export default {
         this.gameSubscription.turnStart()
       } else {
         console.log("passing clue")
-        this.currentGame.set.current_turn.passed += 1
+        this.currentGame.current_turn.passed += 1
         this.updateGame()
       }
     },
@@ -260,7 +260,7 @@ export default {
       }
     },
     completeTurn: function() {
-      this.currentGame.set.current_turn.completed = true
+      this.currentGame.current_turn.completed = true
       this.turnStarted = false
       this.resetClock()
       this.updateGame()

@@ -7,7 +7,7 @@ class GameSession < ApplicationRecord
   has_many :messages, as: :speakerable
 	accepts_nested_attributes_for :messages, allow_destroy: true
 
-  before_create :default_player_name
+  before_validation :default_player_name, on: :create
   include ScoreSetup
 
   attr_accessor :deleted

@@ -15,7 +15,7 @@ RSpec.describe GameSession, type: :model do
 	  	it "fishbowl" do
 	  		game = FactoryBot.create(:fishbowl)
 	  		game_session = GameSession.create! attributes_for(:game_session, game_id: game.id)
-	  		expect(game_session.scores.keys).to eq(game.scoring_rounds.keys)
+	  		expect(game_session.scores.keys).to eq(game.scoring_rounds.keys.map(&:to_s))
 	  	end
 	  end
 	end

@@ -9,16 +9,24 @@ RSpec.describe Game, type: :model do
   end
 
   describe "Game initialises" do
+  	it "should set up game turn order" do
+  		game = FactoryBot.create(:game)
+  	
+  		expect(game.turn_order.keys).to include("current_turn", "players_gone")
+  	end
   	context "fishbowl" do
 			it "should set up game set json" do
 				game = FactoryBot.create(:fishbowl)
-				expect(game.set.keys).to include("clues", "current_clue", "guessed_clues", "current_round", "current_turn", "players_gone", "players_done_clues", "options")
+			
+			
+				expect(game.set.keys).to include("clues", "current_clue", "guessed_clues", "current_round", "players_done_clues", "options")
 			end
   	end
   	context "ghost" do
 			it "should set up game set json" do
 				game = FactoryBot.create(:ghost)
-				expect(game.set.keys).to include("play_word", "word_definition", "challenge_results", "played_words", "current_round", "current_turn", "players_gone", "player_ghosts", "options", "rounds")
+			
+				expect(game.set.keys).to include("play_word", "word_definition", "challenge_results", "played_words", "current_round", "player_ghosts", "options", "rounds_played")
 			end
   	end
   end
@@ -29,27 +37,29 @@ RSpec.describe Game, type: :model do
 	  		context "with teams," do
 	  			before(:each) do
 	  				@game = FactoryBot.create(:fishbowl, team_mode: true)
+	  				
 	  				5.times {@game.teams.create}
 	  				@game.update_attributes(started: true)
 	  			end
 	  			it "should setup current round to be the first round" do
-	  				expect(@game.set["current_round"]["round_number"]).to eq(@game.rounds.keys.first)
+	  				expect(@game.current_round["round_number"]).to eq(@game.rounds.keys.first)
 	  			end
 	  			it "should setup players gone according to teams" do
-	  				expect(@game.set["players_gone"].keys.length).to eq(@game.teams.length)
+	  				expect(@game.players_gone.keys.length).to eq(@game.teams.length)
 	  			end 
 	  		end
 
 	  		context "without teams," do
 	  			before(:all) do
 	  				@game = FactoryBot.create(:fishbowl)
+	  				
 	  				@game.update_attributes(started: true)
 	  			end
 	  			it "should setup current round to be the first round" do
-	  				expect(@game.set["current_round"]["round_number"]).to eq(@game.rounds.keys.first)
+	  				expect(@game.current_round["round_number"]).to eq(@game.rounds.keys.first)
 	  			end
 	  			it "should setup players gone according to teams" do
-	  				expect(@game.set["players_gone"]).to eq([])
+	  				expect(@game.players_gone).to eq([])
 	  			end 
 	  		end
 	  	end
@@ -62,10 +72,10 @@ RSpec.describe Game, type: :model do
 	  			@game.update_attributes(started: true)
 	  		end
 	  		it "should setup current round to be the first round" do
-	  			expect(@game.set["current_round"]["round_number"]).to eq(@game.rounds.keys.first.to_i)
+	  			expect(@game.current_round["round_number"]).to eq(@game.rounds.keys.first.to_i)
 	  		end
 	  		it "should setup current turn nominated player" do
-	  			expect(@game.set["current_turn"]["nominated_player"].present?).to be(true)
+	  			expect(@game.current_turn["nominated_player"].present?).to be(true)
 	  		end
 	  	end
 	  end
@@ -75,6 +85,7 @@ RSpec.describe Game, type: :model do
 	describe "populate fishbowl pot" do
 		before(:all) do
 			@game = FactoryBot.create(:fishbowl)
+			
 			@game_sessions = FactoryBot.build_list(:game_session, 5, game_id: @game.id)
 			@game_sessions.map(&:save)
 			@game.update_attributes(started: true)
@@ -97,6 +108,7 @@ RSpec.describe Game, type: :model do
 	context "with teams" do
 		before(:each) do
   		@game = FactoryBot.create(:game, team_mode: true)
+  		
   		@game_sessions = FactoryBot.build_list(:game_session, 6, game_id: @game.id)
   		@game_sessions.map(&:save)
   		2.times { @game.teams.create }
@@ -111,50 +123,41 @@ RSpec.describe Game, type: :model do
 		end
 		it "should change the turn to the next team" do
 			@game.next_turn
-			expect(@game.set["current_turn"]["team"]).not_to be @game.set_was["current_turn"]["team"]
+			expect(@game.current_turn["team"]).not_to be @game.turn_order_was["current_turn"]["team"]
 			@game.next_turn
-			expect(@game.set["current_turn"]["team"]).not_to be @game.set_was["current_turn"]["team"]
+			expect(@game.current_turn["team"]).not_to be @game.turn_order_was["current_turn"]["team"]
 		end
 		it "should change the turn to the next player not gone before" do
 			@game.next_turn
-			expect(@game.set["players_gone"][@game.set["current_turn"]["team"].to_s]).not_to include(@game.set["current_turn"]["nominated_player"])
+			expect(@game.players_gone[@game.current_turn["team"].to_s]).not_to include(@game.current_turn["nominated_player"])
 			@game.next_turn
-			expect(@game.set["players_gone"][@game.set["current_turn"]["team"].to_s]).not_to include(@game.set["current_turn"]["nominated_player"])
+			expect(@game.players_gone[@game.current_turn["team"].to_s]).not_to include(@game.current_turn["nominated_player"])
 		end
 		it "should cycle through teams" do
 			@team_orders.cycle(10) do |team|
 				@game.next_turn
-				expect(@game.set["current_turn"]["team"]).to be(team)
-				expect(@game.set["current_turn"]["team"]).not_to be(@game.set_was["current_turn"]["team"])
+				expect(@game.current_turn["team"]).to be(team)
+				expect(@game.current_turn["team"]).not_to be(@game.turn_order_was["current_turn"]["team"])
 			end
 		end
 
 		it "should cycle through players each team" do
-			# first_team_players = @game.teams.sort_by { |t| t.order }.first.game_sessions
-			# second_team_players = @game.teams.sort_by { |t| t.order }.second.game_sessions
 			gone_players = {}
 			@game.teams.each do |team|
 				gone_players[team.id] = []
 			end
 			@game.next_turn
 			@game.teams.sort_by(&:order).cycle(12).with_index do |team, index|
-				# puts "index #{index}"
-				# puts "old team #{team.order}"
-				# puts "old team #{@game.set["current_turn"]["team"]}"
-				# puts "old player #{@game.set["current_turn"]["nominated_player"]}"
 				
 				if team.game_sessions.length == gone_players[team.id].length
 					gone_players[team.id] = []
 				end
-				# puts gone_players
-				# puts "compare to #{@game.set['players_gone']}"
-				expect(gone_players[team.id]).not_to include(@game.set["current_turn"]["nominated_player"])
-				expect(team.game_sessions.map(&:id)).to include(@game.set["current_turn"]["nominated_player"])
-				gone_players[team.id].push(@game.set["current_turn"]["nominated_player"])
+
+				expect(gone_players[team.id]).not_to include(@game.current_turn["nominated_player"])
+				expect(team.game_sessions.map(&:id)).to include(@game.current_turn["nominated_player"])
+				gone_players[team.id].push(@game.current_turn["nominated_player"])
 				@game.next_turn
-				# puts "new team #{team.order}"
-				# puts "new team #{@game.set["current_turn"]["team"]}"
-				# puts "new player: #{@game.set["current_turn"]["nominated_player"]}"
+
 			end
 		end
 	end
@@ -162,6 +165,7 @@ RSpec.describe Game, type: :model do
 	context "without teams" do
 		before(:each) do
 			@game = FactoryBot.create(:game, team_mode: false)
+			
   		@game_sessions = FactoryBot.build_list(:game_session, 5, game_id: @game.id)
   		@game_sessions.map(&:save)
   		@game.update_attributes(started: true)
@@ -169,14 +173,14 @@ RSpec.describe Game, type: :model do
 		end
 		it "should change the turn to the next player not gone before" do
 			@game.next_turn
-			expect(@game.set["players_gone"]).not_to include(@game.set["current_turn"]["nominated_player"])
+			expect(@game.players_gone).not_to include(@game.current_turn["nominated_player"])
 		end
 
 		it "should cycle through the players" do
 			player_ids = @game_sessions.sort_by(&:id)
 			player_ids.cycle(12) do |game_session|
 				@game.next_turn
-				expect(@game.set["current_turn"]["nominated_player"]).to be(game_session.id)
+				expect(@game.current_turn["nominated_player"]).to be(game_session.id)
 			end
 		end
 	end
