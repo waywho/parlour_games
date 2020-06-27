@@ -1,7 +1,7 @@
 export default {
 	computed: {
 		nominatedPlayer: function() {
-      return _.find(this.game.game_sessions, { id: this.game.set.current_turn.nominated_player })
+      return _.find(this.game.game_sessions, { id: this.game.turn_order.current_turn.nominated_player })
     },
     currentPlayer: function() {
       return this.nominatedPlayer.id == this.gameSession.id

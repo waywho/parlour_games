@@ -2,6 +2,7 @@ require 'rest-client'
 
 class Ghost < Game
 	before_create :game_setup
+	store_accessor :set, :play_word, :word_definition, :challenge_results, :played_words, :current_round, :player_ghosts, :options, :rounds_played
 	before_update :start_game, if: :started_changed?
 	before_update :play, if: :after_started?
 	before_update :lost_turn, if: :lost_challenge
@@ -31,15 +32,15 @@ class Ghost < Game
 		if started
 			set_up_player_ghosts
 		end
-		set["current_turn"]["nominated_player"] = game_sessions.first.id
-		set["current_round"]["round_number"] = 1
+		current_turn["nominated_player"] = game_sessions.first.id
+		current_round["round_number"] = 1
 	end
 
 	def play
 		# check if play_word is a word
 		# lang = LANGUAGES[set["options"]["language"]]
 		logger.debug "run play #{set["play_word"]}"
-		if set["current_round"]["completed"] == false && set["play_word"].length > set["options"]["min_word_length"]
+		if current_round["completed"] == false && set["play_word"].length > set["options"]["min_word_length"]
 			result = RestClient.get "https://api.datamuse.com/words?sp=#{set["play_word"].join}&md=d"
 			ghost_arry = GHOST_ARRY
 			result_array = JSON.parse(result)
@@ -71,9 +72,9 @@ class Ghost < Game
 				logger.debug "Results found"
 				
 				# if player_word is a word, nominated_player looses, gets a letter
-				logger.debug "nominated player #{set["current_turn"]["nominated_player"]}"
+				logger.debug "nominated player #{current_turn["nominated_player"]}"
 
-				player_id = set["current_turn"]["nominated_player"].to_s
+				player_id = current_turn["nominated_player"].to_s
 
 				ghost_length = set["player_ghosts"][player_id].length
 				logger.debug "ghost_length #{ghost_length}"
@@ -97,7 +98,7 @@ class Ghost < Game
 			else
 				next_turn
 			end
-		elsif set["current_round"]["completed"] && !ended
+		elsif current_round["completed"] && !ended
 			next_round
 		else
 			next_turn
@@ -106,13 +107,13 @@ class Ghost < Game
 
 	def next_round
 		set_up_player_ghosts
-		# set["rounds"] << set["current_round"]["round_number"]
+		# rounds_played << current_round["round_number"]
 		set["word_definition"] = nil
 		set["play_word"] = []
-		set["current_round"]["completed"] = false
-		set["rounds"][set["current_round"]["round_number"]] = { name: set["current_round"]["round_number"].to_s, score_round: true }
+		current_round["completed"] = false
+		rounds_played[current_round["round_number"]] = { name: current_round["round_number"].to_s, score_round: true }
 		game_sessions.each do  |session|
-			session.scores[set["current_round"]["round_number"].to_s] = 0
+			session.scores[current_round["round_number"].to_s] = 0
 			session.save		
 		end
 		next_turn
@@ -133,17 +134,17 @@ class Ghost < Game
 	end
 
 	def after_started?
-		logger.debug "#{set["current_round"]["round_number"]} is larger than 0: #{set["current_round"]["round_number"] > 0}"
-		return set["current_round"]["round_number"] > 0 && set["current_round"]["challenge_lost"] == false
+		logger.debug "#{current_round["round_number"]} is larger than 0: #{current_round["round_number"] > 0}"
+		return current_round["round_number"] > 0 && current_round["challenge_lost"] == false
 	end
 
 	def lost_challenge
-		return set["current_round"]["challenge_lost"]
+		return current_round["challenge_lost"]
 	end
 
 	def lost_turn(player_id)
 		ghost_arry = GHOST_ARRY
-		player_id = set["current_turn"]["nominated_player"].to_s
+		player_id = current_turn["nominated_player"].to_s
 		set["player_ghosts"][player_id].push(ghost_arry[ghost_length])
 		set["played_words"] << set["play_word"].join
 		set["play_word"] = []
@@ -155,27 +156,30 @@ class Ghost < Game
 		if set["player_ghosts"][player_id].length == ghost_arry.length	
 			logger.debug "ghost array #{ghost_arry.length}"
 			game_sessions.each do |session|
-				logger.debug "session #{session} #{session.scores[set["current_round"]["round_number"].to_s]}"
-				if session.scores[set["current_round"]["round_number"].to_s].present?
-					session.scores[set["current_round"]["round_number"].to_s] += 1 if session.id != set["current_turn"]["nominated_player"]
+				logger.debug "session #{session} #{session.scores[current_round["round_number"].to_s]}"
+				if session.scores[current_round["round_number"].to_s].present?
+					session.scores[current_round["round_number"].to_s] += 1 if session.id != current_turn["nominated_player"]
 				else
-					session.scores[set["current_round"]["round_number"].to_s] = 1 if session.id != set["current_turn"]["nominated_player"]
+					session.scores[current_round["round_number"].to_s] = 1 if session.id != current_turn["nominated_player"]
 				end
 				session.save
 			end
-			set["current_round"]["completed"] = true
+			current_round["completed"] = true
 		else
 			next_turn
 		end
 	end
 
-	def rounds
-		set["rounds"]
-	end
-
 	private
 
 	def game_setup
+		self.turn_order = {
+			current_turn: {
+				nominated_player: nil, 
+				challenge_lost: false
+			},
+			players_gone: [],
+		}
 		self.set = {
 			play_word: [],
 			word_definition: nil,
@@ -185,15 +189,13 @@ class Ghost < Game
 				round_number: 0,
 				completed: false
 			},
-			current_turn: {nominated_player: nil, challenge_lost: false},
-			players_gone: [],
 			player_ghosts: {},
 			options: {
 				language: 'English',
 				team_mode: false,
 				min_word_length: 2
 			},
-			rounds: {
+			rounds_played: {
 				1 => { name: "1", score_round: true }
 			}
 		}

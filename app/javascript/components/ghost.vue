@@ -150,6 +150,7 @@ export default {
       this.$store.dispatch('updateGame', {
         id: this.currentGame.id,
         set: this.currentGame.set,
+        turn_order: this.currentGame.turn_order,
         game_sessions_attributes: [
           this.nominatedPlayer
         ]

@@ -1,6 +1,6 @@
 <template>
   <b-taglist attached class="no-margin">
-    <b-tag v-if="passing" type="is-light" size="is-medium" class='light-tag'>{{game.set.current_turn.passed}}</b-tag>
+    <b-tag v-if="passing" type="is-light" size="is-medium" class='light-tag'>{{game.turn_order.current_turn.passed}}</b-tag>
     <b-tag type="is-dark" size="is-medium">{{currentPlayerName}}</b-tag>
     <b-tag type="is-light" size="is-medium" class='light-tag'>{{currentPlayerScore}}</b-tag>
   </b-taglist>  
@@ -52,5 +52,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
+.no-margin {
+  margin-bottom: -0.5rem !important;
+}
 </style>

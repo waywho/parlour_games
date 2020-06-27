@@ -13,7 +13,7 @@ RSpec.describe Team, type: :model do
 	  	it "fishbowl" do
 	  		game = FactoryBot.create(:fishbowl)
 	  		team = game.teams.create
-	  		expect(team.scores.keys).to eq(game.scoring_rounds.keys)
+	  		expect(team.scores.keys).to eq(game.scoring_rounds.keys.map(&:to_s))
 	  	end
   	end
   end
