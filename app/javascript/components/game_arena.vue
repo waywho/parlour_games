@@ -40,7 +40,7 @@
       </div>
       <div class="columns is-multiline is-centered" v-if="currentPlayer">
         <div class="column is-three-fifths-desktop control has-text-centered">
-          <b-button class="button is-dark" size="is-medium" @click="start" :disabled="noMorePass">{{playButton}}</b-button>
+          <b-button class="button" :class="[ playButton == 'Start' ? 'is-dark' : '']" size="is-medium" @click="start" :disabled="noMorePass">{{playButton}}</b-button>
           <b-button class="button is-dark" size="is-medium" @click="guessed" v-if="turnStarted">Guessed</b-button>
 <!--             <b-button class="button is-dark is-large" @click="updateGame">Update Game</b-button> -->
         </div>
@@ -55,7 +55,6 @@
             </b-field>
           </form>
         </div>
-
 
       </div>
     </div>
@@ -172,7 +171,7 @@ export default {
       }
     },
     currentTeam: function() {
-      return  _.find(this.game.teams, { order: this.game.current_turn.team })
+      return  _.find(this.game.teams, { order: this.game.turn_order.current_turn.team })
     },
     scoreParties: function() {
       if(this.game.team_mode) {
@@ -182,7 +181,7 @@ export default {
       }
     },
     noMorePass: function() {
-      return this.currentGame.current_turn.passed >= 3
+      return this.currentGame.turn_order.current_turn.passed >= 3
     }
   },
   watch: {
@@ -198,7 +197,7 @@ export default {
   },
   methods: {
     start: function() {
-      if(this.currentGame.current_turn.passed >= 3) {
+      if(this.currentGame.turn_order.current_turn.passed >= 3) {
         console.log('more than 3')
         return
       }
@@ -210,7 +209,7 @@ export default {
         this.gameSubscription.turnStart()
       } else {
         console.log("passing clue")
-        this.currentGame.current_turn.passed += 1
+        this.currentGame.turn_order.current_turn.passed += 1
         this.updateGame()
       }
     },
@@ -260,7 +259,7 @@ export default {
       }
     },
     completeTurn: function() {
-      this.currentGame.current_turn.completed = true
+      this.currentGame.turn_order.current_turn.completed = true
       this.turnStarted = false
       this.resetClock()
       this.updateGame()
@@ -277,6 +276,7 @@ export default {
           game_sessions_attributes: [
             this.nominatedPlayer
           ],
+          turn_order: this.currentGame.turn_order,
           teams_attributes: [
             this.currentTeam
           ]
@@ -318,11 +318,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
-.no-margin {
-  margin-bottom: -0.5rem;
-}
-
 .game-header {
   max-height: 70px;
 }
