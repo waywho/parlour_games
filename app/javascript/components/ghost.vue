@@ -41,7 +41,7 @@
           <b-button v-if="false" type="is-dark" @click="() => {this.showChallenge = true}">Challenge</b-button>
         </div>
         <div class="column is-full" v-show="showChallenge">
-          <b>Possible Words:</b>{{currentGame.set.challenge_results.join(", ")}}
+          <b>Possible Words:</b>{{challengeResults}}
         </div>
         <div class="column is-full">
             <div class="title is-5 section-line">
@@ -120,10 +120,21 @@ export default {
     currentRound: function() {
       console.log('word def',this.currentGame.set.word_definition )
       // let word_def = JSON.parse(this.currentGame.set.word_definition)
-      
-      return {
-        name: this.currentGame.set.word_definition.word,
-        instructions: this.currentGame.set.word_definition.defs
+      if(this.currentGame.set.word_definition != null & this.currentGame.set.word_definition != undefined) {
+        return {
+          name: this.currentGame.set.word_definition.word,
+          instructions: this.currentGame.set.word_definition.defs
+        }
+      } else {
+        return {
+          name: '',
+          instructions: ''
+        }
+      }
+    },
+    challengeResults: function() {
+      if(this.currentGame.set.challenge_results != null & this.currentGame.set.challenge_results != undefined) {
+        return this.currentGame.set.challenge_results.join(", ")
       }
     }
   },

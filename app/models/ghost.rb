@@ -135,11 +135,11 @@ class Ghost < Game
 
 	def after_started?
 		logger.debug "#{current_round["round_number"]} is larger than 0: #{current_round["round_number"] > 0}"
-		return current_round["round_number"] > 0 && current_round["challenge_lost"] == false
+		return current_round["round_number"] > 0 && current_turn["challenge_lost"] == false
 	end
 
 	def lost_challenge
-		return current_round["challenge_lost"]
+		return current_turn["challenge_lost"]
 	end
 
 	def lost_turn(player_id)
