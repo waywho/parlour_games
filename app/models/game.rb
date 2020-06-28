@@ -153,11 +153,11 @@ class Game < ApplicationRecord
 				# only user ids in array
 				players_gone: nil,
  			}
-			self.set = {
-				current_round: { 
-					round_number: nil,
-					completed: false
-				}
-			}
+			# self.set = {
+			# 	current_round: { 
+			# 		round_number: nil,
+			# 		completed: false
+			# 	}
+			# }
 	end
 end

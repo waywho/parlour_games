@@ -44,23 +44,22 @@ class Ghost < Game
 			result = RestClient.get "https://api.datamuse.com/words?sp=#{set["play_word"].join}&md=d"
 			ghost_arry = GHOST_ARRY
 			result_array = JSON.parse(result)
-			logger.debug "finding results #{result}"
-			logger.debug "finding array #{result_array} #{result_array.nil?}"
-			logger.debug "ghost array #{ghost_arry}"
+			# logger.debug "finding results #{result}"
+			# logger.debug "finding array #{result_array} #{result_array.nil?}"
+			# logger.debug "ghost array #{ghost_arry}"
 			
 			# look for possible words for challenge list
-			challenge
+			challenge_lookup
 
 			if result_array.empty?
 				logger.debug "no result"
 				exact_word = false
 				has_meaning = false	
 			else
-				logger.debug "i got here"
 				result_json = result_array.first
-				logger.debug "finding results #{result_json}"
-				logger.debug "finding word #{result_json["word"]}"
-				logger.debug "finding definition #{result_json["defs"]}"
+				# logger.debug "finding results #{result_json}"
+				# logger.debug "finding word #{result_json["word"]}"
+				# logger.debug "finding definition #{result_json["defs"]}"
 				exact_word = result_json["word"] == set["play_word"].join
 				has_meaning = result_json["defs"].present?
 				set["word_definition"] = result_json if exact_word && has_meaning
@@ -119,7 +118,7 @@ class Ghost < Game
 		next_turn
 	end
 
-	def challenge
+	def challenge_lookup
 		results = RestClient.get "https://api.datamuse.com/words?sp=#{set["play_word"].join}*"
 		logger.debug "challenge results #{results}"
 		results = JSON.parse(results)

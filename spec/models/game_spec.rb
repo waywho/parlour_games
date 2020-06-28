@@ -8,30 +8,35 @@ RSpec.describe Game, type: :model do
   	it { should have_many(:users) }
   end
 
-  describe "Game initialises" do
+  describe "initialises" do
   	it "should set up game turn order" do
   		game = FactoryBot.create(:game)
-  	
   		expect(game.turn_order.keys).to include("current_turn", "players_gone")
   	end
   	context "fishbowl" do
 			it "should set up game set json" do
 				game = FactoryBot.create(:fishbowl)
-			
-			
+				expect(game.turn_order.keys).to include("current_turn", "players_gone")
 				expect(game.set.keys).to include("clues", "current_clue", "guessed_clues", "current_round", "players_done_clues", "options")
 			end
   	end
   	context "ghost" do
 			it "should set up game set json" do
 				game = FactoryBot.create(:ghost)
-			
+				expect(game.turn_order.keys).to include("current_turn", "players_gone")
 				expect(game.set.keys).to include("play_word", "word_definition", "challenge_results", "played_words", "current_round", "player_ghosts", "options", "rounds_played")
+			end
+  	end
+  	context "wink murder" do
+			it "should set up game set json" do
+				game = FactoryBot.create(:wink_murder)
+				expect(game.turn_order.keys).to include("current_turn")
+				expect(game.set.keys).to include("current_round", "rounds_played", "options")
 			end
   	end
   end
 
-  describe "Game updates" do
+  describe "updates" do
   	describe "to start the game" do
 	  	context "fishbowl" do
 	  		context "with teams," do
@@ -76,6 +81,59 @@ RSpec.describe Game, type: :model do
 	  		end
 	  		it "should setup current turn nominated player" do
 	  			expect(@game.current_turn["nominated_player"].present?).to be(true)
+	  		end
+	  	end
+
+	  	context "wink murder" do
+	  		before(:all) do
+	  			@game = FactoryBot.create(:wink_murder)
+	  			@game_sessions = FactoryBot.build_list(:game_session, 10, game_id: @game.id)
+					@game_sessions.map(&:save)
+	  			@game.update_attributes(started: true)
+	  		end
+	  		it "should nominate a murder randomly from the players" do
+	  			expect(@game_sessions.map(&:id)).to include(*@game.current_round["murderers"])
+	  		end
+	  		it "should setup killed list according to murder id" do
+	  			expect(@game.current_round["killed"].keys).to eq(@game.current_round["murderers"].map(&:to_s))
+	  		end
+	  		it "should advance into round one" do
+	  			expect(@game.current_round["round_number"]).to be(1)
+	  		end
+	  	end
+	  end
+
+	  describe "to play the game" do
+	  	context "wink murder" do
+	  		before(:each) do
+	  			@game = FactoryBot.create(:wink_murder)
+	  			@game.options = {number_of_murderers: 2, enable_chat: false}
+	  			@game.save
+	  			@game_sessions = FactoryBot.build_list(:game_session, 10, game_id: @game.id)
+					@game_sessions.map(&:save)
+	  			@game.update_attributes(started: true)
+	  		end
+
+	  		it "should save those killed" do
+		  		civilians = @game_sessions.select { |s| !@game.current_round["murderers"].include?(s.id) }
+		  		killed = civilians.first
+		  		@game.current_turn["killed"] = killed.id
+		  		killer =  @game.current_round["murderers"].first
+		  		@game.current_turn["murderer"] = killer
+		  		@game.save
+		  		expect(@game.current_round["killed"][killer.to_s]).to include(killed.id)
+	  		end
+
+	  		it "should end the round if all killed" do
+	  			civilians = @game_sessions.select { |s| !@game.current_round["murderers"].include?(s.id) }
+		  		civilians.each do |civilian|
+			  		@game.current_turn["killed"] = civilian.id
+			  		killer =  @game.current_round["murderers"].first
+			  		@game.current_turn["murderer"] = killer
+			  		@game.save
+			  		expect(@game.current_round["killed"][killer.to_s]).to include(civilian.id)
+			  	end
+			  	expect(@game.current_round["completed"]).to be(true)
 	  		end
 	  	end
 	  end
