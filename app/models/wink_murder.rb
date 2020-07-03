@@ -49,38 +49,21 @@ class WinkMurder < Game
 			first_accuser = accusations[:first][:accuser]
 			second_accuser = accusations[:second][:accuser]
 
-			if first_accused == second_accused && current_round[:murderers].include?(first_accused)
+			if current_round[:murderers].include?(first_accused)
 				out_player_id = current_round[:murderers].delete(first_accused)
 				player_out(out_player_id, first_accuser)
 
 				player_scores(first_accuser, possible_full_score)
-				player_scores(second_accuser, possible_full_score)
-			elsif current_round[:murderers].include?(first_accused) && current_round[:murderers].include?(second_accused)
-				out_player_id = current_round[:murderers].delete(first_accused)
-				player_out(out_player_id, first_accuser)
-
-				out_player_id = current_round[:murderers].delete(second_accused)
-				player_out(out_player_id, second_accuser)
-
-				player_scores(first_accuser, possible_full_score)
-				player_scores(second_accuser, possible_full_score)
-
-			elsif current_round[:murderers].include?(first_accused) && !current_round[:murderers].include?(accusations[:second][:accused])
-				out_player_id = current_round[:murderers].delete(first_accused)
-				player_out(out_player_id, first_accuser)
-
-				player_scores(first_accuser, possible_full_score)			
-				player_out(second_accuser, "challenge_lost")
-
-			elsif current_round[:murderers].include?(accusations[:second][:accused]) && !current_round[:murderers].include?(first_accused)
-				out_player_id = current_round[:murderers].delete(second_accused)
-				player_out(out_player_id, second_accuser)
-
-				player_scores(second_accuser, possible_full_score)
-
-				player_out(first_accuser, "challenge_lost")
 			else
 				player_out(first_accuser, "challenge_lost")
+			end
+
+			if current_round[:murderers].include?(second_accused)
+				out_player_id = current_round[:murderers].delete(second_accused)
+				player_out(out_player_id, second_accuser)
+
+				player_scores(second_accuser, possible_full_score)
+			else
 				player_out(second_accuser, "challenge_lost")
 			end
 			
