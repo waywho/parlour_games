@@ -51,7 +51,7 @@ class WinkMurder < Game
 
 			if current_round[:murderers].include?(first_accused)
 				out_player_id = current_round[:murderers].delete(first_accused)
-				player_out(out_player_id, first_accuser)
+				player_out(out_player_id, first_accuser) if out_player_id.present?
 
 				player_scores(first_accuser, possible_full_score)
 			else
@@ -60,7 +60,7 @@ class WinkMurder < Game
 
 			if current_round[:murderers].include?(second_accused)
 				out_player_id = current_round[:murderers].delete(second_accused)
-				player_out(out_player_id, second_accuser)
+				player_out(out_player_id, second_accuser) if out_player_id.present?
 
 				player_scores(second_accuser, possible_full_score)
 			else
