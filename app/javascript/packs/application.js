@@ -31,6 +31,9 @@ import moment from 'moment'
 import _ from 'lodash'
 
 // import VueDraggable from 'vue-draggable'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faAngleLeft, faAngleRight } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Buefy from 'buefy'
 import '../styles/global.scss'
 import Fitty from 'vue-fitty' 
@@ -39,9 +42,13 @@ export const bus = new Vue({})
 	
 document.addEventListener('DOMContentLoaded', () => {
 	Vue.use(Fitty)
-	
+	library.add(faAngleLeft, faAngleRight)
+	Vue.component('font-awesome-icon', FontAwesomeIcon);
 	Vue.use(Buefy, {
-		defaultFieldLabelPosition: 'on-border'
+		defaultFieldLabelPosition: 'on-border',
+		defaultIconComponent: 'font-awesome-icon',
+		defaultIconPack: 'fas',
+    defaultContainerElement: '#content'
 	})
 
 	Vue.use(VueChatScroll)
@@ -82,10 +89,20 @@ document.addEventListener('DOMContentLoaded', () => {
 	  }
 	})
 
-		Vue.filter('camelToUnderscore', function (value) {
+	Vue.filter('camelToUnderscore', function (value) {
 	  if (value !== null && value !== undefined) {
 	    value = value.replace(/([A-Z])/g, "_$1");
 	    value = value.replace(/^[_]/, "");
+	    return value.toLowerCase()
+	  } else {
+	    return ''
+	  }
+	})
+
+	Vue.filter('camelToKabab', function (value) {
+	  if (value !== null && value !== undefined) {
+	    value = value.replace(/([A-Z])/g, "-$1");
+	    value = value.replace(/^[-]/, "");
 	    return value.toLowerCase()
 	  } else {
 	    return ''

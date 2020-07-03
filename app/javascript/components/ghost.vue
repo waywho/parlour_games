@@ -3,7 +3,7 @@
     <div class="column">
       <div class="columns is-multiline">
         <div class="column center-tile is-full-size-mobile is-full-size-desktop">
-          <game-header class="game-header" :game="game" :game-image="gameImage"></game-header>
+          <game-header class="game-header" :game="game"></game-header>
         </div>
         <div class="column is-full">
           <div class="columns is-mobile is-centered is-vcentered">
@@ -57,21 +57,20 @@
           </div>
         </div>
         <div class="column is-full">
-          <score-board :teams="currentGame.game_sessions" :rounds="this.currentGame.rounds" class="is-narrow"></score-board>
+          <score-board :teams="currentGame.game_sessions" :rounds="this.currentGame.set.rounds_played" class="is-narrow"></score-board>
         </div>
       </div>
     </div>
-    <round-notice :current-round="currentRound" :game-image="gameImage"></round-notice>
+    <round-notice :current-round="currentRound" :game="game"></round-notice>
   </div>
 </template>
 
 <script>
 import scoreBoard from './score_board';
 import player from './player';
-import ghostImage from '../assets/smileys-filled.png';
 import gameHeader from './game_header';
 import playerTurn from './player_turn';
-import gameBehaviours from '../mixins/gameBehaviours'
+import gameBehaviours from '../mixins/gameBehavioursMixin'
 import roundNotice from './round_notice';
 
 export default {

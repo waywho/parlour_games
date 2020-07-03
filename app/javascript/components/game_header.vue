@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 
 export default {
   props: {
@@ -13,9 +14,9 @@ export default {
       type: Object,
       required: true,
     },
-    gameImage: {
+    imageType: {
       type: String,
-      required: false,
+      required: false
     },
     imageSize: {
       type: String,
@@ -25,6 +26,18 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    }
+  },
+  computed: {
+    ...mapGetters({
+      getGames: 'getGames'
+    }),
+    gameImage: function() {
+      if(this.imageType == 'logo') {
+        return _.find(this.getGames, {name: this.game.name}).logo
+      } else {
+        return _.find(this.getGames, {name: this.game.name}).image
+      }
     }
   },
   data: function () {

@@ -1,7 +1,7 @@
 <template>
   <div class="tile">
     <div class="tile is-vertical" v-if="!cluesSubmitted">
-      <game-header :game="game" :game-image="gameImage" :image-size="'100px'"></game-header>
+      <game-header :game="game" :image-size="'100px'"></game-header>
       <div class="tile is-parent card-pot">
         <div class=" tile is-child card-stack">
           <game-paper v-for="(c, index) in 3" :key="index" v-model="currentClue" :ref="'clue_' + index" :clue="currentClue" @input="enableButton"></game-paper>
@@ -46,9 +46,7 @@
           </div>
         </div>
       </div>
-
     </div>
-    
   </div>
 </template>
 
@@ -58,7 +56,6 @@ import gameCard from './game_card';
 import gamePaper from './game_paper';
 import draggable from 'vuedraggable';
 import gameHeader from './game_header';
-import fishbowlImage from '../assets/fish-bowl-logo.png'
 
 export default {
 	props: ['game', 'currentHost', 'gameSession'],

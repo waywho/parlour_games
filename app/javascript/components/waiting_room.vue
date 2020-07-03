@@ -1,12 +1,12 @@
 <template>
   <div class="columns is-multiline is-mobile">
     <div class="column is-full has-text-centered">
-  	 <game-header :game="game" :game-image="gameInfo.logo" :image-size="'100px'"></game-header>
+  	 <game-header :game="game" :image-type="'logo'" :image-size="'100px'"></game-header>
       <span class="title is-4">Waiting Room{{ currentGame.started ? ': this game has started' : ''}}</span>
     </div>
     <div class="column is-full">
       <div class="columns">
-        <div class="field column is-half" v-if="currentHost && game.set.options.enable_team_mode">
+        <div class="field column is-half" v-if="currentHost && game.options.enable_team_mode">
           <div class="field">
             <b-switch v-model="currentGame.team_mode" :disabled="!currentHost" @input="removeTeams" type="is-dark">
                 turn on team mode
@@ -21,7 +21,7 @@
           </b-field>
           <div v-if="teamsCreated">Go ahead and drag players into your desired teams.</div>
         </div>
-        <div v-else-if="game.set.options.enable_team_mode && currentGame.team_mode && !currentHost" class="column is-half">
+        <div v-else-if="game.options.enable_team_mode && currentGame.team_mode && !currentHost" class="column is-half">
           Number of teams: {{numberOfTeams}}
           <div v-if="teamsCreated">Go ahead and drag players into your desired teams.</div>
         </div>
@@ -62,7 +62,6 @@ import draggable from 'vuedraggable'
 import gameAxios from '../axios/axios_game_update.js';
 import player from './player';
 import gameHeader from './game_header';
-import fishbowlImage from '../assets/fish-bowl-logo.png'
 
 export default {
 	props: {
@@ -80,7 +79,6 @@ export default {
   },
   data: function () {
     return {
-      gameInfo: null,
       teams: [],
       teamNumbers: null,
       currentGame: {}
@@ -192,7 +190,6 @@ export default {
   created () {
     // console.log('where is my game', this.game)
     this.currentGame = this.game
-    this.gameInfo = this.$store.getters.gameInfo(this.game.name)
     if(this.currentGame.team_mode) {
       this.teamNumbers = this.currentGame.teams.length
     }

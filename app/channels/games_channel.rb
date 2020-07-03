@@ -30,6 +30,18 @@ class GamesChannel < ApplicationCable::Channel
       game_id: data['game_id']
   end
 
+  def looking(data)
+    ActionCable.server.broadcast "game:#{data['game_id']}",
+      looking: data['looking'],
+      looker: data['looker']
+  end
+
+  def killing(data)
+    ActionCable.server.broadcast "game:#{data['game_id']}",
+      killing: true,
+      killer: data['killer']
+  end
+
   def unsubscribed
     # Any cleanup needed when channel is unsubscribed
     stop_all_streams

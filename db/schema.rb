@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_26_183946) do
+ActiveRecord::Schema.define(version: 2020_07_03_092256) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -67,6 +67,7 @@ ActiveRecord::Schema.define(version: 2020_06_26_183946) do
     t.boolean "team_mode", default: false
     t.string "password_digest"
     t.jsonb "turn_order"
+    t.jsonb "options"
     t.index ["name"], name: "index_games_on_name"
   end
 

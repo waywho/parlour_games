@@ -2,6 +2,9 @@
   "dependencies": {
     "@argueta10/vue-webrtc": "^1.3.0",
     "@creativebulma/bulma-divider": "creativebulma/bulma-divider",
+    "@fortawesome/fontawesome-svg-core": "^1.2.29",
+    "@fortawesome/free-solid-svg-icons": "^5.13.1",
+    "@fortawesome/vue-fontawesome": "^0.1.10",
     "@rails/webpacker": "5.0.1",
     "axios": "^0.19.2",
     "buefy": "0.8.20",

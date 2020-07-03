@@ -1,8 +1,7 @@
 class Game < ApplicationRecord
 	after_create :create_chatroom
 	before_create :game_setup
-	# serialize [:set, :turn_order], HashSerializer
-	store_accessor :turn_order, :current_turn, :players_gone
+	store :turn_order, accessors: [:current_turn, :players_gone], coder: JSON
 	before_update :setup_teams, if: :started_changed?
 	has_many :game_sessions, dependent: :destroy
 	has_many :teams, dependent: :destroy
@@ -47,25 +46,25 @@ class Game < ApplicationRecord
 		logging("Game Step 3", "Next turn, #{self.set}")
 		logger.debug "not the problem"
 		# reset turn passing number and completed
-		current_turn["passed"] = 0 if current_turn["passed"].present?
-		current_turn["completed"] = false
+		current_turn[:passed] = 0 if current_turn[:passed].present?
+		current_turn[:completed] = false
 		if team_mode
 			# find current team
-			team_number = current_turn["team"]
+			team_number = current_turn[:team]
 			logging("Game Step 3.1", "Last Team Order, #{team_number}")
 
 			# put last player into 'gone' list according to team
-			players_gone[team_number.to_s] << current_turn["nominated_player"] if current_turn["nominated_player"].present?
+			players_gone[team_number.to_s] << current_turn[:nominated_player] if current_turn[:nominated_player].present?
 
 			# check if we are at the end of the teams
 			if team_number == teams.length
-				current_turn["team"] = 1
+				current_turn[:team] = 1
 			else
-				current_turn["team"] += 1
+				current_turn[:team] += 1
 			end
 		else
 			# put last player into 'gone' list without team
-			players_gone << current_turn["nominated_player"] if current_turn["nominated_player"].present?
+			players_gone << current_turn[:nominated_player] if current_turn[:nominated_player].present?
 		end
 		next_player
 	end
@@ -74,7 +73,7 @@ class Game < ApplicationRecord
 		logging("Game Step 4", "Next player #{self.set}")
 
 		if team_mode
-			new_team_number = current_turn["team"]
+			new_team_number = current_turn[:team]
 			logging("Game Step 4.1", "Team order #{new_team_number}")
 
 			new_team = teams.where(order: new_team_number).take
@@ -113,7 +112,7 @@ class Game < ApplicationRecord
 			self.players_gone = []
 		end
 
-		current_turn["nominated_player"] = left_players.first
+		current_turn[:nominated_player] = left_players.first
 
 		logging("Game Step 4.5", "Found next player #{left_players.first}, #{self.set}")
 	end
@@ -130,13 +129,13 @@ class Game < ApplicationRecord
  	def setup_teams
  		if started
 	 		if teams.present? && team_mode
-					turn_order["players_gone"] = {}
+					self.players_gone = {}
 					teams.each_with_index do |team, index|
 						team.update_attributes(order: (index + 1))
-						turn_order["players_gone"][index + 1] = []
+						self.players_gone[index + 1] = []
 					end
 				else
-					turn_order["players_gone"] = []
+					self.players_gone = []
 			end
 		end
  	end
