@@ -43,165 +43,202 @@ RSpec.describe Game, type: :model do
   	describe "to start the game" do
 	  	context "fishbowl" do
 	  		context "with teams," do
-	  			before(:each) do
-	  				@game = FactoryBot.create(:fishbowl, team_mode: true)
-	  				
-	  				5.times {@game.teams.create}
-	  				@game.update_attributes(started: true)
+	  			let(:game) {
+	  				FactoryBot.create(:fishbowl, team_mode: true)
+	  			}
+	  			before do
+	  				5.times {game.teams.create}
+	  				game.update_attributes(started: true)
 	  			end
 	  			it "should setup current round to be the first round" do
-	  				expect(@game.current_round[:round_number]).to eq(@game.rounds.keys.first)
+	  				expect(game.current_round[:round_number]).to eq(game.rounds.keys.first)
 	  			end
 	  			it "should setup players gone according to teams" do
-	  				expect(@game.players_gone.keys.length).to eq(@game.teams.length)
+	  				expect(game.players_gone.keys.length).to eq(game.teams.length)
 	  			end 
 	  		end
 
 	  		context "without teams," do
-	  			before(:all) do
-	  				@game = FactoryBot.create(:fishbowl)
-	  				
-	  				@game.update_attributes(started: true)
+	  			let(:game) {
+	  				FactoryBot.create(:fishbowl)
+	  			}
+	  			before do
+	  				game.update_attributes(started: true)
 	  			end
 	  			it "should setup current round to be the first round" do
-	  				expect(@game.current_round[:round_number]).to eq(@game.rounds.keys.first)
+	  				expect(game.current_round[:round_number]).to eq(game.rounds.keys.first)
 	  			end
 	  			it "should setup players gone according to teams" do
-	  				expect(@game.players_gone).to eq([])
+	  				expect(game.players_gone).to eq([])
 	  			end 
 	  		end
 	  	end
 
 	  	context "ghost" do
-	  		before(:all) do
-	  			@game = FactoryBot.create(:ghost)
-	  			@game_sessions = FactoryBot.build_list(:game_session, 5, game_id: @game.id)
-					@game_sessions.map(&:save)
-	  			@game.update_attributes(started: true)
+	  		let(:game) {
+	  			FactoryBot.create(:ghost)
+	  		}
+
+	  		let(:game_sessions) {
+	  			FactoryBot.build_list(:game_session, 5, game_id: game.id)
+	  		}
+	  		before do
+					game_sessions.map(&:save)
+	  			game.update_attributes(started: true)
 	  		end
 	  		it "should setup current round to be the first round" do
-	  			expect(@game.current_round[:round_number]).to eq(@game.rounds.keys.first.to_i)
+	  			expect(game.current_round[:round_number]).to eq(game.rounds.keys.first.to_i)
 	  		end
 	  		it "should setup current turn nominated player" do
-	  			expect(@game.current_turn[:nominated_player].present?).to be(true)
+	  			expect(game.current_turn[:nominated_player].present?).to be(true)
 	  		end
 	  	end
 
 	  	context "wink murder" do
-	  		before(:all) do
-	  			@game = FactoryBot.create(:wink_murder)
-	  			@game_sessions = FactoryBot.build_list(:game_session, 10, game_id: @game.id)
-					@game_sessions.map(&:save)
-	  			@game.update_attributes(started: true)
+	  		let(:game) {
+	  			FactoryBot.create(:wink_murder)
+	  		}
+
+	  		let(:game_sessions) {
+	  			FactoryBot.build_list(:game_session, 5, game_id: game.id)
+	  		}
+
+	  		before do
+					game_sessions.map(&:save)
+	  			game.update_attributes(started: true)
 	  		end
 	  		it "should nominate a murder randomly from the players" do
-	  			expect(@game_sessions.map(&:id)).to include(*@game.current_round[:murderers])
+	  			expect(game_sessions.map(&:id)).to include(*game.current_round[:murderers])
 	  		end
 	  		it "should set up out list according to murder id" do
-	  			expect(@game.current_round[:out_list].keys).to include(*@game.current_round[:murderers].map(&:to_s))
+	  			expect(game.current_round[:out_list].keys).to include(*game.current_round[:murderers].map(&:to_s))
 	  		end
 	  		it "should advance into round one" do
-	  			expect(@game.current_round[:round_number]).to be(1)
+	  			expect(game.current_round[:round_number]).to be(1)
 	  		end
 	  		it "should set up lookers list according to players id" do
-	  			expect(@game.lookers.keys).to eq(@game.game_sessions.map(&:id).map(&:to_s))
+	  			expect(game.lookers.keys).to eq(game.game_sessions.map(&:id).map(&:to_s))
 	  		end
 	  	end
 	  end
 
 	  describe "to play the game" do
 	  	context "wink murder" do
+	  		let(:game) {
+	  			FactoryBot.create(:wink_murder)
+	  		}
+
+	  		let(:game_sessions) {
+	  			FactoryBot.build_list(:game_session, 10, game_id: game.id)
+	  		}
 	  		before(:each) do
-	  			@game = FactoryBot.create(:wink_murder)
-	  			@game.options = {number_of_murderers: 2, enable_chat: false}
-	  			@game.save
-	  			@game_sessions = FactoryBot.build_list(:game_session, 10, game_id: @game.id)
-					@game_sessions.map(&:save)
-	  			@game.update_attributes(started: true)
-	  			@civilians = @game_sessions.select { |s| !@game.current_round[:murderers].include?(s.id) }
-	  			@killer_id =  @game.current_round[:murderers].first
-	  			@second_killer_id =  @game.current_round[:murderers].last
-	  			@outed = @civilians[rand(@civilians.length - 1)]
-	  			@potential_points = (@civilians.length / @game.current_round[:murderers].length).round
+	  			game.options = {number_of_murderers: 2, enable_chat: false}
+	  			game.save
+					game_sessions.map(&:save)
+	  			game.update_attributes(started: true)
 	  		end
 
-	  		def commit_murder(game, killer_id, outed_id)
-	  			game.looking_turn[:looker] = killer_id
-	  			game.looking_turn[:looking] = outed_id
+	  		let(:civilians) {
+	  			game_sessions.select { |s| !game.current_round[:murderers].include?(s.id) }
+	  		}
+
+	  		let(:killer_id) {
+	  			game.current_round[:murderers][rand(game.current_round[:murderers].length - 1)]
+	  		}
+
+	  		let(:second_killer_id) {
+	  			murderers = game.current_round[:murderers].dup
+	  			murderers.delete(killer_id)
+	  			murderers[rand(murderers.length - 1)]
+	  		}
+
+	  		let(:outed) {
+	  			civilians[rand(civilians.length - 1)]
+	  		}
+
+	  		def commit_murder(id_killer, outed_id)
+	  			game.looking_turn[:looker] = id_killer
+	  			game.looking_turn[:lookee] = outed_id
 	  			game.save
 	  			game.looking_turn[:looker] = outed_id
-	  			game.looking_turn[:looking] = killer_id
+	  			game.looking_turn[:lookee] = id_killer
 	  			game.save
 		  		game.current_turn[:outed] = outed_id
-		  		game.current_turn[:murderer] = killer_id
+		  		game.current_turn[:murderer] = id_killer
 		  		game.save
+		  		game
 	  		end
 
 	  		it "should save who is and is not looking at each player" do
-	  			randIndex = rand(@game_sessions.length - 1)
-	  			looking = @game_sessions[randIndex]
-	  			looker = @game_sessions[randIndex + 1] || @game_sessions[randIndex - 1]
-	  			@game.looking_turn[:looker] = looker.id
-	  			@game.looking_turn[:looking] = looking.id
-	  			@game.save
-	  			expect(@game.lookers[looking.id.to_s]).to include(looker.id)
-	  			@game_sessions.each do |session|
-	  				if session.id != looking.id
-	  					expect(@game.lookers[session.id.to_s]).not_to include(looker.id)
+	  			randIndex = rand(game_sessions.length - 1)
+	  			lookee = game_sessions[randIndex]
+	  			looker = game_sessions[randIndex + 1] || game_sessions[randIndex - 1]
+	  			game.looking_turn[:looker] = looker.id
+	  			game.looking_turn[:lookee] = lookee.id
+	  			game.save
+	  			expect(game.lookers[lookee.id.to_s]).to include(looker.id)
+	  			game_sessions.each do |session|
+	  				if session.id != lookee.id
+	  					expect(game.lookers[session.id.to_s]).not_to include(looker.id)
 	  				end
 	  			end
 	  		end
 
 	  		it "should save those outed if murderer and civilian are looking at each other" do
-	  			commit_murder(@game, @killer_id, @outed.id)
-		  		@game.reload
-		  		expect(@game.current_round[:out_list][@killer_id.to_s]).to include(@outed.id)
+	  			outed_id = outed.id
+	  			new_killer_id = killer_id
+		  		expect(commit_murder(new_killer_id, outed_id).current_round[:out_list][new_killer_id.to_s]).to include(outed_id)
 	  		end
 
 	  		it "should NOT save those outed if murderer and civilian are NOT looking at each other" do
-	  			@game.current_turn[:outed] = @outed.id
-		  		@game.current_turn[:murderer] = @killer_id
-		  		@game.save
-		  		@game.reload
-		  		expect(@game.current_round[:out_list][@killer_id.to_s]).not_to include(@outed.id)
+	  			outed_id = outed.id
+	  			new_killer_id = killer_id
+	  			game.current_turn[:outed] = outed_id
+		  		game.current_turn[:murderer] = new_killer_id
+		  		game.save
+		  		game.reload
+		  		expect(game.current_round[:out_list][new_killer_id.to_s]).not_to include(outed_id)
 	  		end
 
 	  		it "should NOT save those outed if only murderer  is NOT looking at the civilian" do
-	  			@game.looking_turn[:looker] = @killer_id
-	  			@game.looking_turn[:looking] = @outed.id
-	  			@game.save
-	  			@game.current_turn[:outed] = @outed.id
-		  		@game.current_turn[:murderer] = @killer_id
-		  		@game.save
-		  		@game.reload
-		  		expect(@game.current_round[:out_list][@killer_id.to_s]).not_to include(@outed.id)
+	  			outed_id = outed.id
+	  			new_killer_id = killer_id
+
+	  			game.looking_turn[:looker] = new_killer_id
+	  			game.looking_turn[:lookee] = outed_id
+	  			game.save
+	  			game.current_turn[:outed] = outed_id
+		  		game.current_turn[:murderer] = new_killer_id
+		  		game.save
+		  		game.reload
+		  		expect(game.current_round[:out_list][new_killer_id.to_s]).not_to include(outed_id)
 	  		end
 
 	  		it "should end the round if all outed" do
-	  			killer_id =  @game.current_round[:murderers].first
-		  		@civilians.each do |civilian|
-
-		  			commit_murder(@game, killer_id, civilian.id)
-
-			  		expect(@game.current_round[:out_list][killer_id.to_s]).to include(civilian.id)
+	  			new_killer_id = killer_id
+		  		civilians.each do |civilian|
+		  			updated_game = commit_murder(new_killer_id, civilian.id)
+			  		expect(updated_game.current_round[:out_list][new_killer_id.to_s]).to include(civilian.id)
 			  	end
-			  	expect(@game.current_round[:completed]).to be(true)
+			  	expect(game.current_round[:completed]).to be(true)
 	  		end
 
 	  		it "should grant murderer a point for the round when one is murdered" do
-	  			murderer = @game_sessions.select { |s| s.id == @killer_id }.first
-	  			old_score = murderer.scores[@game.current_round[:round_number].to_s]
+	  			new_killer_id = killer_id
+	  			outed_id = outed.id
+	  			murderer = game_sessions.select { |s| s.id == new_killer_id }.first
+	  			old_score = murderer.scores[game.current_round[:round_number].to_s]
 	  			
-	  			commit_murder(@game, @killer_id, @outed.id)
+	  			commit_murder(new_killer_id, outed_id)
 	  			
 		  		murderer.reload
-		  		new_score = murderer.scores[@game.current_round[:round_number].to_s]
+		  		new_score = murderer.scores[game.current_round[:round_number].to_s]
 		  		expect(new_score).to eq(old_score += 1)
 	  		end
 
 	  		# accusing murderers
 
-	  		def seconder(game, civilians)
+	  		def seconder
 	  			game.accusations[:first][:accuser] = civilians[1].id
 	  			game.current_round["phase"] = "seconder-seeking"
 	  			game.save
@@ -209,187 +246,210 @@ RSpec.describe Game, type: :model do
 	  			game.current_round["phase"] = "accusation"
 	  		end
 
+	  		def get_old_scores
+	  			first_accuser = game_sessions.select { |s| s.id == game.accusations[:first][:accuser] }.first
+	  			first_accuser_old_score = first_accuser.scores[game.current_round[:round_number].to_s]
+	  			second_accuser = game_sessions.select { |s| s.id == game.accusations[:second][:accuser] }.first
+	  			second_accuser_old_score = second_accuser.scores[game.current_round[:round_number].to_s]
+	  			
+	  			return first_accuser, second_accuser, first_accuser_old_score, second_accuser_old_score
+	  		end
+
+	  		def get_new_scores(first_accuser, second_accuser)
+	  			first_accuser.reload
+	  			second_accuser.reload
+	  			first_accuser_new_score = first_accuser.scores[game.current_round[:round_number].to_s]
+	  			second_accuser_new_score = second_accuser.scores[game.current_round[:round_number].to_s]
+	  			return first_accuser_new_score, second_accuser_new_score
+	  		end
+
 	  		it "should not allow second accuser if game is not in seconder-seaking phase" do
-	  			@game.accusations[:first][:accuser] = @civilians[1].id
-	  			@game.save
-	  			@game.reload
-	  			expect(@game.accusations[:second]).to be(nil)
+	  			game.accusations[:first][:accuser] = civilians[1].id
+	  			game.save
+	  			game.reload
+	  			expect(game.accusations[:second]).to be(nil)
 	  		end
 
 	  		it "should not allow any accused if game is not in accusation phase" do
-	  			@game.accusations[:first][:accuser] = @civilians[1].id
-	  			@game.current_round["phase"] = "seconder-seeking"
-	  			@game.save
-	  			@game.reload
-	  			expect(@game.accusations.keys).to include("second")
-	  			expect(@game.accusations[:second].keys).to include("accuser")
-	  			expect(@game.accusations[:second].keys).not_to include("accused")
-	  			expect(@game.accusations[:first].keys).not_to include("accused")
+	  			game.accusations[:first][:accuser] = civilians[1].id
+	  			game.current_round["phase"] = "seconder-seeking"
+	  			game.save
+	  			game.reload
+	  			expect(game.accusations.keys).to include("second")
+	  			expect(game.accusations[:second].keys).to include("accuser")
+	  			expect(game.accusations[:second].keys).not_to include("accused")
+	  			expect(game.accusations[:first].keys).not_to include("accused")
 	  		end
 
 	  		it "should allow naming accused if game is in accusation phase" do
-	  			seconder(@game, @civilians)
-	  			@game.save
-	  			@game.reload
-	  			expect(@game.accusations[:first].keys).to include("accused")
-	  			expect(@game.accusations[:second].keys).to include("accused")
+	  			seconder
+	  			game.save
+	  			game.reload
+	  			expect(game.accusations[:first].keys).to include("accused")
+	  			expect(game.accusations[:second].keys).to include("accused")
 	  		end
 
 	  		it "should accept named accused if game is in challenge phase" do
-	  			@game.accusations[:first][:accused] = @civilians[3].id
-	  			@game.current_round["phase"] = "challenge"
-	  			@game.save
-	  			@game.reload
-	  			expect(@game.accusations[:first][:accused]).to eq(@civilians[3].id)
+	  			game.accusations[:first][:accused] = civilians[3].id
+	  			game.current_round["phase"] = "challenge"
+	  			game.save
+	  			game.reload
+	  			expect(game.accusations[:first][:accused]).to eq(civilians[3].id)
 	  		end
 
-	  		it "should add the murderer to out_list and remove from murderer list if one of the accuser is correct (first)" do
-	  			seconder(@game, @civilians)
-	  			@game.accusations[:first][:accused] = @killer_id
-	  			@game.accusations[:second][:accused] = @civilians[3].id
-	  			@game.current_round["phase"] = "challenge"
-	  			@game.save
-	  			@game.reload
-	  			expect(@game.current_round[:murderers]).not_to include(@killer_id)
-	  			out_players = @game.current_round[:out_list].values.flatten
-	  			expect(out_players).to include(@killer_id)
-	  			expect(out_players).not_to include(@game.accusations[:second][:accused])
-	  			expect(out_players).to include(@game.accusations[:second][:accuser])
+	  		it "should add one murderer to out_list if both accusers are correct" do
+	  			seconder
+	  			game.accusations[:first][:accused] = killer_id
+	  			game.accusations[:second][:accused] = killer_id
+	  			game.current_round["phase"] = "challenge"
+	  			game.save
+	  			game.reload
+	  			out_players = game.current_round[:out_list].values.flatten
+	  			expect(out_players).to include(game.accusations[:first][:accused])
+	  			expect(out_players).to include(game.accusations[:second][:accused])
+	  			expect(out_players).not_to include(game.accusations[:first][:accuser])
+	  			expect(out_players).not_to include(game.accusations[:second][:accuser])
 	  		end
 
-	  		it "should add the murderer to out_list and remove from murderer list if one of the accuser is correct (second)" do
-	  			seconder(@game, @civilians)
-	  			@game.accusations[:first][:accused] = @civilians[3].id 
-	  			@game.accusations[:second][:accused] = @killer_id
-	  			@game.current_round["phase"] = "challenge"
-	  			@game.save
-	  			@game.reload
-	  			expect(@game.current_round[:murderers]).not_to include(@killer_id)
-	  			out_players = @game.current_round[:out_list].values.flatten
-	  			expect(out_players).to include(@killer_id)
-	  			expect(out_players).not_to include(@game.accusations[:first][:accused])
-	  			expect(out_players).to include(@game.accusations[:first][:accuser])
+	  		it "should add one murderer to out_list if both accusers are correct" do
+	  			seconder
+	  			game.accusations[:first][:accused] = killer_id
+	  			game.accusations[:second][:accused] = second_killer_id
+	  			game.current_round["phase"] = "challenge"
+	  			game.save
+	  			game.reload
+	  			out_players = game.current_round[:out_list].values.flatten
+	  			expect(out_players).to include(game.accusations[:first][:accused])
+	  			expect(out_players).to include(game.accusations[:second][:accused])
+	  			expect(out_players).not_to include(game.accusations[:first][:accuser])
+	  			expect(out_players).not_to include(game.accusations[:second][:accuser])
+	  		end
+
+	  		it "should add the murderer to out_list if one of the accuser is correct (first)" do
+	  			seconder
+	  			game.accusations[:first][:accused] = killer_id
+	  			game.accusations[:second][:accused] = civilians[3].id
+	  			game.current_round["phase"] = "challenge"
+	  			game.save
+	  			game.reload
+	  			out_players = game.current_round[:out_list].values.flatten
+	  			expect(out_players).to include(game.accusations[:first][:accused])
+	  			expect(out_players).to include(game.accusations[:second][:accuser])
+	  			expect(out_players).not_to include(game.accusations[:first][:accuser])
+	  			expect(out_players).not_to include(game.accusations[:second][:accused])
+	  		end
+
+	  		it "should add the murderer to out_list if one of the accuser is correct (second)" do
+	  			seconder
+	  			game.accusations[:first][:accused] = civilians[3].id 
+	  			game.accusations[:second][:accused] = killer_id
+	  			game.current_round["phase"] = "challenge"
+	  			game.save
+	  			game.reload
+	  			out_players = game.current_round[:out_list].values.flatten
+	  			expect(out_players).to include(game.accusations[:first][:accuser])
+	  			expect(out_players).to include(game.accusations[:second][:accused])
+	  			expect(out_players).not_to include(game.accusations[:first][:accused])
+	  			expect(out_players).not_to include(game.accusations[:second][:accuser])
 	  		end
 
 	  		it "should NOT add the murderer to out_list and NOT remove from murderer list if both of the accused are incorrect" do
-	  			seconder(@game, @civilians)
-	  			@game.accusations[:first][:accused] = @civilians[3].id
-	  			@game.accusations[:second][:accused] = @civilians[4].id
-	  			@game.current_round["phase"] = "challenge"
-	  			@game.save
-	  			@game.reload
-	  			expect(@game.current_round[:murderers]).to include(@killer_id)
-	  			out_players = @game.current_round[:out_list].values.flatten
-	  			expect(out_players).not_to include(@killer_id)
-	  			expect(out_players).not_to include(@civilians[3].id)
-	  			expect(out_players).not_to include(@civilians[4].id)
-	  			expect(out_players).to include(@game.accusations[:first][:accuser])
-	  			expect(out_players).to include(@game.accusations[:second][:accuser])
+	  			seconder
+	  			game.accusations[:first][:accused] = civilians[3].id
+	  			game.accusations[:second][:accused] = civilians[4].id
+	  			game.current_round["phase"] = "challenge"
+	  			game.save
+	  			game.reload
+	  			out_players = game.current_round[:out_list].values.flatten
+	  			expect(out_players).not_to include(killer_id)
+	  			expect(out_players).not_to include(civilians[3].id)
+	  			expect(out_players).not_to include(civilians[4].id)
+	  			expect(out_players).to include(game.accusations[:first][:accuser])
+	  			expect(out_players).to include(game.accusations[:second][:accuser])
 	  		end
-	  		
+
+	  		# scoring calculations for players to catch murerer
+
 	  		it "should grant first accuser the potential points if only first accuser is correct" do
-	  			seconder(@game, @civilians)
-	  			@game.accusations[:first][:accused] = @killer_id
-	  			@game.accusations[:second][:accused] = @civilians[3].id
-	  			@game.current_round["phase"] = "challenge"
+	  			seconder
+	  			game.accusations[:first][:accused] = killer_id
+	  			game.accusations[:second][:accused] = civilians[3].id
+	  			game.current_round["phase"] = "challenge"
 
-	  			first_accuser = @game_sessions.select { |s| s.id == @game.accusations[:first][:accuser] }.first
-	  			first_accuser_old_score = first_accuser.scores[@game.current_round[:round_number].to_s]
-	  			second_accuser = @game_sessions.select { |s| s.id == @game.accusations[:second][:accuser] }.first
-	  			second_accuser_old_score = second_accuser.scores[@game.current_round[:round_number].to_s]
-	  			@game.save
-	  			@game.reload
-	  			first_accuser.reload
-	  			second_accuser.reload
-	  			first_accuser_new_score = first_accuser.scores[@game.current_round[:round_number].to_s]
-	  			second_accuser_new_score = second_accuser.scores[@game.current_round[:round_number].to_s]
-
-	  	
-	  			expect(first_accuser_new_score).to eq(first_accuser_old_score + @potential_points)
-	  			expect(second_accuser_new_score).not_to eq(second_accuser_old_score + @potential_points)
-	  		end
+	  			first_accuser, second_accuser, first_accuser_old_score, second_accuser_old_score = get_old_scores
+	  			potential_points = (civilians.length / game.current_round[:murderers].length).round
+	  			game.save
+	  			game.reload
+	  			
+	  			first_accuser_new_score, second_accuser_new_score = get_new_scores(first_accuser, second_accuser)
+	  			expect(first_accuser_new_score).to eq(first_accuser_old_score + potential_points)
+	  			expect(second_accuser_new_score).not_to eq(second_accuser_old_score + potential_points)
+	  		end	  		
 
 	  		it "should grant second accuser all the potential points if first accuser is correct" do
-	  			seconder(@game, @civilians)
-	  			@game.accusations[:first][:accused] = @civilians[3].id
-	  			@game.accusations[:second][:accused] = @killer_id
-	  			@game.current_round["phase"] = "challenge"
+	  			seconder
+	  			game.accusations[:first][:accused] = civilians[3].id
+	  			game.accusations[:second][:accused] = killer_id
+	  			game.current_round["phase"] = "challenge"
 
-	  			first_accuser = @game_sessions.select { |s| s.id == @game.accusations[:first][:accuser] }.first
-	  			first_accuser_old_score = first_accuser.scores[@game.current_round[:round_number].to_s]
-	  			second_accuser = @game_sessions.select { |s| s.id == @game.accusations[:second][:accuser] }.first
-	  			second_accuser_old_score = second_accuser.scores[@game.current_round[:round_number].to_s]
+	  			first_accuser, second_accuser, first_accuser_old_score, second_accuser_old_score = get_old_scores
 
-	  			@game.save
-	  			@game.reload
-					
-					first_accuser.reload
-	  			second_accuser.reload
-	  			first_accuser_new_score = first_accuser.scores[@game.current_round[:round_number].to_s]
-	  			second_accuser_new_score = second_accuser.scores[@game.current_round[:round_number].to_s]
+	  			potential_points = (civilians.length / game.current_round[:murderers].length).round
 
-	  			expect(first_accuser_new_score).not_to eq(first_accuser_old_score + @potential_points)
-	  			expect(second_accuser_new_score).to eq(second_accuser_old_score + @potential_points)
+	  			game.save
+	  			game.reload
+				
+					first_accuser_new_score, second_accuser_new_score = get_new_scores(first_accuser, second_accuser)
+
+	  			expect(first_accuser_new_score).not_to eq(first_accuser_old_score + potential_points)
+	  			expect(second_accuser_new_score).to eq(second_accuser_old_score + potential_points)
 	  		end
 
-	  		it "should grant the all correct accusers with the same accused all the potential points" do
-	  			seconder(@game, @civilians)
-	  			@game.accusations[:first][:accused] = @killer_id
-	  			@game.accusations[:second][:accused] = @killer_id
-	  			@game.current_round["phase"] = "challenge"
+	  		it "should grant all correct accusers with the same accused all the potential points" do
+	  			seconder
+	  			game.accusations[:first][:accused] = killer_id
+	  			game.accusations[:second][:accused] = killer_id
+	  			game.current_round["phase"] = "challenge"
 
+	  			first_accuser, second_accuser, first_accuser_old_score, second_accuser_old_score = get_old_scores
+	  			potential_points = (civilians.length / game.current_round[:murderers].length).round
 
-	  			first_accuser = @game_sessions.select { |s| s.id == @game.accusations[:first][:accuser] }.first
-	  			first_accuser_old_score = first_accuser.scores[@game.current_round[:round_number].to_s]
-	  			second_accuser = @game_sessions.select { |s| s.id == @game.accusations[:second][:accuser] }.first
-	  			second_accuser_old_score = second_accuser.scores[@game.current_round[:round_number].to_s]
+	  			game.save
+	  			game.reload
 
-	  			@game.save
-	  			@game.reload
-					
-					first_accuser.reload
-	  			second_accuser.reload
-	  			first_accuser_new_score = first_accuser.scores[@game.current_round[:round_number].to_s]
-	  			second_accuser_new_score = second_accuser.scores[@game.current_round[:round_number].to_s]
-
-	  			expect(first_accuser_new_score).to eq(first_accuser_old_score + @potential_points)
-	  			expect(second_accuser_new_score).to eq(second_accuser_old_score + @potential_points)
+					first_accuser_new_score, second_accuser_new_score = get_new_scores(first_accuser, second_accuser)
+	  			
+	  			expect(first_accuser_new_score).to eq(first_accuser_old_score + potential_points)
+	  			expect(second_accuser_new_score).to eq(second_accuser_old_score + potential_points)
 	  		end
 
 	  		it "should grant the all correct accusers with different accused all the potential points" do
-	  			seconder(@game, @civilians)
-	  			@game.accusations[:first][:accused] = @second_killer_id
-	  			@game.accusations[:second][:accused] = @killer_id
-	  			@game.current_round["phase"] = "challenge"
+	  			seconder
+	  			game.accusations[:first][:accused] = second_killer_id
+	  			game.accusations[:second][:accused] = killer_id
+	  			game.current_round["phase"] = "challenge"
 
+	  			first_accuser, second_accuser, first_accuser_old_score, second_accuser_old_score = get_old_scores
+	  			potential_points = (civilians.length / game.current_round[:murderers].length).round
 
-	  			first_accuser = @game_sessions.select { |s| s.id == @game.accusations[:first][:accuser] }.first
-	  			first_accuser_old_score = first_accuser.scores[@game.current_round[:round_number].to_s]
-	  			second_accuser = @game_sessions.select { |s| s.id == @game.accusations[:second][:accuser] }.first
-	  			second_accuser_old_score = second_accuser.scores[@game.current_round[:round_number].to_s]
-
-	  			@game.save
-	  			@game.reload
+	  			game.save
+	  			game.reload
 					
-					first_accuser.reload
-	  			second_accuser.reload
-	  			first_accuser_new_score = first_accuser.scores[@game.current_round[:round_number].to_s]
-	  			second_accuser_new_score = second_accuser.scores[@game.current_round[:round_number].to_s]
-
-	  			expect(first_accuser_new_score).to eq(first_accuser_old_score + @potential_points)
-	  			expect(second_accuser_new_score).to eq(second_accuser_old_score + @potential_points)
+					first_accuser_new_score, second_accuser_new_score = get_new_scores(first_accuser, second_accuser)
+	  			expect(first_accuser_new_score).to eq(first_accuser_old_score + potential_points)
+	  			expect(second_accuser_new_score).to eq(second_accuser_old_score + potential_points)
 	  		end
 	  		
 	  		it "should end the round if all killers are found" do
-	  			@game.current_round[:murderers].each do |killer_id|
-	  				seconder(@game, @civilians)
-	  				@game.accusations[:first][:accused] = killer_id
-	  				@game.accusations[:second][:accused] = @civilians[3].id
-	  				@game.current_round["phase"] = "challenge"
-	  				@game.save
+	  			game.current_round[:murderers].each do |killer_id|
+	  				seconder
+	  				game.accusations[:first][:accused] = killer_id
+	  				game.accusations[:second][:accused] = civilians[3].id
+	  				game.current_round["phase"] = "challenge"
+	  				game.save
 	  			end
-	  			@game.reload
-	  			expect(@game.current_round[:completed]).to eq(true)
+	  			game.reload
+	  			expect(game.current_round[:completed]).to eq(true)
 	  		end
 	  		
 	  	end

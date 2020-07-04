@@ -27,22 +27,26 @@ class WinkMurder < Game
 		end
 	end
 
+	# TODO if looking at becomes multiple looking_turn[:lookee] should be array
 	def play
 		if current_round[:completed] && !ended
 			next_round
-		elsif looking_turn[:looker].present? && looking_turn[:looking].present?
-			lookers.each do |key, value|
-				if value.include?(looking_turn[:looker]) && looking_turn[:looking].to_s == key
-					value.delete(looking_turn[:looker])
-				end
-			end
+		elsif looking_turn[:looker].present? && looking_turn[:lookee].present?
 
-			lookers[looking_turn[:looking].to_s].push(looking_turn[:looker])
+			lookers[looking_turn[:lookee].to_s].delete(looking_turn[:looker])
+
+			lookers[looking_turn[:lookee].to_s].push(looking_turn[:looker])
+
 			looking_turn[:looker] = nil
-			looking_turn[:looking] = nil
+			looking_turn[:lookee] = nil
+
+		looking_turn[:looker]
+		looking_turn[:lookee]
+		lookers
 
 		elsif current_round[:phase] == "challenge"
-			possible_full_score = (game_sessions.length / options[:number_of_murderers]).round
+			number_of_surviving_civilians = game_sessions.length - current_round[:murderers].length - total_out_list.length
+			potential_points = ( number_of_surviving_civilians / current_round[:murderers].length).round
 			first_accused = accusations[:first][:accused]
 			second_accused = accusations[:second][:accused]
 
@@ -50,46 +54,50 @@ class WinkMurder < Game
 			second_accuser = accusations[:second][:accuser]
 
 			if current_round[:murderers].include?(first_accused)
-				out_player_id = current_round[:murderers].delete(first_accused)
-				player_out(out_player_id, first_accuser) if out_player_id.present?
+				player_out(first_accused, first_accuser)
 
-				player_scores(first_accuser, possible_full_score)
+				player_scores(first_accuser, potential_points)
+				end_round?
 			else
 				player_out(first_accuser, "challenge_lost")
+				end_round?
 			end
 
 			if current_round[:murderers].include?(second_accused)
-				out_player_id = current_round[:murderers].delete(second_accused)
-				player_out(out_player_id, second_accuser) if out_player_id.present?
+				player_out(second_accused, second_accuser)
 
-				player_scores(second_accuser, possible_full_score)
+				player_scores(second_accuser, potential_points)
+				end_round?
 			else
 				player_out(second_accuser, "challenge_lost")
+				end_round?
 			end
-			
 		elsif current_turn[:outed].present?
 			murderer_id = current_turn[:murderer]
 			outed_id = current_turn[:outed]
-
 			if lookers[murderer_id.to_s].include?(outed_id) && lookers[outed_id.to_s].include?(murderer_id)
-				current_round[:out_list][murderer_id.to_s] << current_turn[:outed]
-
+				current_round[:out_list][murderer_id.to_s] << outed_id
 				player_scores(murderer_id.to_i, 1)
-				
-				current_turn[:out_list] = nil
+				current_turn[:outed] = nil
 				current_turn[:murderer] = nil
 				lookers[murderer_id.to_s].delete(outed_id)
 
-				number_of_murderers = current_round[:murderers].length
-				civilian_numbers = game_sessions.length - number_of_murderers
-
-				all_out_list = current_round[:out_list].values.flatten
-				if all_out_list.length == civilian_numbers
-					current_round[:completed] = true
-					rounds_played[current_round[:round_number]] = current_round.merge("name" => current_round[:round_number].to_s)
-				end
+				end_round?
 			end
+			
 		end
+	end
+
+	def end_round?
+		if all_gone(civilian_ids) || all_gone(current_round[:murderers])
+			current_round[:completed] = true
+			rounds_played[current_round[:round_number]] = current_round.merge("name" => current_round[:round_number].to_s)
+			return
+		end
+	end
+
+	def all_gone(check_list)
+		return check_list.all? {|id| total_out_list.include?(id)}
 	end
 
 	def player_scores(player_id, score_amount)
@@ -139,6 +147,14 @@ class WinkMurder < Game
 		end
 	end
 
+	def total_out_list
+		current_round[:out_list].values.flatten
+	end
+
+	def civilian_ids
+		game_sessions.map(&:id) - current_round[:murderers]
+	end
+
 	def check_accusation_phases
 		if current_round[:phase] == 'winking'
 			accusations.delete_if { |key, value| key == "second" && value.present? }
@@ -156,7 +172,7 @@ class WinkMurder < Game
 	def after_started?
 		if current_round[:round_number] > 0 && current_turn[:outed].present?
 			return true
-		elsif current_round[:round_number] > 0 && looking_turn[:looker].present? && looking_turn[:looking].present?
+		elsif current_round[:round_number] > 0 && looking_turn[:looker].present? && looking_turn[:lookee].present?
 			return true
 		elsif accusations[:first][:accuser].present?
 			return true
@@ -180,7 +196,7 @@ class WinkMurder < Game
 					accuser: nil
 				}
 			},
-			looking_turn: { looker: nil, looking: nil },
+			looking_turn: { looker: nil, lookee: nil },
 			lookers: {},
 			players_gone: []
 		}
