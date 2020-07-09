@@ -1,7 +1,7 @@
 <template>
   <div class="tile">
+    <game-header :game="game" :image-size="'100px'"></game-header>
     <div class="tile is-vertical" v-if="!cluesSubmitted">
-      <game-header :game="game" :image-size="'100px'"></game-header>
       <div class="tile is-parent card-pot">
         <div class=" tile is-child card-stack">
           <game-paper v-for="(c, index) in 3" :key="index" v-model="currentClue" :ref="'clue_' + index" :clue="currentClue" @input="enableButton"></game-paper>
@@ -72,8 +72,7 @@ export default {
       cluesToAdd: [],
       clueNumbers: 5,
       currentClue: "",
-      disableAdd: true,
-      gameImage: fishbowlImage
+      disableAdd: true
     }
   },
   computed: {

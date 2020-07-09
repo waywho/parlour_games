@@ -148,11 +148,11 @@ export const store = new Vuex.Store({
 			commit('setGameSession')
 		},
 		updateGame({commit, dispatch, state}, game) {
-			console.log('update payload', game)
+			console.log('update game', game)
 			return new Promise((resolve, reject) => {
 				gameAxios.put(`${game.id}`, {game: game})
           .then(res => {
-            console.log('game updated', res)
+            console.log('game updated')
             resolve(res)
           })
           .catch(error => {

@@ -3,7 +3,7 @@
                  has-modal-card
                  aria-role="dialog"
                  aria-modal
-                 :can-cancel="false"
+                 :can-cancel="cancelPlaces"
                  >
     <div class="modal-content">
     <!-- Any other Bulma elements you want -->
@@ -12,6 +12,7 @@
         
         <div class="title is-4">{{currentRound.name}}</div>
         <div v-if="showScores">
+          <p>{{currentRound.instructions}}</p>
           <score-board :teams="scoringParties" :rounds="game.set.rounds_played" class="is-fullwidth"></score-board>
         </div>
         <div v-else>
@@ -30,7 +31,6 @@
 <script>
 import scoreBoard from './score_board';
 import { mapGetters } from 'vuex';
-
 export default {
   props: {
     currentRound: {
@@ -80,6 +80,11 @@ export default {
       // console.log('inst', this.currentRound.instructions)
       // console.log("array", typeof(this.currentRound.instructions))
       return typeof(this.currentRound.instructions) == 'object'
+    },
+    cancelPlaces: function() {
+      if(this.cancelOutside) {
+        return ['outside']
+      }
     }
   },
   watch: {
@@ -95,12 +100,17 @@ export default {
     // }
   },
   methods: {
+    close: function() {
+      this.isModalActive = false
+    },
+    activate: function() {
+      this.isModalActive = true
+    },
     nextRound: function() {
-      let newSet = this.game.set
-      newSet.current_round.round_number += 1
+      let roundData = this.game.set.current_round
+     roundData.round_number += 1
       this.$store.dispatch('updateGame', {
           id: this.game.id,
-          set: newSet
         }).then(res => {
           // console.log('dispatched update received', res)
           this.isModalActive = false
@@ -111,7 +121,8 @@ export default {
           id: this.game.id,
           ended: true
         }).then(res => {
-          // console.log('dispatched update received', res)
+          // console.log('dispatched update received', res
+
           this.isModalActive = false
         })
     }

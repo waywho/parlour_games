@@ -46,6 +46,10 @@ a:hover {
   overflow: visible;
 }
 
+.wrap-tile {
+   flex-wrap: wrap;
+}
+
 .center-tile {
   display: flex !important;
   justify-content: center !important;

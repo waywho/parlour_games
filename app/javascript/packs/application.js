@@ -32,7 +32,7 @@ import _ from 'lodash'
 
 // import VueDraggable from 'vue-draggable'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faAngleLeft, faAngleRight } from '@fortawesome/free-solid-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Buefy from 'buefy'
 import '../styles/global.scss'
@@ -42,7 +42,7 @@ export const bus = new Vue({})
 	
 document.addEventListener('DOMContentLoaded', () => {
 	Vue.use(Fitty)
-	library.add(faAngleLeft, faAngleRight)
+	library.add(fas)
 	Vue.component('font-awesome-icon', FontAwesomeIcon);
 	Vue.use(Buefy, {
 		defaultFieldLabelPosition: 'on-border',

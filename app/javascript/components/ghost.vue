@@ -92,7 +92,6 @@ export default {
   data: function () {
     return {
       showChallenge: false,
-      gameImage: ghostImage,
       options: {
         minSize: 8,
         maxSize: 120

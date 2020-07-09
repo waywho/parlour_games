@@ -36,8 +36,8 @@ class Fishbowl < Game
 
 	def next_round
 		logging("Game Step 2", "Next round, #{self.set}")
-		# round_info = rounds[current_round[:round_number]]
-		# rounds_played[current_round[:round_number].to_s] = { name: round_info[:name], score_round: round_info[:score_round]}
+		round_info = self.rounds[current_round[:round_number]]
+		rounds_played[current_round[:round_number]] = { name: round_info[:name], score_round: round_info[:score_round]}
 		if current_round[:round_number] == rounds.keys.last
 			current_round[:completed] = true
 			current_turn[:team] = 0

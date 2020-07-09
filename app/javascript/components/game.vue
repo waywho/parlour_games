@@ -1,5 +1,5 @@
 <template>
-  <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost"></component>
+  <component class="game" :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost"></component>
 </template>
 
 <script>
@@ -145,5 +145,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

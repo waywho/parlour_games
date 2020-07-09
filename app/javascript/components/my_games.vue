@@ -50,11 +50,6 @@ export default {
 </script>
 
 <style scoped>
-
-.wrap-tile {
-   flex-wrap: wrap;
-}
-
 .item-hover:hover {
   background-color: #363636;
   color: #fff;

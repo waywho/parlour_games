@@ -140,7 +140,6 @@ export default {
   },
   data: function () {
     return {
-      gameImage: fishbowlImage,
       currentGame: null,
       clues: null,
       randIndex: null,
