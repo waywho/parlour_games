@@ -18,4 +18,8 @@ FactoryBot.define do
   factory :ghost, parent: :game, class: 'Ghost' do
     name { "Ghost" }
   end
+
+  factory :wink_murder, parent: :game, class: 'WinkMurder' do
+    name { "WinkMurder" }
+  end
 end

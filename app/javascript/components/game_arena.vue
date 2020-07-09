@@ -3,7 +3,7 @@
     <div class="column is-two-thrids-desktop is-half-tablet">
       <div class="columns is-mobile is-centered is-vcentered">
         <div class="column center-tile is-full-size-mobile is-full-size-desktop">
-          <game-header class="game-header" :game="game" :game-image="gameImage"></game-header>
+          <game-header class="game-header" :game="game"></game-header>
           <div>
             <div v-if="!game.ended"><b>Round: </b>
               <b-tooltip :label="currentRound.instructions" type="is-dark"
@@ -97,9 +97,8 @@ import player from './player';
 import gamePaper from './game_paper';
 import { bus } from '../packs/application';
 import gameHeader from './game_header';
-import fishbowlImage from '../assets/fish-bowl-glow.png';
 import playerTurn from './player_turn';
-import gameBehaviours from '../mixins/gameBehaviours'
+import gameBehaviours from '../mixins/gameBehavioursMixin'
 
 export default {
   props: {
@@ -141,7 +140,6 @@ export default {
   },
   data: function () {
     return {
-      gameImage: fishbowlImage,
       currentGame: null,
       clues: null,
       randIndex: null,
@@ -198,17 +196,17 @@ export default {
   methods: {
     start: function() {
       if(this.currentGame.turn_order.current_turn.passed >= 3) {
-        console.log('more than 3')
+        // console.log('more than 3')
         return
       }
       this.randIndex = Math.floor(Math.random() * this.currentGame.set.clues.length)
       if(!this.turnStarted) {
         this.turnStarted = true
         // this.$refs.gameTimer.startTimer()
-        console.log('timer step 1 start')
+        // console.log('timer step 1 start')
         this.gameSubscription.turnStart()
       } else {
-        console.log("passing clue")
+        // console.log("passing clue")
         this.currentGame.turn_order.current_turn.passed += 1
         this.updateGame()
       }
@@ -221,10 +219,10 @@ export default {
       this.nominatedPlayer.scores[this.currentRoundNum] += 1
       this.currentTeam.scores[this.currentRoundNum] += 1
       // this.nominatedPlayer.scores[this.currentRoundNum] += 1
-      console.log('score update', this.currentGame.game_sessions[player_index].scores)
+      // console.log('score update', this.currentGame.game_sessions[player_index].scores)
     },
     guessed: function() {
-      console.log('guessed 1', this.currentGame.set.clues.length)
+      // console.log('guessed 1', this.currentGame.set.clues.length)
 
       let guessed = this.currentGame.set.clues.splice(this.randIndex, 1)[0];
       this.currentGame.set.guessed_clues.push(guessed)
@@ -232,7 +230,7 @@ export default {
       this.clueNum -= 1
       this.gameSubscription.clueGuessed(guessed)
 
-      console.log('guessed 2', this.currentGame.set.clues.length)
+      // console.log('guessed 2', this.currentGame.set.clues.length)
 
       if(this.currentGame.set.clues.length == 0) { 
         this.$refs.gameTimer.stopTimer()
@@ -243,7 +241,7 @@ export default {
       
     },
     sendGuess: function() {
-      // console.log('sending message', this.guess)
+      console.log('sending message', this.guess)
       if(this.guess != null || this.guess != undefined || this.guess != "") {
         this.$refs.gameChatBox.sendMessage()
       }
@@ -266,8 +264,8 @@ export default {
 
     },
     updateGame: function() {
-      console.log('game update 2', this.currentGame)
-      console.log('current player', this.currentPlayer)
+      // console.log('game update 2', this.currentGame)
+      // console.log('current player', this.currentPlayer)
 
       if (this.currentPlayer) {
         this.$store.dispatch('updateGame', {
@@ -281,7 +279,7 @@ export default {
             this.currentTeam
           ]
         }).then(res => {
-          console.log('dispatched update received', res)
+          // console.log('dispatched update received', res)
         })
       }
 
@@ -291,8 +289,8 @@ export default {
     this.currentGame = this.game
     // this.clues = this.game.set.clues
     this.clueNum = this.game.set.clues.length
-    if(this.game.set.options.time_limit) {
-      this.timeLimit = this.game.set.options.time_limit
+    if(this.game.options.time_limit) {
+      this.timeLimit = this.game.options.time_limit
     }
     
     bus.$on('startTimer', () => {
@@ -311,16 +309,13 @@ export default {
 
     })
 
-    console.log('game gameSubscription', this.gameSubscription)
-    console.log('current player', this.currentPlayer)
+    // console.log('game gameSubscription', this.gameSubscription)
+    // console.log('current player', this.currentPlayer)
   }
 }
 </script>
 
 <style scoped lang="scss">
-.game-header {
-  max-height: 70px;
-}
 
 .clue-word {
   text-align: center;

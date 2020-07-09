@@ -46,10 +46,19 @@ a:hover {
   overflow: visible;
 }
 
+.wrap-tile {
+   flex-wrap: wrap;
+}
+
 .center-tile {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
+}
+
+.horizontal-center-tile {
+  display: flex !important;
+  justify-content: center !important;
 }
 
 .vertical-tile {
@@ -74,3 +83,6 @@ a:hover {
   border: 1px solid #363636;
 }
 
+.game-header {
+  max-height: 70px;
+}

@@ -1,7 +1,7 @@
 <template>
   <span class="">
-    <component :is="currentComponent" :game="game" :game-session="gameSession" :current-host="currentHost" :game-subscription="gameSubscription" :current-round="currentRound" :game-image="gameImage"></component>
-    <round-notice :current-round="currentRound" :game-image="gameImage"></round-notice>
+    <component :is="currentComponent" :game="game" :game-session="gameSession" :scoring-parties="game.teams" :current-host="currentHost" :game-subscription="gameSubscription" :current-round="currentRound" :game-image="gameImage"></component>
+    <round-notice :current-round="currentRound" :game="game"></round-notice>
   </span>
 </template>
 
@@ -10,8 +10,8 @@ import clues from './clues';
 import gameArena from './game_arena';
 import endGame from './end_game';
 import roundNotice from './round_notice';
+import gameBehaviours from '../mixins/gameBehavioursMixin';
 import { bus } from '../packs/application';
-import fishbowlImage from '../assets/fish-bowl-glow.png'
 
 export default {
 	props: ['game', 'gameSession', 'currentHost', 'gameSubscription'],
@@ -21,9 +21,9 @@ export default {
     'end-game': endGame,
     'round-notice': roundNotice
   },
+  mixins: [gameBehaviours],
   data: function () {
     return {
-      gameImage: fishbowlImage,
       newRound: false,
       gameComponents: {
         0: {component: 'clues'},

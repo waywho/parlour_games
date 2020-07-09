@@ -1,6 +1,8 @@
 class Fishbowl < Game
 	before_create :game_setup
-	store_accessor :set, :clues, :current_clue, :guessed_clues, :current_round, :options, :players_done_clues
+	# store :turn_order, accessors: [:current_turn, :players_gone], coder: JSON
+	store :set, accessors: [:clues, :current_clue, :guessed_clues, :current_round, :players_done_clues, :rounds_played], coder: JSON
+	store :options, accessors: [:time_limit, :enable_team_mode, :enable_chat], coder: JSON
 	before_update :start_game, if: :started_changed?
 	before_update :populate_pot, if: :only_clue_keys?
 	before_update :play, if: :after_clues?
@@ -17,16 +19,16 @@ class Fishbowl < Game
 	def start_game
 		if started
 			logging("Game Step 0", "starting game, #{self.set}")
-			current_round["round_number"] = 0
+			current_round[:round_number] = 0
 		end
 	end
 
 	def play
 		logging("Game Step 1", "playing game, #{self.set}")
-		if current_round["completed"] == true || set["clues"].empty?
-			current_round["completed"] = true
+		if current_round[:completed] == true || set["clues"].empty?
+			current_round[:completed] = true
 			next_round
-		elsif current_turn["completed"] == true
+		elsif current_turn[:completed] == true
 			# next team
 			next_turn
 		end
@@ -34,30 +36,32 @@ class Fishbowl < Game
 
 	def next_round
 		logging("Game Step 2", "Next round, #{self.set}")
-		if current_round["round_number"] == rounds.keys.last
-			current_round["completed"] = true
-			current_turn["team"] = 0
+		round_info = self.rounds[current_round[:round_number]]
+		rounds_played[current_round[:round_number]] = { name: round_info[:name], score_round: round_info[:score_round]}
+		if current_round[:round_number] == rounds.keys.last
+			current_round[:completed] = true
+			current_turn[:team] = 0
 			current_turn["nominated_player"] = nil
 			self.ended = true
-		elsif !current_round["round_number"].nil?
-			if current_round["round_number"] > 0
+		elsif !current_round[:round_number].nil?
+			if current_round[:round_number] > 0
 				set["clues"] = set["guessed_clues"].uniq
 				logging("Game Step 2", "Reset clues, #{self.set["clues"]}")
 				set["guessed_clues"] = []
 			end
-			current_round["round_number"] += 1
-			current_round["completed"] = false
+			current_round[:round_number] += 1
+			current_round[:completed] = false
 	
 			next_turn
 		end
 	end
 
 	def after_clues?
-		if current_round["round_number"].nil?
+		if current_round[:round_number].nil?
 			return false
-		elsif current_round["round_number"] == 0 && current_round["completed"] == true
+		elsif current_round[:round_number] == 0 && current_round[:completed] == true
 			return true
-		elsif current_round["round_number"] > 0
+		elsif current_round[:round_number] > 0
 			return true
 		else
 			return false
@@ -113,11 +117,12 @@ class Fishbowl < Game
 					completed: false
 				},
 				players_done_clues: [],
-				options: {
-					time_limit: 60,
-					enable_team_mode: true,
-					enable_chat: false
-				}
+				rounds_played: {}
+			}
+			self.options = {
+				time_limit: 60,
+				enable_team_mode: true,
+				enable_chat: false
 			}
 		end
 end

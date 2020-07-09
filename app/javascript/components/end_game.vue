@@ -1,7 +1,7 @@
 <template>
   <div class="tile is-ancestor is-vertical">
-    <game-header :game="game" :game-image="gameImage" :image-size="'150px'"></game-header>
-    <score-board :teams="game.teams" :rounds="game.rounds" class="is-fullwidth"></score-board>
+    <game-header :game="game" :image-type="'logo'" :image-size="'150px'"></game-header>
+    <score-board :teams="scoringParties" :rounds="game.set.rounds_played" class="is-fullwidth"></score-board>
        <div class="firework-rounded">
           <div class="firework-rounded-light"></div>
           <div class="firework-rounded-light"></div>
@@ -16,15 +16,13 @@
 </template>
 
 <script>
-import scoreBoard from './score_board'
-import gameHeader from './game_header'
-import fishbowlImage from '../assets/fish-bowl-logo.png'
+import scoreBoard from './score_board';
+import gameHeader from './game_header';
 
 export default {
-  props: ['game'],
+  props: ['game', 'scoringParties'],
   data: function () {
     return {
-      gameImage: fishbowlImage
     }
   },
   components: {

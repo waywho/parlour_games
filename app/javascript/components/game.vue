@@ -1,5 +1,5 @@
 <template>
-  <component :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost"></component>
+  <component class="game" :is="comp" :game="game" :game-session="gameSession" v-on:start-game="goToGameComponent" :game-subscription="gameSubscription" :current-host="currentHost"></component>
 </template>
 
 <script>
@@ -9,13 +9,15 @@ import gameAxios from '../axios/axios_game_update.js';
 import { mapGetters } from 'vuex';
 import { bus } from '../packs/application'
 import Ghost from './ghost';
+import WinkMurder from './wink_murder'
 
 
 export default {
   components: {
     'fishbowl': FishBowl,
     'ghost': Ghost,
-    'waiting_room': WaitingRoom
+    'waiting-room': WaitingRoom,
+    'wink-murder': WinkMurder
   },
   props: {
     gameComponent: {
@@ -50,16 +52,16 @@ export default {
   watch: {
     game: function(newVal, oldVal) {
       if(this.gameSession.game_id == newVal.id && newVal.started) { 
-        this.comp = this.$options.filters.camelToUnderscore(newVal.name);
+        this.comp = this.$options.filters.camelToKabab(newVal.name);
       } else {
-        this.comp = 'waiting_room'
+        this.comp = 'waiting-room'
       }
     }
   },
   methods: {
     goToGameComponent: function(game) {
       this.game = game
-      this.comp = this.$options.filters.camelToUnderscore(game.name)
+      this.comp = this.$options.filters.camelToKabab(game.name)
     }
   },
   created () {
@@ -107,6 +109,19 @@ export default {
             console.log('clues pass', data.passed)
             bus.$emit('cluesPassed', JSON.parse(data.passed))
           }
+
+          if(data.looking != null || data.looking != undefined) {
+            console.log("game session", this.gameSession)
+            if(data.looking == this.gameSession.id) {
+              console.log("looking at me")
+              bus.$emit('looking', JSON.parse(data.looker))
+            } else {
+              bus.$emit('not_looking', JSON.parse(data.looker))
+            }
+          }
+          if(data.killing && data.killer != null || data.killer != undefined) {
+            bus.$emit('killing', JSON.parse(data.killer))
+          }
         },
         turnStart: function () {
           console.log('starting timer from client', gameId)
@@ -115,6 +130,13 @@ export default {
 
         clueGuessed: function(guessedClue) {
           this.perform('guessed_clue', {game_id: gameId, guessed_clue: guessedClue})
+        },
+        looking: function(lookingId, lookerId) {
+          console.log("calling lookings")
+          this.perform('looking', {game_id: gameId, looking: lookingId, looker: lookerId})
+        },
+        killing: function(killer) {
+          this.perform('killing', {game_id: gameId, killer: killer})
         }
     })
     
@@ -123,5 +145,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

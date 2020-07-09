@@ -1,17 +1,23 @@
 <template>
   <div class="game-card">
-    <textarea class="clue-input clue-box" placeholder="enter a clue" rows="6" v-model="clue"></textarea>
+    <textarea v-if="useTextarea" class="clue-input clue-box" placeholder="enter a clue" rows="6" v-model="clue"></textarea>
+    <span v-else>{{term}}</span>
   </div>
 </template>
 
 <script>
 
 export default {
-  components: {
-
-  },
-  computed: {
-   
+  props: {
+    useTextarea: {
+      type: Boolean,
+      required: false,
+      default: true
+    },
+    term: {
+      type: String,
+      required: false
+    }
   },
   data: function () {
     return {

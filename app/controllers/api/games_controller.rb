@@ -80,7 +80,13 @@ module Api
 
       # Only allow a trusted parameter "white list" through.
       def game_params
-        params.require(:game).permit(:id, :name, :team_mode, :started, :ended, set: {}, turn_order: {}, user_ids: [], player_ids: [], teams_attributes: [:id, :name, :order, game_session_ids: [], scores: {}], team: {}, game_sessions_attributes: [:id, scores: {}])
+        params.require(:game).permit(:id, :name, :team_mode, :started, :ended, 
+          :number_of_murderers, :enable_team_mode, :enable_chat,
+          set: {}, turn_order: {}, current_round: {}, current_turn: {}, 
+          looking_turn: {}, accusations:{}, players_gone: {}, options: {}, user_ids: [], 
+          player_ids: [], 
+          teams_attributes: [:id, :name, :order, game_session_ids: [], scores: {}], 
+          team: {}, game_sessions_attributes: [:id, scores: {}])
       end
 
       def team_params
