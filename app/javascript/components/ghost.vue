@@ -28,6 +28,12 @@
             <b-button type="is-dark" v-for="(l, index) in letters" @click="playLetter(l)" :value="l" :key="index">{{l}}</b-button>
           </div>
         </div>
+        <div class="column is-full">
+          <div class="buttons">
+             <b-button type="is-dark" @click="wordComplete" :disabled="!disableChallenge">Challenge World Complete</b-button>
+            <b-button type="is-dark" @click="spelling" :disabled="!disableChallenge">Challenge Spelling</b-button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="column">
@@ -35,20 +41,13 @@
         <!-- <div v-if="currentGame.set.word_definition"class="column is-full">
           <div>{{currentGame.set.word_definition}}</div>
         </div> -->
-        <div class="column is-full buttons">
-          <b-button type="is-dark" @click="nextRound" :disabled="!roundCompleted">Next Round</b-button>
-          <!-- TODO: not implemented at the moment, implement later -->
-          <b-button v-if="false" type="is-dark" @click="() => {this.showChallenge = true}">Challenge</b-button>
-        </div>
-        <div class="column is-full" v-show="showChallenge">
-          <b>Possible Words:</b>{{challengeResults}}
-        </div>
+        
         <div class="column is-full">
             <div class="title is-5 section-line">
               Players
             </div>
         </div>
-        <div class="column is-full tags" v-for="session in currentGame.game_sessions" :key="session.id" >
+        <div class="column is-full" v-for="session in currentGame.game_sessions" :key="session.id" >
           <player :game-session="session" :currentHost="currentHost" :class="[nominatedPlayer.id == session.id ? 'is-dark' : 'is-light']"></player>: <div class="tag is-dark" v-for="letter in game.set.player_ghosts[session.id]">{{letter}}</div>
         </div>
         <div class="column is-full">
@@ -61,7 +60,7 @@
         </div>
       </div>
     </div>
-    <round-notice :current-round="currentRound" :game="game"></round-notice>
+    <round-notice :current-round="currentRound" :game="game" :show-scores="gameComplete" :enable-next-round="gameComplete && currentHost" :scoring-parties="game.game_sessions"></round-notice>
   </div>
 </template>
 
@@ -91,7 +90,6 @@ export default {
   mixins: [gameBehaviours],
   data: function () {
     return {
-      showChallenge: false,
       options: {
         minSize: 8,
         maxSize: 120
@@ -109,6 +107,11 @@ export default {
     'player-turn': playerTurn
   },
   computed: {
+    disableChallenge: function() {
+      console.log(this.currentGame.set.play_word.length)
+      console.log(this.currentGame.options.min_word_length)
+      return this.currentGame.set.play_word.length >= this.currentGame.options.min_word_length
+    },
     showPlay: function() {
       return this.currentGame.set.play_word.join("")
     },
@@ -118,22 +121,25 @@ export default {
     currentRound: function() {
       console.log('word def',this.currentGame.set.word_definition )
       // let word_def = JSON.parse(this.currentGame.set.word_definition)
-      if(this.currentGame.set.word_definition != null & this.currentGame.set.word_definition != undefined) {
+      if(this.currentGame.set.current_round.completed) {
         return {
-          name: this.currentGame.set.word_definition.word,
-          instructions: this.currentGame.set.word_definition.defs
+          name: "End of Round",
+          instructions: ""
+        }
+      } else if(this.currentGame.turn_order.challenge.results != null & this.currentGame.turn_order.challenge.results != undefined) {
+        return {
+          name: this.currentGame.turn_order.challenge.results.word,
+          instructions: this.currentGame.turn_order.challenge.results.outcome
         }
       } else {
         return {
-          name: '',
-          instructions: ''
+          name: "",
+          instructions: ""
         }
       }
     },
-    challengeResults: function() {
-      if(this.currentGame.set.challenge_results != null & this.currentGame.set.challenge_results != undefined) {
-        return this.currentGame.set.challenge_results.join(", ")
-      }
+    gameComplete: function() {
+      return this.currentGame.set.current_round.completed
     }
   },
   methods: {
@@ -150,20 +156,43 @@ export default {
       console.log("letter", e)
       this.currentGame.set.play_word.push(e)
       if(this.currentPlayer) {
-        this.updateGame()
+        var gameData = {
+          id: this.currentGame.id,
+          play_word: this.currentGame.set.play_word
+          
+          // game_sessions_attributes: [
+          //   this.nominatedPlayer
+          // ]
+        }
+        this.updateGame(gameData)
       };
     },
-    updateGame: function() {
+    wordComplete: function() {
+      var gameData = {
+        id: this.currentGame.id,
+        challenge: {
+          type: 'word_complete',
+          challenger: this.gameSession.id,
+          challenge_results: null
+        }
+      }
+      this.updateGame(gameData)
+    },
+    spelling: function() {
+      var gameData = {
+        id: this.currentGame.id,
+        challenge: {
+          type: 'spelling',
+          challenger: this.gameSession.id,
+          challenge_results: null
+        }
+      }
+      this.updateGame(gameData)
+    },
+    updateGame: function(gameData) {
       console.log('game update 2', this.currentGame)
 
-      this.$store.dispatch('updateGame', {
-        id: this.currentGame.id,
-        set: this.currentGame.set,
-        turn_order: this.currentGame.turn_order,
-        game_sessions_attributes: [
-          this.nominatedPlayer
-        ]
-      }).then(res => {
+      this.$store.dispatch('updateGame', gameData).then(res => {
         console.log('dispatched update received', res)
       })
     }

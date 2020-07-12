@@ -84,7 +84,7 @@ module Api
           :number_of_murderers, :enable_team_mode, :enable_chat,
           set: {}, turn_order: {}, current_round: {}, current_turn: {}, 
           looking_turn: {}, accusations:{}, players_gone: {}, options: {}, user_ids: [], 
-          player_ids: [], 
+          player_ids: [], challenge: {}, play_word: [], play_words: [], player_ghosts: {},
           teams_attributes: [:id, :name, :order, game_session_ids: [], scores: {}], 
           team: {}, game_sessions_attributes: [:id, scores: {}])
       end

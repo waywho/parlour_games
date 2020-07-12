@@ -24,8 +24,8 @@ RSpec.describe Game, type: :model do
   	context "ghost" do
 			it "should set up game set json" do
 				game = FactoryBot.create(:ghost)
-				expect(game.turn_order.keys).to include("current_turn", "players_gone")
-				expect(game.set.keys).to include("play_word", "word_definition", "challenge_results", "played_words", "current_round", "player_ghosts", "rounds_played")
+				expect(game.turn_order.keys).to include("current_turn", "players_gone", "challenge")
+				expect(game.set.keys).to include("play_word", "played_words", "current_round", "player_ghosts", "rounds_played")
 				expect(game.options).to include("language", "team_mode", "min_word_length")
 			end
   	end
@@ -123,6 +123,120 @@ RSpec.describe Game, type: :model do
 	  end
 
 	  describe "to play" do
+	  	context "ghost" do
+	  		let(:game) {
+	  			FactoryBot.create(:ghost)
+	  		}
+
+	  		let(:game_sessions) {
+	  			FactoryBot.build_list(:game_session, 5, game_id: game.id)
+	  		
+	  		}
+	  		before(:each) do
+					game_sessions.map(&:save)
+	  			game.update_attributes(started: true)
+	  		end
+
+	  		let(:player_ids) {
+	  			game_sessions.map(&:id)
+	  		}
+
+	  		def play_complete_word
+	  			game.play_word << "a"
+	  			game.save
+	  			game.play_word << "b"
+	  			game.save
+	  			game.play_word << "s"
+	  			
+	  		end
+
+	  		it "should let players to play each letter" do
+	  			play_complete_word
+	  			expect(game.play_word).to include("a", "b", "s")
+	  		end
+
+	  		it "should make last player loose challenge if a word is completed" do
+	  			play_complete_word
+	  			last_player_id = game.current_turn[:nominated_player]
+	  			game.save
+	  			player_ids.delete(last_player_id)
+	  			challenge_player = player_ids.first
+	  			last_ghost = game.player_ghosts[last_player_id.to_s].length
+	  			game.challenge[:type] = "word_complete"
+	  			game.challenge[:challenger] = challenge_player
+	  			game.save
+	  			expect(game.player_ghosts[last_player_id.to_s].length).to eq(last_ghost + 1)
+	  			expect(game.play_word.empty?).to eq(true)
+	  		end
+
+	  		it "should make challenger loose challenge if a word is NOT completed" do
+	  			game.play_word << "a"
+	  			game.save
+	  			game.play_word << "w"
+	  			game.save
+	  			game.play_word << "r"
+	  			
+
+	  			last_player_id = game.current_turn[:nominated_player]
+	  			game.save
+	  			player_ids.delete(last_player_id)
+
+	  			challenger = player_ids.first
+
+	  			last_ghost = game.player_ghosts[challenger.to_s].length
+	  			game.challenge[:type] = "word_complete"
+	  			game.challenge[:challenger] = challenger
+
+	  			game.save
+	  			expect(game.player_ghosts[challenger.to_s].length).to eq(last_ghost + 1)
+	  			expect(game.play_word.empty?).to eq(true)
+	  		end
+
+	  		it "should make challenger loose challenge if a word has potential" do
+	  			game.play_word << "a"
+	  			game.save
+	  			game.play_word << "w"
+	  			game.save
+	  			game.play_word << "r"
+
+	  			last_player_id = game.current_turn[:nominated_player]
+	  			game.save
+	  			player_ids.delete(last_player_id)
+
+	  			challenger = player_ids.first
+
+	  			last_ghost = game.player_ghosts[challenger.to_s].length
+	  			game.challenge[:type] = "spelling"
+	  			game.challenge[:challenger] = challenger
+
+	  			game.save
+	  			expect(game.player_ghosts[challenger.to_s].length).to eq(last_ghost + 1)
+	  			expect(game.play_word.empty?).to eq(true)
+	  		end
+
+	  		it "should make last player loose challenge if a word has no potential" do
+	  			game.play_word << "a"
+	  			game.save
+	  			game.play_word << "v"
+	  			game.save
+	  			game.play_word << "q"
+
+	  			last_player_id = game.current_turn[:nominated_player]
+
+	  			game.save
+	  			player_ids.delete(last_player_id)
+
+	  			challenger = player_ids.first
+
+	  			last_ghost = game.player_ghosts[last_player_id.to_s].length
+	  			game.challenge[:type] = "spelling"
+	  			game.challenge[:challenger] = challenger
+
+	  			game.save
+	  			expect(game.player_ghosts[last_player_id.to_s].length).to eq(last_ghost + 1)
+	  			expect(game.play_word.empty?).to eq(true)
+	  		end
+	  	end
 	  	context "wink murder" do
 	  		let(:game) {
 	  			FactoryBot.create(:wink_murder)

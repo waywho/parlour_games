@@ -2,12 +2,11 @@ require 'rest-client'
 
 class Ghost < Game
 	before_create :game_setup
-	store :set, accessors: [:play_word, :word_definition, :challenge_results, :played_words, :current_round, :player_ghosts, :options], coder: JSON
-	# store :turn_order, accessors: [:current_turn, :players_gone], coder: JSON
+	store :set, accessors: [:play_word, :word_definition, :played_words, :current_round, :player_ghosts, :rounds_played], coder: JSON
+	store :turn_order, accessors: [:current_turn, :challenge, :players_gone], coder: JSON
 	store :options, accessors: [:language, :team_mode, :min_word_length], coder: JSON
 	before_update :start_game, if: :started_changed?
 	before_update :play, if: :after_started?
-	before_update :lost_turn, if: :lost_challenge
 
 	ROUNDS = {
 		1  => { name: "1", score_round: true }
@@ -28,6 +27,8 @@ class Ghost < Game
 		"Turkish": "tr"
 	}
 
+	CHALLENGE_TYPES = ['spelling', 'word_complete']
+
 	GHOST_ARRY = ['g', 'h', 'o', 's', 't']
 
 	def start_game
@@ -39,92 +40,111 @@ class Ghost < Game
 	end
 
 	def play
-		# check if play_word is a word
-		# lang = LANGUAGES[options["language"]]
 		logger.debug "run play #{play_word}"
-		if current_round[:completed] == false && play_word.length > min_word_length
-			result = RestClient.get "https://api.datamuse.com/words?sp=#{play_word.join}&md=d"
-			ghost_arry = GHOST_ARRY
-			result_array = JSON.parse(result)
-			# logger.debug "finding results #{result}"
-			# logger.debug "finding array #{result_array} #{result_array.nil?}"
-			# logger.debug "ghost array #{ghost_arry}"
-			
-			# look for possible words for challenge list
-			challenge_lookup
+		if !current_round[:completed] && play_word.length >= min_word_length && challenge[:type].present?
+			previous_player_id = turn_order[:current_turn][:previous_player].to_s
 
-			if result_array.empty?
-				logger.debug "no result"
-				exact_word = false
-				has_meaning = false	
-			else
-				result_json = result_array.first
-				# logger.debug "finding results #{result_json}"
-				# logger.debug "finding word #{result_json["word"]}"
-				# logger.debug "finding definition #{result_json["defs"]}"
-				exact_word = result_json["word"] == play_word.join
-				has_meaning = result_json["defs"].present?
-				word_definition = result_json if exact_word && has_meaning
-			end
-
-			logger.debug "escape to word"
-			
-			if exact_word && has_meaning
-				logger.debug "Results found"
-				
-				# if player_word is a word, nominated_player looses, gets a letter
-				logger.debug "nominated player #{current_turn[:nominated_player]}"
-
-				player_id = current_turn[:nominated_player].to_s
-
-				ghost_length = player_ghosts[player_id].length
-				logger.debug "ghost_length #{ghost_length}"
-				
-				
-				if ghost_length < ghost_arry.length
-					logger.debug "got a letter"
-					player_ghosts[player_id].push(ghost_arry[ghost_length])
-
-					logger.debug "save played word"
-					played_words << play_word.join
-					logger.debug "reset played word"
-					play_word = []
-					logger.debug "#{player_id} player ghosts #{player_ghosts[player_id]}"
+			joined_play_word = play_word.join
+			case challenge[:type]
+			when 'word_complete'
+				# last nominated player lose turn
+				if word_challenge(joined_play_word)
 					
-					# if nominated player has "ghost", round ends, turn stays the same
-					lost_round(player_id)
+					lost_turn(previous_player_id)
+					lost_round?(previous_player_id)
 				else
-					next_turn
+			
+					lost_turn(challenge[:challenger].to_s)
+					lost_round?(challenge[:challenger].to_s)
 				end
-			else
-				next_turn
+
+			when 'spelling'
+				# challenger lose turn
+				if spelling_challenge(joined_play_word)
+					lost_turn(challenge[:challenger].to_s)
+					lost_round?(challenge[:challenger].to_s)
+				else
+					lost_turn(previous_player_id)
+					lost_round?(previous_player_id)
+				end
 			end
+
+			challenge[:type] = nil
+
 		elsif current_round[:completed] && !ended
 			next_round
+			current_turn[:previous_player] = nil
+			next_turn
 		else
+			current_turn[:previous_player] = current_turn[:nominated_player]
 			next_turn
 		end
 	end
 
 	def next_round
 		set_up_player_ghosts
-		word_definition = nil
-		play_word = []
+		self.challenge = {
+				type: nil,
+				challenger: nil,
+				results: nil
+			}
+		self.play_word = []
+		current_round[:round_number] += 1
 		current_round[:completed] = false
 		rounds_played[current_round[:round_number]] = { name: current_round[:round_number].to_s, score_round: true }
 		game_sessions.each do  |session|
 			session.scores[current_round[:round_number].to_s] = 0
 			session.save		
 		end
-		next_turn
 	end
 
-	def challenge_lookup
-		results = RestClient.get "https://api.datamuse.com/words?sp=#{play_word.join}*"
+	def word_challenge(word)
+		result = RestClient.get "https://api.datamuse.com/words?sp=#{word}&md=d"
+		result_array = JSON.parse(result)
+
+		if result_array.empty?
+			return false
+		else
+			result_json = result_array.first
+			exact_word = result_json["word"] == word
+			has_meaning = result_json["defs"].present?
+	
+			if exact_word && has_meaning
+				challenge[:results] = {
+					word: result_json["word"],
+					outcome: result_json["defs"]
+				}
+				return true
+			else
+				challenge[:results] = {
+					word: word,
+					outcome: ["This word is not complete, cannot find word with meaning."]
+				}
+				return false
+			end
+		end
+	end
+
+	def spelling_challenge(word)
+
+		results = RestClient.get "https://api.datamuse.com/words?sp=#{word}*"
 		logger.debug "challenge results #{results}"
 		results = JSON.parse(results)
 		challenge_arry = results&.map { |w| w["word"] }
-		challenge_results = challenge_arry
+		
+		if results.length > 1
+			challenge[:results] = {
+				word: word,
+				outcome: challenge_arry
+			}
+			return true
+		else
+			challenge[:results] = {
+				word: word,
+				outcome: ["No possible word from this spelling."]
+			}
+			return false
+		end
 	end
 
 	def set_up_player_ghosts
@@ -135,23 +155,21 @@ class Ghost < Game
 
 	def after_started?
 		logger.debug "#{current_round[:round_number]} is larger than 0: #{current_round[:round_number] > 0}"
-		return current_round[:round_number] > 0 && current_turn[:challenge_lost] == false
-	end
-
-	def lost_challenge
-		return current_turn[:challenge_lost]
+		return current_round[:round_number] > 0
 	end
 
 	def lost_turn(player_id)
+		lost_player_name = game_sessions.find_by_id(player_id.to_i).player_name
+		challenge[:results][:outcome].unshift("#{lost_player_name} lost.\n")
+
 		ghost_arry = GHOST_ARRY
-		player_id = current_turn[:nominated_player].to_s
+		ghost_length = player_ghosts[player_id].length
 		player_ghosts[player_id].push(ghost_arry[ghost_length])
 		played_words << play_word.join
-		play_word = []
-		lost_round(player_id)
+		self.play_word = []
 	end
 
-	def lost_round(player_id)
+	def lost_round?(player_id)
 		ghost_arry = GHOST_ARRY
 		if player_ghosts[player_id].length == ghost_arry.length	
 			logger.debug "ghost array #{ghost_arry.length}"
@@ -165,8 +183,9 @@ class Ghost < Game
 				session.save
 			end
 			current_round[:completed] = true
+			return true
 		else
-			next_turn
+			return false
 		end
 	end
 
@@ -175,15 +194,18 @@ class Ghost < Game
 	def game_setup
 		self.turn_order = {
 			current_turn: {
-				nominated_player: nil, 
-				challenge_lost: false
+				nominated_player: nil,
+				previous_player: nil
+			},
+			challenge: {
+				type: nil,
+				challenger: nil,
+				results: nil
 			},
 			players_gone: [],
 		}
 		self.set = {
 			play_word: [],
-			word_definition: nil,
-			challenge_results: nil,
 			played_words: [],
 			current_round: {
 				round_number: 0,
