@@ -104,7 +104,7 @@
 <script>
 import gameBehaviours from '../mixins/gameBehavioursMixin'
 import roundNotice from './round_notice';
-import challengeNotice from './challenge_notice';
+import challengeNotice from './wm_challenge_notice';
 import gameHeader from './game_header';
 import gameCard from './game_card';
 import { bus } from '../packs/application';
