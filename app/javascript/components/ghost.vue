@@ -30,7 +30,7 @@
         </div>
         <div class="column is-full">
           <div class="buttons">
-             <b-button type="is-dark" @click="wordComplete" :disabled="!disableChallenge">Challenge World Complete</b-button>
+             <b-button type="is-dark" @click="wordComplete" :disabled="!disableChallenge">Challenge Word Completion</b-button>
             <b-button type="is-dark" @click="spelling" :disabled="!disableChallenge">Challenge Spelling</b-button>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default {
     disableChallenge: function() {
       console.log(this.currentGame.set.play_word.length)
       console.log(this.currentGame.options.min_word_length)
-      return this.currentGame.set.play_word.length >= this.currentGame.options.min_word_length
+      return this.currentGame.set.play_word.length > this.currentGame.options.min_word_length
     },
     showPlay: function() {
       return this.currentGame.set.play_word.join("")

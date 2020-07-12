@@ -217,6 +217,8 @@ export default {
     disableActions: function() {
       if(this.playerDying) {
         return true
+      } else if (this.outList.length == (this.game.game_sessions.length - 1)) {
+        return true
       } else if (this.game.set.current_round.phase != 'winking') {
         return true
       } else {
