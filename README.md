@@ -2,22 +2,26 @@
 
 This is the codebase for parlourgames.club. This project was created during Lockdown 2020. The intent is to let people enjoy fun party games online. 
 
-Things you may want to cover:
+This is currently launched on [parlourgames.club](http://www.parlourgames.club/)
 
-* Ruby version
+This system utilises ActionCable to enable real-time interactivity between players.
 
-* System dependencies
+***There are currently three games available to play***
 
-* Configuration
+- Fishbowl
+- Ghost
+- Wink Murder
 
-* Database creation
 
-* Database initialization
+## Stack
 
-* How to run the test suite
+This system is built on:
 
-* Services (job queues, cache servers, search engines, etc.)
+- Ruby on Rails
+- Redis
+- VueJS
+- PostgreSQL
+- Rspec
 
-* Deployment instructions
-
-* ...
+## Author
+WeiHsi Hu
