@@ -15,7 +15,9 @@ Rails.application.routes.draw do
       # post 'setup', on: :member
     end
     resources :game_sessions
-    resources :users
+    resources :users do
+      get 'confirmation'
+    end
     post 'user_token' => 'user_token#create'
   end
   

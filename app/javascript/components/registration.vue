@@ -7,7 +7,7 @@
       </b-message>
       <form @submit.prevent="onSubmit">
         <b-field v-for="field, key, id in formFields" :id="key" :key="key" :label="key | camel-to-space" :type="formFields[key].classType" :message="formFields[key].message">
-          <b-input v-model="formFields[key].value" :type="formFields[key].type"></b-input>
+          <b-input v-model="formFields[key].value" :type="formFields[key].type" :focus="loading = false"></b-input>
         </b-field>
         <invisible-recaptcha 
           :sitekey="siteKey" 

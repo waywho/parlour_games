@@ -56,11 +56,11 @@ export default {
 			// console.log(errorObject.response.data.errors[0].details)
 			if(errorObject == undefined || errorObject == null) {return }
 			// console.log(Object.keys(errorDetails))
-			if(errorObject.response.data.data == "" || errorObject.response.data.data == undefined || errorObject.response.data.data == null ) {
-				this.showGeneralMessage(errorObject.response.statusText, 'is-danger')
-			} else {
-				let errorDetails = errorObject.response.data.errors[0].details
-					Object.keys(errorDetails).forEach(key => {
+			this.showGeneralMessage(errorObject.response.statusText, 'is-danger')
+		
+			if(errorObject.response.data.errors != null || errorObject.response.data.errors != undefined ) {
+				let errorDetails = errorObject.response.data.errors
+				Object.keys(errorDetails).forEach(key => {
 					// console.log(`${key} ${errorDetails[key].join()}`)
 					console.log(key)
 					console.log(this.formFields[key])
@@ -68,11 +68,12 @@ export default {
 					this.formFields[key].message = `${key.charAt(0).toUpperCase() + key.slice(1)} ${errorDetails[key].join(', ')}`
 				})
 			}
+			
 		},
 		showGeneralMessage: function (message, type) {
 			this.message.show = true
-      	this.message.type = type
-      	this.message.content = message
+      this.message.type = type
+      this.message.content = message
 		}
 	}
 

@@ -47,7 +47,7 @@ export default {
       this.$store.dispatch('authenticateUser', formData).then((res) => {
         this.$router.replace({ path: '/' })
       }).catch(error => {
-        console.log(error)
+        console.log('sign in error', error)
         this.showGeneralMessage(error.response.data.statusText, 'is-danger')
       })
     }
