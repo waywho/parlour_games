@@ -1,0 +1,15 @@
+<b>Dear <%= @user.name %>,</b>
+
+<p>
+
+Thank you for signing up to an account with <%= link_to 'parlourgames.club',
+ root_url %>
+
+In order to continue playing, please confirm your email address at the following link:
+
+<%= "http://www.parlourgames.club/user_confirmation?token=#{@user.confirmation_token}" %>
+
+Happy playing,
+
+Your game master.
+</p>

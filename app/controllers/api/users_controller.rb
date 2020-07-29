@@ -25,16 +25,11 @@ module Api
 
       if @user.save
         # render json: @user, except: [:password] , status: :created
+        UserMailer.with(user: @user).confirmation_email.deliver_later
         render_token_payload(@user)
       else
         # render json: @user.errors, status: :unprocessable_entity
-        render json: { errors: [
-        {
-           status: '422',
-           title: 'Unprocessable Entity',
-           details: @user.errors
-            }]
-        }, status: :unprocessable_entity
+        render_error(@user.errors)
       end
     end
 
@@ -62,5 +57,14 @@ module Api
       def user_params
         params.require(:user).permit(:name, :email, :password, :password_confirmation, :admin, :avatar)
       end
+
+      def render_error(error_hash, status= :unprocessable_entity)
+        render json: { 
+          status: 422,
+          title: status.to_s,
+          errors: error_hash
+        }, status: status
+      end
+
   end
 end
