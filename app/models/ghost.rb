@@ -118,7 +118,7 @@ class Ghost < Game
 			else
 				challenge[:results] = {
 					word: word,
-					outcome: ["This word is not complete, cannot find word with meaning."]
+					outcome: ["This is not a complete word, cannot find word with meaning."]
 				}
 				return false
 			end
