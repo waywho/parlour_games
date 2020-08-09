@@ -1,7 +1,8 @@
 require 'rest-client'
 
 class Ghost < Game
-	before_create :game_setup
+	include TurnBehaviour
+
 	store :set, accessors: [:play_word, :word_definition, :played_words, :current_round, :player_ghosts, :rounds_played], coder: JSON
 	store :turn_order, accessors: [:current_turn, :challenge, :players_gone], coder: JSON
 	store :options, accessors: [:language, :team_mode, :min_word_length], coder: JSON
@@ -31,6 +32,7 @@ class Ghost < Game
 
 	GHOST_ARRY = ['g', 'h', 'o', 's', 't']
 
+	# start game logic if game is started, it will set up the player ghost tracking
 	def start_game
 		if started
 			set_up_player_ghosts
@@ -39,6 +41,7 @@ class Ghost < Game
 		current_round[:round_number] = 1
 	end
 
+	# Play logic runs every update after game start with before_update
 	def play
 		logger.debug "run play #{play_word}"
 		if !current_round[:completed] && play_word.length >= min_word_length && challenge[:type].present?

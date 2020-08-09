@@ -1,5 +1,6 @@
 class Fishbowl < Game
-	before_create :game_setup
+	include TurnBehaviour
+
 	# store :turn_order, accessors: [:current_turn, :players_gone], coder: JSON
 	store :set, accessors: [:clues, :current_clue, :guessed_clues, :current_round, :players_done_clues, :rounds_played], coder: JSON
 	store :options, accessors: [:time_limit, :enable_team_mode, :enable_chat], coder: JSON
@@ -23,6 +24,8 @@ class Fishbowl < Game
 		end
 	end
 
+	# Play logic runs every update after game start with before_update
+	# For fishbowl game, play governs turn exchange if the game is not completed
 	def play
 		logging("Game Step 1", "playing game, #{self.set}")
 		if current_round[:completed] == true || set["clues"].empty?
@@ -34,6 +37,7 @@ class Fishbowl < Game
 		end
 	end
 
+	# Fishbowl game rounds are set, when one round is completed then next round is set
 	def next_round
 		logging("Game Step 2", "Next round, #{self.set}")
 		round_info = self.rounds[current_round[:round_number]]
@@ -56,6 +60,7 @@ class Fishbowl < Game
 		end
 	end
 
+	# check stage of the game, if it is after the clue setup round
 	def after_clues?
 		if current_round[:round_number].nil?
 			return false
@@ -68,6 +73,7 @@ class Fishbowl < Game
 		end
 	end
 
+	# when users add clues to the game pot, process the clues for unique clues and remove empty items
 	def populate_pot
 		old_set = self.set_was
 		logging("Game Setup", "Previous Game set #{self.set_was}")

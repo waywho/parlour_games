@@ -217,7 +217,9 @@ export default {
     updatePlayerScore: function(incre) {
       let player_index = this.currentGame.game_sessions.indexOf(this.nominatedPlayer)
       this.nominatedPlayer.scores[this.currentRoundNum] += 1
-      this.currentTeam.scores[this.currentRoundNum] += 1
+      if (this.currentTeam != null || this.currentTeam != undefined) {
+        this.currentTeam.scores[this.currentRoundNum] += 1
+      }
       // this.nominatedPlayer.scores[this.currentRoundNum] += 1
       // console.log('score update', this.currentGame.game_sessions[player_index].scores)
     },
