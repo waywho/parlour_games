@@ -10,6 +10,9 @@ import Games from '../components/games'
 import Game from '../components/game'
 import MyGames from '../components/my_games'
 import JoinGame from '../components/join_game'
+import Confirmation from '../components/users/confirmation'
+
+Vue.use(VueRouter)
 
 const ifNotAuthenticated = (to, from, next) => {
 	if (!store.getters.authenticated) {
@@ -39,12 +42,21 @@ const notJoinedGame = (to, from, next) => {
 	}
 }
 
-Vue.use(VueRouter)
+const confirmUser = (to, from, next) => {
+	// console.log(to.query)
+	store.dispatch('confirmUser', to.query.token).then((res) => {
+        next()
+      }).catch(error => {
+        console.log('sign in error', error)
+      })
+}
+
 const router = new VueRouter({
 	mode: 'history',
 	routes: [
 		{ path: '/', component: landingPage },
-		{ path: '/chats', name: 'chats', component: Chatrooms, beforeEnter: ifNotAuthenticated },
+		{ path: '/user_confirmation', name: 'user_confirmation', component: Confirmation, beforeEnter: confirmUser },
+		{ path: '/chats', name: 'chatrooms', component: Chatrooms, beforeEnter: ifNotAuthenticated },
 		{ path: '/video_chats', component: videoChats, beforeEnter: ifNotAuthenticated },
 		{ path: '/games', component: Games },
 		{ path: '/my_games', component: MyGames, beforeEnter: ifNotAuthenticated},

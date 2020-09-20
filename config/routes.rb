@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       get 'confirmation'
     end
     post 'user_token' => 'user_token#create'
+    post 'user_confirmation' => 'users#confirmation'
   end
   
   root 'landings#index'

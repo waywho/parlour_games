@@ -14,6 +14,8 @@ Rails.application.configure do
    password: ENV['GMAIL_PASSWORD']
   }
 
+  config.action_mailer.default_url_options = { :host => "localhost" }
+
   config.cache_classes = false
 
   # Do not eager load code on boot.

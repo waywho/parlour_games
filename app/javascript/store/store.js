@@ -139,6 +139,20 @@ export const store = new Vuex.Store({
         })
 			})
 		},
+		confirmUser({commit, dispatch, state}, payload) {
+			return new Promise((resolve, reject) => {
+				axios.post("/api/user_confirmation", {user: {confirmation_token: payload}})
+        .then(res => {
+        	console.log(res)
+        	localStorage.setItem('auth_token', res.data.body.token)
+		      commit('setToken', res.data.body.token);
+		      resolve(res)
+        }).catch(error => {
+        	console.log(error)
+        	reject(error)
+        })
+			})
+		},
 		resetGameSession({commit, dispatch, state}, gameSession) {
 			localStorage.setItem('game_session', JSON.stringify(gameSession))
 			commit('setGameSession')
