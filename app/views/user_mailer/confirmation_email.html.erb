@@ -5,11 +5,18 @@
 Thank you for signing up to an account with <%= link_to 'parlourgames.club',
  root_url %>
 
-In order to continue playing, please confirm your email address at the following link:
-
+</p>
+<p>
+In order to continue playing, please confirm your email by:
+<br/>
+<%= link_to 'clicking this link', "http://www.parlourgames.club/user_confirmation?token=#{@user.confirmation_token}" %>
+<br />
+OR cut and paste this link into your browser
 <%= "http://www.parlourgames.club/user_confirmation?token=#{@user.confirmation_token}" %>
-
+ </p>
+<p>
 Happy playing,
-
+<br />
+<br />
 Your game master.
 </p>

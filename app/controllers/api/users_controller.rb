@@ -1,6 +1,6 @@
 module Api
   class UsersController < ApplicationController
-    before_action :authenticate_user, except: [:create]
+    before_action :authenticate_user, except: [:create, :confirmation]
     before_action :set_user, only: [:show, :update, :destroy]
 
     # GET /users
@@ -42,6 +42,15 @@ module Api
       end
     end
 
+    def confirmation
+      @user = User.find_by(confirmation_token: user_params[:confirmation_token])
+      if @user.present?
+        @user.update_attribute(:confirmed_at, Time.now)
+        render_token_payload(@user, :ok)
+      else
+      end
+    end
+
     # DELETE /users/1
     def destroy
       @user.destroy
@@ -55,7 +64,7 @@ module Api
 
       # Only allow a trusted parameter "white list" through.
       def user_params
-        params.require(:user).permit(:name, :email, :password, :password_confirmation, :admin, :avatar)
+        params.require(:user).permit(:name, :email, :password, :password_confirmation, :admin, :avatar, :confirmation_token)
       end
 
       def render_error(error_hash, status= :unprocessable_entity)

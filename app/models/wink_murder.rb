@@ -1,5 +1,5 @@
 class WinkMurder < Game
-	before_create :game_setup
+
 	store :set, accessors: [:current_round, :rounds_played], coder: JSON
 	store :turn_order, accessors: [:current_turn, :looking_turn, :lookers, :players_gone, :accusations], coder: JSON
 	store :options, accessors: [:number_of_murderers, :enable_chat], coder: JSON
@@ -28,6 +28,9 @@ class WinkMurder < Game
 	end
 
 	# TODO if looking at becomes multiple looking_turn[:lookee] should be array
+	# Play logic runs every update after game start with before_update
+	# Play logic governs if users are looking at each other, when the Wink murderer winks to kill
+	# and when users want to accuse someone as the Wink murderer
 	def play
 		
 		if current_round[:completed] && !ended
@@ -97,6 +100,11 @@ class WinkMurder < Game
 		end
 	end
 
+	# Check if all users have gone through their turn
+	def all_gone(check_list)
+		return check_list.all? {|id| total_out_list.include?(id)}
+	end
+
 	def end_round?
 		if all_gone(civilian_ids) || all_gone(current_round[:murderers])
 			current_round[:completed] = true
@@ -106,10 +114,6 @@ class WinkMurder < Game
 		else
 			current_round[:phase] = 'winking'
 		end
-	end
-
-	def all_gone(check_list)
-		return check_list.all? {|id| total_out_list.include?(id)}
 	end
 
 	def player_scores(player_id, score_amount)

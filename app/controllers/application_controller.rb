@@ -5,8 +5,8 @@ class ApplicationController < ActionController::API
 		current_user.admin?
 	end
 
-	def render_token_payload(entity)
+	def render_token_payload(entity, status = :created)
 		auth_token = Knock::AuthToken.new payload: entity.to_token_payload
-      render json: { 'body': auth_token }, status: :created
+      render json: { 'body': auth_token }, status: status
 	end
 end

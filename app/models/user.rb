@@ -23,11 +23,11 @@ class User < ApplicationRecord
 
 	def email_confirmed
 		confirmed_at = DateTime.now
-		save(valudate: false)
+		save(validate: false)
 	end
 
 	private
 	def generate_confirmation_token
-		confirmation_token = SecureRandom.urlsafe_base64.to_s if confirmation_token.nil?
+		self.confirmation_token = SecureRandom.urlsafe_base64.to_s if confirmation_token.nil?
 	end
 end
