@@ -70,7 +70,7 @@ module TurnBehaviour
 			self.players_gone = []
 		end
 
-		current_turn[:nominated_player] = players_left.first
+		current_turn[:nominated_player] = players_left.sample
 
 		logging("Game Step 4.5", "Found next player #{players_left.first}, #{self.set}")
 	end

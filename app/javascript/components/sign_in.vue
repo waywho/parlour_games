@@ -48,6 +48,8 @@ export default {
         this.$router.replace({ path: '/' })
       }).catch(error => {
         console.log('sign in error', error)
+        console.log('sign in error', error.response)
+        console.log('sign in error', error.response.data)
         this.showGeneralMessage(error.response.data.statusText, 'is-danger')
       })
     }

@@ -7,11 +7,11 @@ Thank you for signing up to an account with <%= link_to 'parlourgames.club',
 
 </p>
 <p>
-In order to continue playing, please confirm your email by:
-<br/>
-<%= link_to 'clicking this link', "http://www.parlourgames.club/user_confirmation?token=#{@user.confirmation_token}" %>
+In order to continue playing, please confirm your email 
+<%= link_to "by clicking this link", "http://www.parlourgames.club/user_confirmation?token=#{@user.confirmation_token}" %>
 <br />
-OR cut and paste this link into your browser
+<br />
+<b>OR</b> cut and paste this link into your browser
 <%= "http://www.parlourgames.club/user_confirmation?token=#{@user.confirmation_token}" %>
  </p>
 <p>

@@ -156,6 +156,9 @@ export default {
       console.log("letter", e)
       this.currentGame.set.play_word.push(e)
       if(this.currentPlayer) {
+        if(this.currentGame.set.current_round.started == false) {
+          this.currentgame.set.current_round.started = true
+        }
         var gameData = {
           id: this.currentGame.id,
           play_word: this.currentGame.set.play_word
