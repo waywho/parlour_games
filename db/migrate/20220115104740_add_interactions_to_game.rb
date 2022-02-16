@@ -13,7 +13,6 @@ class AddInteractionsToGame < ActiveRecord::Migration[5.2]
           play_word: game.set.delete(:play_word)
         }
         game.turn_order = turn_order
-        game.save
       when "Fishbowl"
         game.set["guessed_clues"]
         game.interactions = {
@@ -22,7 +21,11 @@ class AddInteractionsToGame < ActiveRecord::Migration[5.2]
 
         }
       when "WinkMurder"
+        game.interactions = {
+          accusations: game.turn_order.delete(:accusations)
+        }
       end
+      game.save
     end
   end
 end

@@ -18,17 +18,19 @@ RSpec.describe Game, type: :model do
 			it "should set up game set json" do
 				game = FactoryBot.create(:fishbowl)
 				expect(game.turn_order.keys).to include("current_turn", "players_gone")
-				expect(game.set.keys).to include("clues", "current_clue", "guessed_clues", "current_round", "players_done_clues")
+				expect(game.set.keys).to include("clues", "current_round", "players_done_clues")
 				expect(game.options).to include("time_limit", "enable_team_mode", "enable_chat")
+				expect(game.interactions).to include("current_clue", "guessed_clues")
 			end
 		end
 
 		context "ghost" do
 			it "should set up game set json" do
 				game = FactoryBot.create(:ghost)
-				expect(game.turn_order.keys).to include("current_turn", "players_gone", "challenge")
-				expect(game.set.keys).to include("play_word", "played_words", "current_round", "player_ghosts", "rounds_played")
+				expect(game.turn_order.keys).to include("current_turn", "players_gone")
+				expect(game.set.keys).to include("current_round", "player_ghosts", "rounds_played")
 				expect(game.options).to include("language", "team_mode", "min_word_length")
+				expect(game.interactions).to include("challenge", "played_words", "play_word")
 			end
 		end
 
@@ -38,6 +40,7 @@ RSpec.describe Game, type: :model do
 				expect(game.turn_order.keys).to include("current_turn")
 				expect(game.set.keys).to include("current_round", "rounds_played")
 				expect(game.options).to include("number_of_murderers", "enable_chat")
+				expect(game.interactions).to include("accusations")
 			end
 		end
 	end

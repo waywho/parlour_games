@@ -3,9 +3,10 @@ require 'rest-client'
 class Ghost < Game
 	include TurnBehaviour
 
-	store :set, accessors: [:play_word, :word_definition, :played_words, :current_round, :player_ghosts, :rounds_played], coder: JSON
-	store :turn_order, accessors: [:current_turn, :challenge, :players_gone], coder: JSON
+	store :set, accessors: [:word_definition, :played_words, :current_round, :player_ghosts, :rounds_played], coder: JSON
+	store :turn_order, accessors: [:current_turn, :players_gone], coder: JSON
 	store :options, accessors: [:language, :team_mode, :min_word_length], coder: JSON
+	store :interactions, accessors: [:challenge, :played_words, :play_word]
 	before_update :start_game, if: :started_changed?
 	before_update :play, if: :after_started?
 
@@ -234,16 +235,18 @@ class Ghost < Game
 				nominated_player: nil,
 				previous_player: nil
 			},
+			players_gone: [],
+		}
+		self.interactions = {
+			played_words: [],
+			play_word: [],
 			challenge: {
 				type: nil,
 				challenger: nil,
 				results: nil
-			},
-			players_gone: [],
+			}
 		}
 		self.set = {
-			play_word: [],
-			played_words: [],
 			current_round: {
 				started: false,
 				round_number: 0,
