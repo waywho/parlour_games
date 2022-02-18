@@ -2,8 +2,9 @@ class Fishbowl < Game
 	include TurnBehaviour
 
 	# store :turn_order, accessors: [:current_turn, :players_gone], coder: JSON
-	store :set, accessors: [:clues, :current_clue, :guessed_clues, :current_round, :players_done_clues, :rounds_played], coder: JSON
+	store :set, accessors: [:clues, :current_round, :players_done_clues, :rounds_played], coder: JSON
 	store :options, accessors: [:time_limit, :enable_team_mode, :enable_chat], coder: JSON
+	store :interactions, accesssors: [:current_clue, :guessed_clues], coder: JSON
 	before_update :start_game, if: :started_changed?
 	before_update :populate_pot, if: :only_clue_keys?
 	before_update :play, if: :after_clues?
@@ -49,9 +50,9 @@ class Fishbowl < Game
 			self.ended = true
 		elsif !current_round[:round_number].nil?
 			if current_round[:round_number] > 0
-				set["clues"] = set["guessed_clues"].uniq
+				set["clues"] = interactions["guessed_clues"].uniq
 				logging("Game Step 2", "Reset clues, #{self.set["clues"]}")
-				set["guessed_clues"] = []
+				interactions["guessed_clues"] = []
 			end
 			current_round[:round_number] += 1
 			current_round[:completed] = false
@@ -115,9 +116,12 @@ class Fishbowl < Game
 				# only user ids in array
 				players_gone: nil				
  			}
-			self.set = { clues: [], 
+			self.interactions = {
 				current_clue: nil,
 				guessed_clues: [],
+			}
+			self.set = { 
+				clues: [], 				
 				current_round: { 
 					round_number: nil,
 					completed: false

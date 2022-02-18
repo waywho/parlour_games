@@ -1,8 +1,9 @@
 class WinkMurder < Game
 
 	store :set, accessors: [:current_round, :rounds_played], coder: JSON
-	store :turn_order, accessors: [:current_turn, :looking_turn, :lookers, :players_gone, :accusations], coder: JSON
+	store :turn_order, accessors: [:current_turn, :looking_turn, :lookers, :players_gone], coder: JSON
 	store :options, accessors: [:number_of_murderers, :enable_chat], coder: JSON
+	store :interactions, accessors: [:accusations], coder: JSON
 	before_update :start_game, if: :started_changed?
 	before_update :check_accusation_phases
 	before_update :play, if: :after_started?
@@ -231,6 +232,12 @@ class WinkMurder < Game
 				outed: nil, 
 				murderer: nil,
 			},
+			looking_turn: { looker: nil, lookee: nil },
+			lookers: {},
+			players_gone: []
+		}
+
+		self.interactions = {
 			accusations: { 
 				first: {
 					accuser: nil
@@ -238,9 +245,6 @@ class WinkMurder < Game
 				do_not_second: nil,
 				no_seconders: []
 			},
-			looking_turn: { looker: nil, lookee: nil },
-			lookers: {},
-			players_gone: []
 		}
 		self.set = {
 			current_round: {

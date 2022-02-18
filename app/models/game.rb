@@ -71,22 +71,22 @@ class Game < ApplicationRecord
  	end
 
  	def game_setup
- 			self.turn_order = {
- 				current_turn: { 
-					team: 0, 
-					nominated_player: nil, 
-					passed: 0, 
-					time_left: 0, 
-					completed: false 
-				},
-				# only user ids in array
-				players_gone: nil,
- 			}
-			# self.set = {
-			# 	current_round: { 
-			# 		round_number: nil,
-			# 		completed: false
-			# 	}
-			# }
+		self.turn_order = {
+			current_turn: { 
+				team: 0, 
+				nominated_player: nil, 
+				passed: 0, 
+				time_left: 0, 
+				completed: false 
+			},
+			# only user ids in array
+			players_gone: nil,
+		}
+		# self.set = {
+		# 	current_round: { 
+		# 		round_number: nil,
+		# 		completed: false
+		# 	}
+		# }
 	end
 end

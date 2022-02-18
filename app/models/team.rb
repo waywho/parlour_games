@@ -1,7 +1,7 @@
 class Team < ApplicationRecord
 	has_many :game_sessions
 	accepts_nested_attributes_for :game_sessions
-	has_many :users, through: :game_sessions, class_name: 'User'
+	has_many :users, through: :game_sessions, source: :playerable, source_type: 'User'
 	belongs_to :game
 	has_one :chatroom, as: :gameaable
 	include ScoreSetup

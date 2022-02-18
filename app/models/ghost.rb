@@ -3,9 +3,10 @@ require 'rest-client'
 class Ghost < Game
 	include TurnBehaviour
 
-	store :set, accessors: [:play_word, :word_definition, :played_words, :current_round, :player_ghosts, :rounds_played], coder: JSON
-	store :turn_order, accessors: [:current_turn, :challenge, :players_gone], coder: JSON
+	store :set, accessors: [:word_definition, :played_words, :current_round, :player_ghosts, :rounds_played], coder: JSON
+	store :turn_order, accessors: [:current_turn, :players_gone], coder: JSON
 	store :options, accessors: [:language, :team_mode, :min_word_length], coder: JSON
+	store :interactions, accessors: [:challenge, :played_words, :play_word]
 	before_update :start_game, if: :started_changed?
 	before_update :play, if: :after_started?
 
@@ -39,12 +40,13 @@ class Ghost < Game
 		end
 		current_turn[:nominated_player] = game_sessions.first.id
 		current_round[:round_number] = 1
+		current_round[:started] = true
 	end
 
 	# Play logic runs every update after game start with before_update
 	def play
 		logger.debug "run play #{play_word}"
-		if !current_round[:completed] && play_word.length >= min_word_length && challenge[:type].present?
+		if current_round[:started] && !current_round[:completed] && play_word.length >= min_word_length && challenge[:type].present?
 			previous_player_id = turn_order[:current_turn][:previous_player].to_s
 
 			joined_play_word = play_word.join
@@ -52,23 +54,23 @@ class Ghost < Game
 			when 'word_complete'
 				# last nominated player lose turn
 				if word_challenge(joined_play_word)
-					
-					lost_turn(previous_player_id)
-					lost_round?(previous_player_id)
+
+					lose_turn(previous_player_id)
+					current_round[:completed] = true if lost_round?(previous_player_id)
 				else
-			
-					lost_turn(challenge[:challenger].to_s)
-					lost_round?(challenge[:challenger].to_s)
+
+					lose_turn(challenge[:challenger].to_s)
+					current_round[:completed] = true if lost_round?(challenge[:challenger].to_s)
 				end
 
 			when 'spelling'
 				# challenger lose turn
 				if spelling_challenge(joined_play_word)
-					lost_turn(challenge[:challenger].to_s)
-					lost_round?(challenge[:challenger].to_s)
+					lose_turn(challenge[:challenger].to_s)
+					current_round[:completed] = true if lost_round?(challenge[:challenger].to_s)
 				else
-					lost_turn(previous_player_id)
-					lost_round?(previous_player_id)
+					lose_turn(previous_player_id)
+					current_round[:completed] = true if lost_round?(previous_player_id)
 				end
 			end
 
@@ -94,10 +96,11 @@ class Ghost < Game
 		self.play_word = []
 		current_round[:round_number] += 1
 		current_round[:completed] = false
+		current_round[:started] = true
 		rounds_played[current_round[:round_number]] = { name: current_round[:round_number].to_s, score_round: true }
 		game_sessions.each do  |session|
 			session.scores[current_round[:round_number].to_s] = 0
-			session.save		
+			session.save
 		end
 	end
 
@@ -111,7 +114,7 @@ class Ghost < Game
 			result_json = result_array.first
 			exact_word = result_json["word"] == word
 			has_meaning = result_json["defs"].present?
-	
+
 			if exact_word && has_meaning
 				challenge[:results] = {
 					word: result_json["word"],
@@ -134,7 +137,7 @@ class Ghost < Game
 		logger.debug "challenge results #{results}"
 		results = JSON.parse(results)
 		challenge_arry = results&.map { |w| w["word"] }
-		
+
 		if results.length > 1
 			challenge[:results] = {
 				word: word,
@@ -161,7 +164,7 @@ class Ghost < Game
 		return current_round[:round_number] > 0
 	end
 
-	def lost_turn(player_id)
+	def lose_turn(player_id)
 		lost_player_name = game_sessions.find_by_id(player_id.to_i).player_name
 		challenge[:results][:outcome].unshift("#{lost_player_name} lost.\n")
 
@@ -174,7 +177,7 @@ class Ghost < Game
 
 	def lost_round?(player_id)
 		ghost_arry = GHOST_ARRY
-		if player_ghosts[player_id].length == ghost_arry.length	
+		if player_ghosts[player_id].length == ghost_arry.length
 			logger.debug "ghost array #{ghost_arry.length}"
 			game_sessions.each do |session|
 				logger.debug "session #{session} #{session.scores[current_round[:round_number].to_s]}"
@@ -185,7 +188,6 @@ class Ghost < Game
 				end
 				session.save
 			end
-			current_round[:completed] = true
 			return true
 		else
 			return false
@@ -194,23 +196,59 @@ class Ghost < Game
 
 	private
 
+	def challenge_player
+
+		previous_player_id = turn_order[:current_turn][:previous_player].to_s
+
+			joined_play_word = play_word.join
+			case challenge[:type]
+			when 'word_complete'
+				# last nominated player lose turn
+				if word_challenge(joined_play_word)
+
+					lose_turn(previous_player_id)
+					current_round[:completed] = true if lost_round?(previous_player_id)
+				else
+
+					lose_turn(challenge[:challenger].to_s)
+					current_round[:completed] = true if lost_round?(challenge[:challenger].to_s)
+				end
+
+			when 'spelling'
+				# challenger lose turn
+				if spelling_challenge(joined_play_word)
+					lose_turn(challenge[:challenger].to_s)
+					current_round[:completed] = true if lost_round?(challenge[:challenger].to_s)
+				else
+					lose_turn(previous_player_id)
+					current_round[:completed] = true if lost_round?(previous_player_id)
+				end
+			end
+
+			challenge[:type] = nil
+
+	end
+
 	def game_setup
 		self.turn_order = {
 			current_turn: {
 				nominated_player: nil,
 				previous_player: nil
 			},
+			players_gone: [],
+		}
+		self.interactions = {
+			played_words: [],
+			play_word: [],
 			challenge: {
 				type: nil,
 				challenger: nil,
 				results: nil
-			},
-			players_gone: [],
+			}
 		}
 		self.set = {
-			play_word: [],
-			played_words: [],
 			current_round: {
+				started: false,
 				round_number: 0,
 				completed: false
 			},
