@@ -54,7 +54,7 @@ RSpec.describe Game, type: :model do
 					}
 					before do
 						5.times {game.teams.create}
-						game.update_attributes(started: true)
+						game.update(started: true)
 					end
 					it "should setup current round to be the first round" do
 						expect(game.current_round[:round_number]).to eq(game.rounds.keys.first)
@@ -69,7 +69,7 @@ RSpec.describe Game, type: :model do
 						FactoryBot.create(:fishbowl)
 					}
 					before do
-						game.update_attributes(started: true)
+						game.update(started: true)
 					end
 					it "should setup current round to be the first round" do
 						expect(game.current_round[:round_number]).to eq(game.rounds.keys.first)
@@ -90,7 +90,7 @@ RSpec.describe Game, type: :model do
 				}
 				before do
 					game_sessions.map(&:save)
-					game.update_attributes(started: true)
+					game.update(started: true)
 				end
 
 				it "should setup current round to be the first round" do
@@ -113,7 +113,7 @@ RSpec.describe Game, type: :model do
 
 				before do
 					game_sessions.map(&:save)
-					game.update_attributes(started: true)
+					game.update(started: true)
 				end
 
 				it "should nominate a murder randomly from the players" do
@@ -146,7 +146,7 @@ RSpec.describe Game, type: :model do
 				}
 				before(:each) do
 					game_sessions.map(&:save)
-					game.update_attributes(started: true)
+					game.update(started: true)
 				end
 
 				let(:player_ids) {
@@ -262,7 +262,7 @@ RSpec.describe Game, type: :model do
 					game.options = {number_of_murderers: 2, enable_chat: false}
 					game.save
 					game_sessions.map(&:save)
-					game.update_attributes(started: true)
+					game.update(started: true)
 				end
 
 				let(:civilians) {
@@ -639,12 +639,12 @@ RSpec.describe Game, type: :model do
 
 			@game_sessions = FactoryBot.build_list(:game_session, 5, game_id: @game.id)
 			@game_sessions.map(&:save)
-			@game.update_attributes(started: true)
-			@game.update_attributes(set: {"clues" => ["this", "or"], "players_done_clues" => [@game_sessions[0].id]})
-			@game.update_attributes(set: {"clues" => ["that", "which"], "players_done_clues" => [@game_sessions[1].id]})
-			@game.update_attributes(set: {"clues" => [""], "players_done_clues" => [@game_sessions[2].id]})
-			@game.update_attributes(set: {"clues" => ["this"], "players_done_clues" => [@game_sessions[3].id]})
-			@game.update_attributes(set: {"clues" => ["other"], "players_done_clues" => [@game_sessions[4].id]})
+			@game.update(started: true)
+			@game.update(set: {"clues" => ["this", "or"], "players_done_clues" => [@game_sessions[0].id]})
+			@game.update(set: {"clues" => ["that", "which"], "players_done_clues" => [@game_sessions[1].id]})
+			@game.update(set: {"clues" => [""], "players_done_clues" => [@game_sessions[2].id]})
+			@game.update(set: {"clues" => ["this"], "players_done_clues" => [@game_sessions[3].id]})
+			@game.update(set: {"clues" => ["other"], "players_done_clues" => [@game_sessions[4].id]})
 		end
 
 		it "should ADD clues to the pot with unique list" do
@@ -665,10 +665,10 @@ RSpec.describe Game, type: :model do
 			2.times { @game.teams.create }
 			team_division = @game_sessions.length / @game.teams.length
 			first_pick = @game_sessions.sample(team_division)
-			first_pick.map { |s| s.update_attributes(team_id: @game.teams.first.id)}
+			first_pick.map { |s| s.update(team_id: @game.teams.first.id)}
 			second_pick = @game_sessions - first_pick
-			second_pick.map { |s| s.update_attributes(team_id: @game.teams.second.id)}
-			@game.update_attributes(started: true)
+			second_pick.map { |s| s.update(team_id: @game.teams.second.id)}
+			@game.update(started: true)
 			@ordered_teams = @game.teams.sort_by(&:order).map(&:order)
 		end
 
@@ -721,7 +721,7 @@ RSpec.describe Game, type: :model do
 
 		before(:each) do
 			game_sessions.map(&:save)
-			game.update_attributes(started: true)
+			game.update(started: true)
 		end
 
 		it "should change the turn to the next player not gone before" do

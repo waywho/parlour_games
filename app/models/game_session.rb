@@ -39,7 +39,7 @@ class GameSession < ApplicationRecord
 
   def default_player_name
     if playerable.present? && player_name.nil?
-      self.update_attributes(player_name: playerable.name)
+      self.update(player_name: playerable.name)
     end
   end
 end

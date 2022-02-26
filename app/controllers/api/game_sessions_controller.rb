@@ -63,7 +63,7 @@ module Api
       end
 
       def join_update(game_session)
-        game_session.update_attributes(invitation_accepted: true)
+        game_session.update(invitation_accepted: true)
       end
 
       # Only allow a trusted parameter "white list" through.

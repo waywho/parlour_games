@@ -96,7 +96,7 @@ RSpec.describe "/api/messages", type: :request do
         post api_messages_url,
              params: { message: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
   end
@@ -128,7 +128,7 @@ RSpec.describe "/api/messages", type: :request do
         patch api_message_url(@message),
               params: { message: new_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:ok)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
 
@@ -138,7 +138,7 @@ RSpec.describe "/api/messages", type: :request do
         patch api_message_url(@message),
               params: { message: invalid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
   end
