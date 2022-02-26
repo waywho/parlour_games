@@ -61,7 +61,7 @@ class Game < ApplicationRecord
 	 		if teams.present? && team_mode
 					self.players_gone = {}
 					teams.each_with_index do |team, index|
-						team.update_attributes(order: (index + 1))
+						team.update(order: (index + 1))
 						self.players_gone[index + 1] = []
 					end
 				else

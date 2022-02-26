@@ -92,7 +92,7 @@ RSpec.describe "/api/chatrooms", type: :request do
         post api_chatrooms_url,
              params: { chatroom: invalid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
   end
@@ -118,7 +118,7 @@ RSpec.describe "/api/chatrooms", type: :request do
         patch api_chatroom_url(chatroom),
               params: { chatroom: new_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:ok)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
 
@@ -128,7 +128,7 @@ RSpec.describe "/api/chatrooms", type: :request do
         patch api_chatroom_url(chatroom),
               params: { chatroom: invalid_attributes }, headers: @token_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
   end

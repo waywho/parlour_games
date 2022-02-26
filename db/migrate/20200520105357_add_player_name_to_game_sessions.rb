@@ -6,7 +6,7 @@ class AddPlayerNameToGameSessions < ActiveRecord::Migration[5.2]
     reversible do |dir|
   		dir.up { 
   			GameSession.all.each do |g|
-  				g.update_attributes(player_name: g.playerable.name, ip_address: g.playerable.try(:ip_address))
+  				g.update(player_name: g.playerable.name, ip_address: g.playerable.try(:ip_address))
   			end
   		}
   	

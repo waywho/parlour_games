@@ -85,7 +85,7 @@ RSpec.describe "/api/game_sessions", type: :request do
         post api_game_sessions_url,
              params: { game_session: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
   end
@@ -115,7 +115,7 @@ RSpec.describe "/api/game_sessions", type: :request do
         patch api_game_session_url(@game_session),
               params: { game_session: new_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
 
@@ -124,7 +124,7 @@ RSpec.describe "/api/game_sessions", type: :request do
         patch api_game_session_url(@game_session),
               params: { game_session: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
       end
     end
   end
