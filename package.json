@@ -1,5 +1,10 @@
 {
+  "name": "parlour-games",
+  "private": true,
   "dependencies": {
+    "@rails/ujs": "^6.0.0",
+    "@rails/activestorage": "^6.0.0",
+    "@rails/actioncable": "^6.0.0",
     "@argueta10/vue-webrtc": "^1.3.0",
     "@creativebulma/bulma-divider": "creativebulma/bulma-divider",
     "@fortawesome/fontawesome-svg-core": "^1.2.29",
@@ -28,5 +33,6 @@
   },
   "devDependencies": {
     "webpack-dev-server": "^3.10.3"
-  }
+  },
+  "version": "0.1.0"
 }
