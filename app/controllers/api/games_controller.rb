@@ -1,5 +1,5 @@
 module Api
-  class GamesController < ApplicationController
+  class GamesController < ApiController
     before_action :set_game, only: [:show, :update, :destroy, :setup]
     before_action :authenticate_user, only: [:create, :destroy]
     # GET /games

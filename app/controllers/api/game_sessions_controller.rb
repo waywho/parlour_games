@@ -1,5 +1,5 @@
 module Api
-  class GameSessionsController < ApplicationController
+  class GameSessionsController < ApiController
     before_action :set_game_session, only: [:show, :update, :destroy]
 
     # GET /api/game_sessions
