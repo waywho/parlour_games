@@ -43,3 +43,6 @@ yarn-debug.log*
 .env.development
 
 dump.rdp
+
+**/.DS_Store
+.DS_Store
