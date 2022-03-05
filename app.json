@@ -3,7 +3,13 @@
     "description": "Games site",
     "website": "https://www.parlourgames.club/",
     "success_url": "/welcome",
-    "addons": ["heroku-postgresql:hobby-dev", "redistogo:nano"],
+    "addons": [
+        "heroku-postgresql:hobby-dev",
+        {
+            plan: "redistogo",
+            as: "nano"
+        }
+    ],
     "env": {
       "RACK_ENV": { "required": true },
       "RAILS_ENV": { "required": true },
