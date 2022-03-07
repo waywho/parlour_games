@@ -11,15 +11,5 @@
       "RACK_ENV": { "required": true },
       "RAILS_ENV": { "required": true },
       "SECRET_KEY_BASE": { "required": true }
-    },
-    "formation": {
-        "frontend": {
-            "quantity": 1,
-            "size": "free"
-        },
-        "backend": {
-            "quantity": 1,
-            "size": "free"
-        }
     }
 }
