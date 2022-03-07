@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.6.9'
+ruby '2.7.5'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.1.4.6', '>= 5.2.4.3'
@@ -11,11 +11,11 @@ gem 'pg', '~> 1.1'
 gem 'puma', '5.6.2'
 # Use SCSS for stylesheets
 gem 'sass-rails', '>= 6'
-# Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
-gem 'webpacker'
+
+gem 'shakapacker', '6.0.0.rc.13'
 
 # gem 'foreman'
-
+gem "bulma-rails", "~> 0.9.3"
 gem 'figaro'
 
 gem "knock", github: "nsarno/knock", branch: "master",
@@ -50,6 +50,7 @@ group :development, :test do
   gem 'factory_bot_rails'
   gem 'shoulda-matchers'
   gem 'letter_opener'
+  gem 'foreman'
 end
 
 group :development do
