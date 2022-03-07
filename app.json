@@ -6,8 +6,8 @@
     "addons": [
         "heroku-postgresql:hobby-dev",
         {
-            plan: "redistogo",
-            as: "nano"
+            "plan": "redistogo",
+            "as": "nano"
         }
     ],
     "env": {
@@ -26,4 +26,3 @@
         }
     }
 }
-  
