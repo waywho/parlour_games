@@ -1,5 +1,5 @@
 module Api
-  class ChatroomsController < ApplicationController
+  class ChatroomsController < ApiController
     before_action :authenticate_user, except: [:show]
     before_action :set_chatroom, only: [:show, :join_chat, :leave_chat, :update, :destroy]
 

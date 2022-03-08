@@ -13,7 +13,7 @@
                 </div>
               </b-tooltip>
             </div>
-            <div><b>Number of clues {{ game.set.guessed_clues.length > 0 ? "left" : ""}}:</b> {{clueNum}} </div>
+            <div><b>Number of clues {{ game.interactions.guessed_clues.length > 0 ? "left" : ""}}:</b> {{clueNum}} </div>
           </div>
         </div>
       </div>
@@ -227,7 +227,7 @@ export default {
       // console.log('guessed 1', this.currentGame.set.clues.length)
 
       let guessed = this.currentGame.set.clues.splice(this.randIndex, 1)[0];
-      this.currentGame.set.guessed_clues.push(guessed)
+      this.currentGame.interactions.guessed_clues.push(guessed)
       this.updatePlayerScore(1)
       this.clueNum -= 1
       this.gameSubscription.clueGuessed(guessed)

@@ -1,4 +1,4 @@
-# PostgreSQL. Versions 9.1 and up are supported.
+# PostgreSQL. Versions 9.3 and up are supported.
 #
 # Install the pg driver:
 #   gem install pg
@@ -76,10 +76,15 @@ test:
 #
 #   DATABASE_URL="postgres://myuser:mypass@localhost/somedatabase"
 #
-# You can use this database configuration with:
+# If the connection URL is provided in the special DATABASE_URL environment
+# variable, Rails will automatically merge its configuration values on top of
+# the values provided in this file. Alternatively, you can specify a connection
+# URL environment variable explicitly:
 #
 #   production:
 #     url: <%= ENV['DATABASE_URL'] %>
+# Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
+# for a full overview on how database connection configuration can be specified.
 #
 production:
   <<: *default

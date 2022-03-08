@@ -1,5 +1,5 @@
 module Api
-  class UsersController < ApplicationController
+  class UsersController < ApiController
     before_action :authenticate_user, except: [:create, :confirmation]
     before_action :set_user, only: [:show, :update, :destroy]
 
