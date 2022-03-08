@@ -46,3 +46,5 @@ dump.rdp
 
 **/.DS_Store
 .DS_Store
+
+.browserslistrc
