@@ -61,7 +61,9 @@ export default {
           current_round:{
             teams:{}, 
             round_number:null
-          }, 
+          }
+        },
+        interactions: {
           guessed_clues:[]
         }, 
         hosts: [],
