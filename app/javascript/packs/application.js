@@ -146,8 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	 router: router,
 	 store: store
 	}).$mount()
-	document.body.appendChild(app.$el)
 
-	console.log(app)
+	const appDOM = document.getElementById('spa')
+
+	if (appDOM) {
+		appDOM.appendChild(app.$el)
+		console.log(app)
+	}
+
+
 	// console.log(process.env)
 })

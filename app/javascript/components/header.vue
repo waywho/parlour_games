@@ -7,7 +7,8 @@
       
     </template>
     <template slot="end">
-      <b-navbar-item v-if="!authorisedLinks"><router-link to="/sign_in">Sign In</router-link></b-navbar-item>
+      <!-- <b-navbar-item v-if="!authorisedLinks"><router-link to="/sign_in">Sign In</router-link></b-navbar-item> -->
+      <b-navbar-item v-if="!authorisedLinks"><router-link to="/login">Sign In</router-link></b-navbar-item>
       <b-navbar-item v-if="!authorisedLinks"><router-link to="/sign_up">Register</router-link></b-navbar-item>
       <b-navbar-dropdown :label="currentUser.name" v-if="authorisedLinks">
         <b-navbar-item v-if="authorisedLinks"><router-link to="/my_games">My Games</router-link></b-navbar-item>
