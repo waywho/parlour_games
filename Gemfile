@@ -14,6 +14,8 @@ gem 'sass-rails', '>= 6'
 
 gem 'shakapacker', '6.0.0.rc.13'
 
+gem 'tailwindcss-rails'
+
 # gem 'foreman'
 gem "bulma-rails", "~> 0.9.3"
 gem 'figaro'
