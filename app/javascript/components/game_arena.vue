@@ -67,7 +67,8 @@
         </div>
         <div class="column is-full">
           <div v-for="team in game.teams" :key="team.id" class="tags are-medium">
-            <span class="tag is-light"><b>{{team.name}}:</b></span> <player v-for="session in team.game_sessions" :key="session.id" :game-session="session" :currentHost="currentHost" :class="[nominatedPlayer.id == session.id ? 'is-dark' : 'is-light']"></player>
+            <span class="tag is-light"><b>{{team.name}}:</b></span> 
+            <player v-for="session in team.game_sessions" :key="session.id" :game-session="session" :currentHost="currentHost" :class="[nominatedPlayer.id == session.id ? 'is-dark' : 'is-light']"></player>
           </div>
         </div>
         <div class="column is-full">

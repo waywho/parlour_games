@@ -65,7 +65,8 @@ const router = new VueRouter({
 		{ path: '/join_game/:game_id', name: 'join_game', component: JoinGame, props: true },
 		// { path: '/games/fish_bowl', component: FishBowl, beforeEnter: ifNotAuthenticated },
 		{ path: '/sign_up', name: 'registraton', component: Registration},
-		{ path: '/sign_in', name: 'signIn', component: SignIn }, 
+		{ path: '/sign_in', name: 'signIn', component: SignIn },
+		{ path: '/login' },
 	]
 })
 

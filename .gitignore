@@ -47,5 +47,6 @@ dump.rdp
 **/.DS_Store
 .DS_Store
 
+.browserslistrc
 /app/assets/builds/*
 !/app/assets/builds/.keep

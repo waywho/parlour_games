@@ -51,9 +51,6 @@
       "./node_modules/shakapacker/package/babel/preset.js"
     ]
   },
-  "browserslist": [
-    "defaults"
-  ],
   "devDependencies": {
     "webpack-dev-server": "^4.7.4"
   }

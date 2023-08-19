@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  get 'users/new'
+  get 'sessions/new'
+  get 'sessions/create'
+  get 'sessions/destroy'
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
   mount ActionCable.server => '/cable'
 
@@ -23,6 +27,9 @@ Rails.application.routes.draw do
   end
   
   root 'landings#index'
+  get 'signup', to: 'users#new'
+  get 'login', to: 'sessions#new'
+  get 'logout', to: 'sessions#destroy'
   get '/*path', to: 'landings#index'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
