@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_26_115732) do
-
+ActiveRecord::Schema[7.0].define(version: 2023_08_19_080449) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -20,8 +19,8 @@ ActiveRecord::Schema.define(version: 2022_02_26_115732) do
   create_table "chatroom_users", force: :cascade do |t|
     t.bigint "chatroom_id"
     t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["chatroom_id"], name: "index_chatroom_users_on_chatroom_id"
     t.index ["user_id"], name: "index_chatroom_users_on_user_id"
   end
@@ -31,8 +30,8 @@ ActiveRecord::Schema.define(version: 2022_02_26_115732) do
     t.uuid "gameaable_id"
     t.string "topic"
     t.boolean "public", default: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["gameaable_type", "gameaable_id"], name: "index_chatrooms_on_gameaable_type_and_gameaable_id"
     t.index ["public"], name: "index_chatrooms_on_public"
     t.index ["topic"], name: "index_chatrooms_on_topic"
@@ -42,8 +41,8 @@ ActiveRecord::Schema.define(version: 2022_02_26_115732) do
     t.uuid "game_id"
     t.bigint "team_id"
     t.boolean "host", default: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "invitation_accepted", default: false
     t.string "playerable_type"
     t.bigint "playerable_id"
@@ -60,8 +59,8 @@ ActiveRecord::Schema.define(version: 2022_02_26_115732) do
   create_table "games", id: :uuid, default: -> { "uuid_generate_v4()" }, force: :cascade do |t|
     t.string "name"
     t.jsonb "set"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "started", default: false
     t.boolean "ended", default: false
     t.boolean "team_mode", default: false
@@ -75,8 +74,8 @@ ActiveRecord::Schema.define(version: 2022_02_26_115732) do
   create_table "messages", force: :cascade do |t|
     t.bigint "chatroom_id"
     t.string "content"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "speakerable_type"
     t.bigint "speakerable_id"
     t.index ["chatroom_id"], name: "index_messages_on_chatroom_id"
@@ -86,15 +85,15 @@ ActiveRecord::Schema.define(version: 2022_02_26_115732) do
   create_table "players", force: :cascade do |t|
     t.string "name"
     t.string "ip_address"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["ip_address"], name: "index_players_on_ip_address"
   end
 
   create_table "teams", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "order"
     t.uuid "game_id"
     t.jsonb "scores"
@@ -108,11 +107,11 @@ ActiveRecord::Schema.define(version: 2022_02_26_115732) do
     t.string "password_digest"
     t.boolean "admin"
     t.string "avatar"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "confirmation_token"
-    t.datetime "confirmed_at"
-    t.datetime "confirmation_sent_at"
+    t.datetime "confirmed_at", precision: nil
+    t.datetime "confirmation_sent_at", precision: nil
     t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
